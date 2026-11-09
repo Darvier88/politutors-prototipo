@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PoliTutors — Prototipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#2450c7; --brand-2:#1b3d99; --brand-soft:#e9effc;
+  --accent:#f5a524; --accent-soft:#fff4de;
+  --ink:#0f172a; --ink-2:#334155; --muted:#64748b; --line:#e4e8f0;
+  --bg:#f5f7fb; --card:#fff; --ok:#15803d; --ok-soft:#e7f6ec; --bad:#c2410c; --bad-soft:#fdeee6;
+  --r:16px; --sh:0 1px 2px rgba(15,23,42,.05),0 8px 24px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body.touring{padding-bottom:150px}
+a{color:inherit}
+button{font:inherit;cursor:pointer;color:inherit}
+button:disabled{cursor:not-allowed}
+h1,h2,h3,h4{margin:0;line-height:1.2;letter-spacing:-.01em}
+h3{font-size:16px;margin:4px 0 12px}
+p{margin:0}
+.wrap{max-width:1140px;margin:0 auto;padding:0 20px}
+.muted{color:var(--muted)} .tiny{font-size:12.5px} .center{text-align:center}
+.row{display:flex;align-items:center} .gap{gap:12px} .wrapf{flex-wrap:wrap} .end{justify-content:flex-end} .between{justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:16px}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:18px;height:64px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:19px;text-decoration:none;letter-spacing:-.02em}
+.mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--brand),#5b84f0);color:#fff;display:grid;place-items:center;font-size:16px;box-shadow:0 4px 10px rgba(36,80,199,.3)}
+.logo .t2{color:var(--brand)}
+.pubnav{display:flex;gap:2px;margin-left:auto}
+.link{background:none;border:0;text-decoration:none;padding:8px 12px;border-radius:999px;font-weight:600;color:var(--ink-2);font-size:14px}
+.link:hover{background:var(--bg)}
+.role-pill{font-size:12px;font-weight:700;background:var(--brand-soft);color:var(--brand);padding:4px 10px;border-radius:999px}
+.user-chip{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+
+/* buttons */
+.btn{border:1px solid transparent;border-radius:12px;padding:10px 18px;font-weight:700;font-size:14.5px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.15s;white-space:nowrap}
+.btn.primary{background:var(--brand);color:#fff;box-shadow:0 4px 12px rgba(36,80,199,.25)}
+.btn.primary:hover:not(:disabled){background:var(--brand-2)}
+.btn.primary:disabled{background:#a9b8e3;box-shadow:none}
+.btn.ghost{background:#fff;border-color:var(--line);color:var(--ink)}
+.btn.ghost:hover{border-color:#c9d2e3}
+.btn.danger{background:#fff;border-color:#f3c7b4;color:var(--bad)}
+.btn.ok{background:var(--ok);color:#fff}
+.btn.dark{background:var(--ink);color:#fff}
+.btn.lg{padding:13px 22px;font-size:15.5px}
+.btn.block{width:100%}
+.btn.sm{padding:7px 12px;font-size:13px;border-radius:10px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--sh)}
+.pill{display:inline-block;background:var(--brand-soft);color:var(--brand);font-weight:700;font-size:12.5px;padding:6px 12px;border-radius:999px}
+.pill.amber{background:var(--accent-soft);color:#9a5b00}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.chip:hover{border-color:#b9c6e6}
+.chip.on,.chip:has(input:checked){background:var(--brand);border-color:var(--brand);color:#fff}
+.chip input{display:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+textarea,input[type=text],input[type=email],input[type=tel],input[type=password],input[type=number],input[type=date],select{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 13px;font:inherit;background:#fbfcfe;resize:vertical;color:var(--ink)}
+textarea:focus,input:focus,select:focus{outline:2px solid #bccbf3;border-color:var(--brand);background:#fff}
+label.lbl{display:block;font-weight:700;font-size:13.5px;margin:0 0 6px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fgrid .full{grid-column:1/-1}
+.hint{font-size:12.5px;color:var(--muted);margin-top:5px}
+.check{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;font-size:14px;background:#fff;cursor:pointer}
+.check input{margin-top:3px;width:17px;height:17px;flex:none;accent-color:var(--brand)}
+.check small{display:block;color:var(--muted);font-size:12.5px}
+.err{color:var(--bad);background:var(--bad-soft);padding:9px 12px;border-radius:10px;font-size:13.5px;font-weight:600;margin-top:12px}
+.note{background:var(--accent-soft);color:#7a4a00;border-radius:12px;padding:10px 14px;font-size:13px}
+.info{background:var(--brand-soft);color:#1e3a8a;border-radius:12px;padding:10px 14px;font-size:13.5px}
+
+/* hero */
+.hero{padding:52px 0 36px;background:radial-gradient(900px 420px at 85% 0%,#dfe7fb 0%,transparent 60%),radial-gradient(600px 300px at 0% 100%,#fff1d6 0%,transparent 60%)}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:44px;align-items:center}
+.hero h1{font-size:46px;font-weight:800;letter-spacing:-.03em;margin:16px 0 14px}
+.hl{color:var(--brand)}
+.lead{font-size:17px;color:var(--ink-2);max-width:560px;margin-bottom:22px}
+.trust{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:18px;font-size:13.5px;font-weight:600;color:var(--ink-2)}
+.trust span::before{content:"✓";color:var(--ok);margin-right:6px;font-weight:800}
+.role-ctas{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.role-cta{display:flex;flex-direction:column;gap:6px;text-decoration:none;background:#fff;border:2px solid var(--line);border-radius:18px;padding:18px;transition:.15s;box-shadow:var(--sh)}
+.role-cta:hover{border-color:var(--brand);transform:translateY(-2px)}
+.role-cta .q{font-size:13px;font-weight:700;color:var(--muted)}
+.role-cta .a{font-size:18px;font-weight:800;letter-spacing:-.01em}
+.role-cta .go{color:var(--brand);font-weight:700;font-size:14px;margin-top:4px}
+.role-cta.tut .go{color:#0e9384}
+.role-cta.tut:hover{border-color:#0e9384}
+.phone{background:#fff;border-radius:28px;border:1px solid var(--line);box-shadow:0 30px 60px rgba(15,23,42,.12);padding:18px;max-width:330px;margin-left:auto}
+.phone .ok-bar{background:var(--ok-soft);color:var(--ok);font-weight:700;font-size:13px;padding:8px 12px;border-radius:10px;margin-bottom:14px}
+.mini-rep{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px;font-size:13px}
+.mini-rep ul{margin:6px 0 0;padding-left:18px;color:var(--ink-2)}
+.demo-link{background:none;border:0;color:var(--brand);font-weight:700;font-size:14px;padding:0;margin-top:14px;display:inline-flex;gap:8px;align-items:center}
+.demo-link span{width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:11px}
+
+section.block{padding:52px 0}
+section.white{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.sec-head{text-align:center;max-width:660px;margin:0 auto 28px}
+.sec-head h2{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:10px 0 8px}
+.tabs{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px;margin:0 auto 22px}
+.tabs button{border:0;background:none;padding:8px 18px;border-radius:999px;font-weight:700;font-size:14px;color:var(--muted)}
+.tabs button.on{background:#fff;color:var(--ink);box-shadow:var(--sh)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.step-n{width:34px;height:34px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-weight:800;margin-bottom:12px}
+.steps h4{margin-bottom:6px}
+.feat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.feat{display:flex;flex-direction:column}
+.feat h4{font-size:15px;margin:8px 0 6px}
+.feat p{font-size:13.5px;color:var(--muted);flex:1}
+.feat .num{font-weight:800;color:var(--accent);font-size:13px}
+.feat button{align-self:flex-start;margin-top:12px;background:none;border:0;padding:0;color:var(--brand);font-weight:700;font-size:13px}
+.trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.trust-ic{width:42px;height:42px;border-radius:12px;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;font-size:20px;margin-bottom:12px}
+.price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.price{text-align:center}
+.price b{display:block;font-size:30px;font-weight:800;letter-spacing:-.02em;margin:6px 0}
+.price.hot{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft),var(--sh)}
+.guarantee{display:flex;gap:16px;align-items:center;margin-top:18px;background:var(--ok-soft);border-radius:16px;padding:16px 20px;color:#14532d}
+.guarantee b{font-size:16px}
+.devices{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center}
+.dev-row{display:flex;gap:14px;align-items:flex-end;justify-content:center}
+.dev{background:#0f172a;border-radius:18px;padding:8px}
+.dev .scr{background:linear-gradient(160deg,var(--brand-soft),#fff);border-radius:12px;display:grid;place-items:center;color:var(--brand);font-weight:800}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.testi p{font-size:14.5px;color:var(--ink-2);margin:10px 0 14px}
+.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+details{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+summary{font-weight:700;cursor:pointer;font-size:14.5px}
+details p{margin-top:8px;color:var(--ink-2);font-size:14px}
+.final-cta{background:linear-gradient(135deg,var(--brand),#4f78e8);border-radius:24px;padding:36px;color:#fff;text-align:center}
+.final-cta h2{font-size:28px;font-weight:800;margin-bottom:18px}
+.final-cta .role-ctas{max-width:640px;margin:0 auto;text-align:left}
+.final-cta .role-cta{color:var(--ink)}
+footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--muted);font-size:13px;margin-top:20px}
+footer .link{font-size:13px;padding:4px 8px}
+
+/* pages */
+.page{padding:28px 20px 60px}
+.page.narrow{max-width:760px}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.page-head h2{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.grid-2-1{display:grid;grid-template-columns:1.6fr 1fr;gap:20px;align-items:start}
+.center-page{display:grid;place-items:center;min-height:calc(100vh - 160px)}
+
+/* wizard */
+.wiz-steps{display:flex;gap:6px;margin:0 0 20px;flex-wrap:wrap}
+.ws{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--muted);padding:6px 12px 6px 6px;border-radius:999px;background:#fff;border:1px solid var(--line)}
+.ws span{width:24px;height:24px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-size:12px}
+.ws.on{color:var(--brand);border-color:var(--brand)}
+.ws.on span{background:var(--brand);color:#fff}
+.ws.done{color:var(--ok)}
+.ws.done span{background:var(--ok-soft);color:var(--ok)}
+.who-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.who{background:#fff;border:2px solid var(--line);border-radius:18px;padding:22px;text-align:left;display:flex;flex-direction:column;gap:6px}
+.who:hover{border-color:var(--brand)}
+.who .ic{font-size:28px}
+.who b{font-size:18px}
+.wiz-foot{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
+.cred{background:var(--bg);border-radius:14px;padding:14px 16px;font-size:14px;margin:14px 0}
+.cred code{background:#fff;border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-weight:700}
+.big-ok{width:64px;height:64px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;font-size:30px;margin:0 auto 14px;font-weight:800}
+.big-wait{width:64px;height:64px;border-radius:50%;background:var(--accent-soft);color:#9a5b00;display:grid;place-items:center;font-size:28px;margin:0 auto 14px}
+.file-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px dashed #c6d0e3;border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#fbfcfe}
+.file-row input{font-size:13px;max-width:230px}
+.subj-row{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:10px}
+.subj-row label{flex:1;display:flex;align-items:center;gap:10px;font-weight:700}
+.subj-row input[type=checkbox]{width:17px;height:17px;accent-color:var(--brand)}
+.subj-row input[type=number]{width:110px}
+.quiz{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.quiz .opts{display:grid;gap:8px;margin-top:10px}
+.quiz label{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;cursor:pointer}
+.quiz label:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
+.coc{background:var(--bg);border-radius:12px;padding:12px 14px;font-size:13.5px;color:var(--ink-2);margin:0 0 12px}
+.coc ul{margin:6px 0 0;padding-left:18px}
+.timeline{list-style:none;padding:0;margin:16px 0}
+.timeline li{display:flex;gap:12px;padding:10px 0;align-items:flex-start}
+.timeline .d{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;flex:none}
+.timeline .d.ok{background:var(--ok-soft);color:var(--ok)}
+.timeline .d.wait{background:var(--accent-soft);color:#9a5b00}
+.timeline .d.no{background:var(--bg);color:var(--muted)}
+
+/* student */
+.online-pill{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-weight:600;font-size:13.5px}
+.dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.18)}
+.subj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.subj{border:2px solid var(--line);background:#fff;border-radius:14px;padding:14px;font-weight:700;display:flex;flex-direction:column;align-items:flex-start;gap:8px;text-align:left}
+.subj-ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 12%,white);color:var(--c);font-size:19px}
+.subj.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 5%,white)}
+.dur-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.dur{border:2px solid var(--line);background:#fff;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:2px}
+.dur b{font-size:17px}
+.dur span{font-size:12.5px;color:var(--muted);font-weight:600}
+.dur.on{border-color:var(--brand);background:var(--brand-soft)}
+.dur:disabled{opacity:.45}
+.photo-drop{display:flex;align-items:center;gap:12px;border:1px dashed #c6d0e3;border-radius:12px;padding:12px;margin-top:10px;background:#fbfcfe;font-size:13.5px}
+.photo-drop img{width:64px;height:64px;object-fit:cover;border-radius:8px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.kv span{color:var(--muted)}
+.kv b{text-align:right}
+.kv.total{border:0;font-size:17px;margin:4px 0 14px}
+.locked{position:relative}
+.locked::after{content:"";position:absolute;inset:0;background:rgba(245,247,251,.6);border-radius:var(--r)}
+.av{width:40px;height:40px;border-radius:50%;color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
+.av.lg{width:68px;height:68px;font-size:22px}
+.av.sm{width:32px;height:32px;font-size:12px}
+.verified{display:inline-flex;align-items:center;gap:4px;background:var(--ok-soft);color:var(--ok);font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;vertical-align:middle;margin-left:6px;white-space:nowrap}
+.vbadges{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.vbadge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--brand-soft);color:var(--brand)}
+.stars{color:var(--accent);letter-spacing:1px}
+.stars .off{color:#d7dce6}
+.rating{display:flex;align-items:center;gap:6px;font-size:14px;margin-top:4px}
+.rep-row{margin:10px 0}
+.rep-row .row{justify-content:space-between;font-size:13.5px;font-weight:600}
+.bar{height:8px;background:#eef1f6;border-radius:99px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),#6d92f2);border-radius:99px}
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px}
+.medal{text-align:center;border-radius:14px;padding:12px 6px;background:var(--bg)}
+.medal .m{width:46px;height:46px;border-radius:50%;margin:0 auto 6px;display:grid;place-items:center;font-size:20px;font-weight:800}
+.medal.oro .m{background:#fff1c2;color:#a16207;box-shadow:0 0 0 3px #fde68a}
+.medal.plata .m{background:#eef1f6;color:#475569;box-shadow:0 0 0 3px #e2e8f0}
+.medal.bronce .m{background:#fbe9dd;color:#9a3412;box-shadow:0 0 0 3px #fed7aa}
+.medal.none .m{background:#fff;color:#cbd5e1;box-shadow:0 0 0 2px dashed #e2e8f0}
+.medal b{display:block;font-size:13px}
+.medal span{font-size:11.5px;color:var(--muted)}
+
+.match-card{text-align:center;max-width:460px;width:100%;padding:36px 28px}
+.radar{position:relative;width:160px;height:160px;margin:0 auto}
+.radar span{position:absolute;inset:0;border-radius:50%;border:2px solid var(--brand);opacity:0;animation:ping 2.4s infinite}
+.radar span:nth-child(2){animation-delay:.8s}.radar span:nth-child(3){animation-delay:1.6s}
+.radar-core{position:absolute;inset:50px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:26px;box-shadow:0 8px 20px rgba(36,80,199,.35)}
+@keyframes ping{0%{transform:scale(.35);opacity:.9}100%{transform:scale(1);opacity:0}}
+.big-timer{font-size:44px;font-weight:800;letter-spacing:-.02em;margin:12px 0 2px;font-variant-numeric:tabular-nums}
+.notified{display:flex;justify-content:center;margin:12px 0}
+.notified .av{width:34px;height:34px;font-size:12px;margin-left:-8px;border:2px solid #fff;opacity:.35;transition:.3s}
+.notified .av.lit{opacity:1}
+.success-banner{background:var(--ok-soft);color:var(--ok);border-radius:12px;padding:12px 16px;font-weight:600;margin-bottom:16px}
+.verif-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0;padding:14px;background:var(--bg);border-radius:12px;font-size:13.5px}
+.verif-list div::before{content:"✓ ";color:var(--ok);font-weight:800}
+.review{border-top:1px solid var(--line);padding:10px 0;font-size:14px}
+.review .rv-who{font-weight:700;font-size:13px}
+.escrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.escrow div{background:var(--bg);border-radius:12px;padding:12px;font-size:13px}
+.escrow b{display:block;font-size:13.5px;margin-bottom:2px}
+
+/* session */
+.session-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;padding:14px 18px}
+.rec{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:#b91c1c;background:#fdecec;padding:4px 10px;border-radius:999px}
+.rec::before{content:"";width:8px;height:8px;border-radius:50%;background:#dc2626;animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.25}}
+.s-timer{font-variant-numeric:tabular-nums;font-weight:800;font-size:18px;margin-left:auto}
+.session-grid{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;align-items:start}
+.board-card{padding:0;overflow:hidden}
+.board-tools{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.swatch{width:26px;height:26px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px var(--line)}
+.swatch.on{box-shadow:0 0 0 2px var(--ink)}
+.tool{border:1px solid var(--line);background:#fff;border-radius:9px;padding:5px 10px;font-size:13px;font-weight:600}
+.tool.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+#board{display:block;width:100%;height:460px;touch-action:none;cursor:crosshair;background-color:#fff;background-image:linear-gradient(#eef2f8 1px,transparent 1px),linear-gradient(90deg,#eef2f8 1px,transparent 1px);background-size:24px 24px}
+.videos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.vid{aspect-ratio:4/3;border-radius:14px;background:linear-gradient(160deg,#1e293b,#0f172a);position:relative;display:grid;place-items:center;overflow:hidden}
+.vid .av{width:56px;height:56px;font-size:18px}
+.vid.talk .av{animation:talk 1.4s infinite}
+@keyframes talk{50%{box-shadow:0 0 0 10px rgba(34,197,94,.25)}}
+.vid span{position:absolute;left:8px;bottom:8px;color:#fff;font-size:12px;font-weight:600;background:rgba(0,0,0,.4);padding:2px 8px;border-radius:6px}
+.chat{padding:0;display:flex;flex-direction:column;height:330px}
+.chat-box{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:85%;padding:9px 12px;border-radius:14px;font-size:14px}
+.msg img{display:block;max-width:180px;border-radius:8px;margin-top:6px}
+.msg.o{background:var(--bg);border-bottom-left-radius:4px}
+.msg.me{background:var(--brand);color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+.msg.sys{align-self:center;background:none;color:var(--muted);font-size:12px;padding:2px}
+.chat-form{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+.chat-form input{flex:1}
+.star-pick{display:flex;gap:6px;justify-content:center;margin:18px 0}
+.star-pick button{background:none;border:0;font-size:40px;line-height:1;color:#d7dce6;padding:0 2px;transition:transform .1s}
+.star-pick button.on{color:var(--accent)}
+.star-pick button:hover{transform:scale(1.1)}
+.spinner{width:42px;height:42px;border-radius:50%;border:4px solid var(--brand-soft);border-top-color:var(--brand);animation:spin .9s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* report */
+.report{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+.report-head{padding:16px 18px;color:#fff;background:var(--c,var(--brand))}
+.report-head h3{margin:0;font-size:18px}
+.report-body{padding:16px 18px;font-size:14px}
+.report-body h4{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px}
+.report-body ul{margin:0;padding-left:18px}
+.eval-row{display:flex;justify-content:space-between;padding:4px 0}
+.sent{margin-top:14px;font-size:12.5px;color:var(--ok);font-weight:700;background:var(--ok-soft);padding:7px 10px;border-radius:8px}
+
+/* parent / tutor */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--sh)}
+.kpi span{font-size:13px;color:var(--muted);font-weight:600}
+.kpi b{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+.kid{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.rep-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;border:1px solid var(--line);margin-bottom:8px;background:#fff;width:100%;text-align:left}
+.rep-item:hover{border-color:#b9c6e6;background:#fbfcff}
+.rep-item .ic{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:18px;flex:none}
+.rep-item .grow{flex:1;min-width:0}
+.rep-item .t{font-weight:700;font-size:14px}
+.rep-item .s{font-size:12.5px;color:var(--muted)}
+.new-dot{font-size:11px;font-weight:800;background:var(--brand);color:#fff;padding:2px 7px;border-radius:999px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:12.5px;padding:8px 6px;border-bottom:1px solid var(--line)}
+td{padding:10px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+.st{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.st.retenido{background:#e9effc;color:var(--brand)}
+.st.revision{background:var(--accent-soft);color:#9a5b00}
+.st.liberado{background:var(--ok-soft);color:var(--ok)}
+.st.reembolsado{background:var(--bad-soft);color:var(--bad)}
+.st.gratis{background:#eef1f6;color:#475569}
+.hbar{margin:10px 0}
+.hbar .row{justify-content:space-between;font-size:13.5px;font-weight:600}
+.hbar .bar{height:10px}
+.hbar .bar i{background:var(--c)}
+.banner{display:flex;align-items:center;justify-content:space-between;gap:14px;background:linear-gradient(90deg,var(--brand),#4f78e8);color:#fff;border-radius:16px;padding:16px 20px;margin-bottom:20px;flex-wrap:wrap}
+.banner.amber{background:linear-gradient(90deg,#f59e0b,#f5a524);color:#3b2600}
+.toggle-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:14px}
+.mini-switch{width:40px;height:22px;border-radius:99px;background:#cbd5e1;position:relative;border:0;padding:0}
+.mini-switch::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}
+.mini-switch.on{background:#22c55e}
+.mini-switch.on::after{left:21px}
+.switch{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 14px 6px 6px;font-weight:700;font-size:14px}
+.switch .knob{width:46px;height:26px;border-radius:99px;background:#cbd5e1;position:relative;transition:.2s}
+.switch .knob::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch.on .knob{background:#22c55e}
+.switch.on .knob::after{left:23px}
+.req{border:2px solid var(--brand);border-radius:16px;padding:16px;background:var(--brand-soft)}
+.req-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin:12px 0;font-size:14px}
+.req-grid span{color:var(--muted)}
+.empty{text-align:center;padding:28px 10px;color:var(--muted)}
+.mini-radar{width:60px;height:60px;position:relative;margin:0 auto 10px}
+.mini-radar span{position:absolute;inset:0;border-radius:50%;border:2px solid var(--brand);animation:ping 2s infinite;opacity:0}
+.mini-radar span:nth-child(2){animation-delay:1s}
+.calc{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--sh)}
+.calc input[type=range]{width:100%;accent-color:#0e9384}
+.calc .big{font-size:40px;font-weight:800;letter-spacing:-.02em;color:#0e9384}
+
+/* toasts, modal, simulador, tour */
+#toasts{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:80}
+body.touring #toasts{bottom:150px}
+.toast{background:var(--ink);color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.2);max-width:340px;animation:in .25s ease}
+.toast.ok::before{content:"✓ ";color:#4ade80}
+.toast.info::before{content:"● ";color:#93c5fd}
+.toast.out{opacity:0;transform:translateY(8px);transition:.35s}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.45);display:grid;place-items:center;z-index:50;padding:16px}
+.modal.hidden{display:none}
+.modal-card{background:#fff;border-radius:20px;max-width:540px;width:100%;max-height:88vh;overflow:auto;padding:22px;box-shadow:0 30px 80px rgba(0,0,0,.25)}
+#sim{position:fixed;left:16px;bottom:16px;z-index:70}
+.sim-btn{background:var(--ink);color:#fff;border:0;border-radius:999px;padding:10px 16px;font-weight:700;font-size:13.5px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:flex;align-items:center;gap:8px}
+.sim-panel{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 60px rgba(15,23,42,.25);width:300px;padding:16px;margin-bottom:10px}
+.sim-panel h4{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:12px 0 6px}
+.sim-panel .btn{width:100%;justify-content:flex-start;margin-bottom:6px}
+#tour{position:fixed;left:0;right:0;bottom:0;z-index:75;background:var(--ink);color:#fff;box-shadow:0 -10px 40px rgba(0,0,0,.25)}
+#tour.hidden{display:none}
+.tour-in{max-width:1140px;margin:0 auto;padding:16px 20px;display:flex;gap:18px;align-items:center}
+.tour-n{font-size:12px;font-weight:700;color:#94a3b8;white-space:nowrap}
+.tour-tag{display:inline-block;background:var(--accent);color:#3b2600;font-size:11.5px;font-weight:800;padding:2px 9px;border-radius:999px;margin-right:8px}
+.tour-txt{flex:1}
+.tour-txt b{font-size:16px}
+.tour-txt p{color:#cbd5e1;font-size:13.5px;margin-top:3px}
+.tour-prog{height:3px;background:#334155}
+.tour-prog i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.tour-ctrl{display:flex;gap:8px}
+.tour-ctrl button{background:#1e293b;border:1px solid #334155;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700;font-size:13px}
+.tour-ctrl button.main{background:var(--accent);border-color:var(--accent);color:#3b2600}
+
+@media (max-width:920px){
+  .hero-grid,.grid-2-1,.session-grid,.devices,.faq-grid{grid-template-columns:1fr}
+  .phone{margin:0 auto}
+  .steps,.feat-grid,.price-grid,.kpis,.trust-grid,.testi-grid{grid-template-columns:1fr 1fr}
+  .hero h1{font-size:34px}
+  .pubnav{display:none}
+  .top .wrap > .row{margin-left:auto}
+  .tour-in{flex-wrap:wrap}
+}
+@media (max-width:620px){
+  .role-ctas,.who-grid,.fgrid,.verif-list,.escrow,.req-grid{grid-template-columns:1fr}
+  .dur-grid{grid-template-columns:1fr 1fr}
+  .steps,.feat-grid,.price-grid,.trust-grid,.testi-grid{grid-template-columns:1fr}
+  #board{height:340px}
+  .role-pill{display:none}
+  .user-chip span{display:none}
+  .sim-panel{width:calc(100vw - 32px)}
+}
+</style>
+</head>
+<body>
+<header class="top" id="top"></header>
+<main id="app"></main>
+<div id="sim"></div>
+<div id="tour" class="hidden"></div>
+<div id="toasts"></div>
+<div id="modal" class="modal hidden"><div class="modal-card" id="modalCard"></div></div>
+
+<script>
+/* =========================================================
+   Utilidades
+   ========================================================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = n => '$' + Number(n).toFixed(2);
+const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
+const fmt = s => (s < 0 ? '-' : '') + Math.floor(Math.abs(s) / 60) + ':' + String(Math.floor(Math.abs(s) % 60)).padStart(2, '0');
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const fdate = t => new Date(t).toLocaleDateString('es-EC', { day: 'numeric', month: 'short' });
+const fdateL = t => new Date(t).toLocaleString('es-EC', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+const stars = (n, max = 5) => { let h = '<span class="stars">'; for (let i = 1; i <= max; i++) h += i <= Math.round(n) ? '★' : '<span class="off">★</span>'; return h + '</span>'; };
+const first = n => String(n || '').split(' ')[0];
+const initials = n => String(n || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+const ageOf = b => { if (!b) return null; const d = new Date(b), n = new Date(); let a = n.getFullYear() - d.getFullYear(); if (n < new Date(n.getFullYear(), d.getMonth(), d.getDate())) a--; return a; };
+const DAY = 86400000;
+let ticks = [];
+const every = (fn, ms) => ticks.push(setInterval(fn, ms));
+const later = (fn, ms) => ticks.push(setTimeout(fn, ms));
+const avatar = (p, cls = '') => `<div class="av ${cls}" style="background:${p.color || '#475569'}">${p.ini || initials(p.name)}</div>`;
+
+/* =========================================================
+   Datos
+   ========================================================= */
+const SUBJECTS = {
+  mat: { name: 'Matemáticas', icon: '∑', color: '#2450c7', topics: ['Funciones', 'Trigonometría', 'Límites', 'Derivadas', 'Ecuaciones', 'Logaritmos'] },
+  fis: { name: 'Física', icon: '⚛', color: '#0e9384', topics: ['Cinemática', 'Leyes de Newton', 'Trabajo y energía', 'Vectores', 'Electricidad'] },
+  qui: { name: 'Química', icon: '⚗', color: '#c2410c', topics: ['Estequiometría', 'Nomenclatura', 'Balanceo de ecuaciones', 'Soluciones', 'Enlaces químicos'] }
+};
+const DURATIONS = [{ min: 15, price: 0, trial: true }, { min: 30, price: 6 }, { min: 45, price: 8.5 }, { min: 60, price: 11 }];
+const EXT_PRICE = 3;
+const SHARE = 0.85;
+const CURSOS = ['1.º de Bachillerato', '2.º de Bachillerato', '3.º de Bachillerato'];
+const METHODS = { payphone: ['Payphone', 'Tarjeta de crédito o débito'], kushki: ['Kushki', 'Tarjeta de crédito o débito'], transfer: ['Transferencia directa', 'Pichincha, Guayaquil, Pacífico, Produbanco…'] };
+const BANKS = ['Banco Pichincha', 'Banco Guayaquil', 'Banco del Pacífico', 'Produbanco', 'Banco Bolivariano', 'Cooperativa JEP'];
+
+const TUTORS = [
+  { id: 1, name: 'Andrea Villacís', carrera: 'Ing. en Ciencias Computacionales', sem: 6, grades: { mat: 9.2, fis: 8.8 }, rating: 4.9, count: 58, sessions: 132, color: '#7c3aed', online: true,
+    reviews: [{ by: 'Mamá de Sofía', stars: 5, text: 'Muy paciente, le explicó derivadas paso a paso.' }, { by: 'Joaquín (estudiante)', stars: 5, text: 'Explica clarísimo, no te hace sentir mal por preguntar.' }] },
+  { id: 2, name: 'Kevin Mora', carrera: 'Ing. Química', sem: 7, grades: { qui: 9.4, mat: 8.7 }, rating: 4.8, count: 41, sessions: 97, color: '#c2410c', online: true,
+    reviews: [{ by: 'Papá de Emilia', stars: 5, text: 'Puntual y muy claro con estequiometría.' }, { by: 'Camila (estudiante)', stars: 4, text: 'Buena clase, a veces va un poco rápido.' }] },
+  { id: 3, name: 'Daniela Ortiz', carrera: 'Ing. Mecánica', sem: 5, grades: { fis: 9.0, mat: 8.5 }, rating: 4.7, count: 33, sessions: 71, color: '#0e9384', online: true,
+    reviews: [{ by: 'Martín (estudiante)', stars: 5, text: 'Por fin entendí los diagramas de cuerpo libre.' }] },
+  { id: 4, name: 'José Cevallos', carrera: 'Matemática', sem: 8, grades: { mat: 9.6 }, rating: 5.0, count: 22, sessions: 48, color: '#2450c7', online: true,
+    reviews: [{ by: 'Mamá de Nicolás', stars: 5, text: 'Excelente, mi hijo subió su nota en el parcial.' }] },
+  { id: 5, name: 'Mélany Torres', carrera: 'Biotecnología', sem: 6, grades: { qui: 9.1 }, rating: 4.8, count: 19, sessions: 40, color: '#db2777', online: true,
+    reviews: [{ by: 'Valeria (estudiante)', stars: 5, text: 'Me ayudó con nomenclatura antes del examen.' }] },
+  { id: 6, name: 'Bryan Alvarado', carrera: 'Ing. Electrónica', sem: 7, grades: { fis: 8.6, mat: 8.4 }, rating: 4.6, count: 15, sessions: 29, color: '#0369a1', online: true, reviews: [] }
+];
+const tutor = id => TUTORS.find(t => t.id === id);
+const short = n => { const p = n.split(' '); return p[0] + ' ' + (p[1] ? p[1][0] + '.' : ''); };
+
+const OBS = {
+  mat: ['Comprende el procedimiento cuando lo hace paso a paso; debe reforzar el manejo de signos.', 'Buena disposición. Próximo paso: resolver 3 ejercicios adicionales antes del parcial.'],
+  fis: ['Identifica las variables del problema; necesita practicar el planteamiento de diagramas.', 'Avanzó bastante. Próximo paso: repasar unidades y conversiones.'],
+  qui: ['Ya balancea ecuaciones simples sin ayuda; reforzar relaciones molares.', 'Participó activamente. Próximo paso: practicar nomenclatura con fichas.']
+};
+const TOPIC_POINTS = t => [`${t}: conceptos clave`, `Ejercicios resueltos de ${t.toLowerCase()}`, 'Errores frecuentes y cómo evitarlos'];
+const REPLIES = ['Perfecto. Vamos paso a paso: primero identifiquemos qué datos nos da el problema.', 'Mira la pizarra, te dejé un ejemplo parecido.', '¡Exacto! Ahora intenta tú el siguiente y me cuentas qué te sale.', 'Muy bien. Ese error es muy común, no te preocupes.', '¿Quieres que hagamos uno como los del examen?', 'Excelente avance. Voy anotando lo que reforzamos para el reporte.'];
+const STUDENT_MSGS = ['Ah, ya entendí la primera parte.', '¿Y si el número es negativo cambia algo?', 'Me sale 12, ¿está bien?', 'Gracias, eso me confundía en clase.', '¿Me deja uno para practicar?'];
+const BOARD_EX = { mat: ['f(x) = (3x² + 1)⁵', "f'(x) = 5(3x² + 1)⁴ · 6x"], fis: ['v = v₀ + a·t', 'x = x₀ + v₀·t + ½·a·t²'], qui: ['2 H₂ + O₂ → 2 H₂O', '4 g H₂ → 2 mol → 36 g H₂O'] };
+const REQS = [
+  { name: 'Valeria R.', curso: '1.º de Bachillerato', subj: 'qui', topic: 'Estequiometría', min: 30, price: 6 },
+  { name: 'Sebastián P.', curso: '3.º de Bachillerato', subj: 'mat', topic: 'Límites', min: 45, price: 8.5 },
+  { name: 'Isabella M.', curso: '2.º de Bachillerato', subj: 'fis', topic: 'Leyes de Newton', min: 30, price: 6 },
+  { name: 'Thiago C.', curso: '3.º de Bachillerato', subj: 'mat', topic: 'Derivadas', min: 60, price: 11 },
+  { name: 'Emilia G.', curso: '1.º de Bachillerato', subj: 'qui', topic: 'Nomenclatura', min: 30, price: 6 },
+  { name: 'Joaquín L.', curso: '2.º de Bachillerato', subj: 'fis', topic: 'Cinemática', min: 45, price: 8.5 }
+];
+const QUIZ = {
+  mat: { q: '¿Cuál es la derivada de f(x) = x³ + 2x?', o: ['3x² + 2', 'x² + 2', '3x + 2'], a: 0 },
+  fis: { q: 'Un auto parte del reposo con a = 2 m/s². ¿Qué velocidad tiene a los 5 s?', o: ['5 m/s', '10 m/s', '25 m/s'], a: 1 },
+  qui: { q: '¿Cuántos moles hay en 36 g de agua (M = 18 g/mol)?', o: ['0,5 mol', '2 mol', '18 mol'], a: 1 }
+};
+
+/* =========================================================
+   Estado
+   ========================================================= */
+const S = {
+  parent: null, child: null, tutor: null,
+  reports: [], payments: [],
+  user: null,            // 'parent' | 'student' | 'tutor'
+  flow: null, live: null,
+  reg: { who: null, step: 1, d: { cSubj: [] } },
+  treg: { step: 1, d: { subj: {} } },
+  homeTab: 'fam', simOpen: false, pendingScroll: null,
+  tour: { on: false, i: 0, auto: false }
+};
+function newFlow() {
+  return { step: 'form', subj: 'mat', topic: '', detail: '', photo: null, dur: S.child && S.child.trialUsed ? 1 : 0, tutorId: null, skipped: [],
+    matchStart: 0, matchSecs: 0, payId: null, elapsed: 0, stars: 0, tags: [], comment: '', reportId: null };
+}
+function resetFlow() {
+  const f = S.flow;
+  if (f && f.payId && !['done', 'reporting'].includes(f.step)) S.payments = S.payments.filter(p => !(p.id === f.payId && p.status === 'retenido'));
+  S.flow = newFlow(); S.live = null;
+}
+S.flow = newFlow();
+
+function seedHistory() {
+  const now = Date.now();
+  S.reports = [
+    { id: 'r3', date: now - 3 * DAY, subj: 'fis', topic: 'Cinemática', tutorId: 3, min: 30, real: 31, points: TOPIC_POINTS('Cinemática'), obs: OBS.fis[0], ev: { punt: 5, resp: 5, cons: 4 }, stars: 5, payId: 'p3', seen: true },
+    { id: 'r2', date: now - 8 * DAY, subj: 'mat', topic: 'Funciones', tutorId: 1, min: 45, real: 44, points: TOPIC_POINTS('Funciones'), obs: OBS.mat[1], ev: { punt: 5, resp: 5, cons: 5 }, stars: 5, payId: 'p2', seen: true },
+    { id: 'r1', date: now - 15 * DAY, subj: 'mat', topic: 'Trigonometría', tutorId: 4, min: 30, real: 30, points: TOPIC_POINTS('Trigonometría'), obs: OBS.mat[0], ev: { punt: 4, resp: 5, cons: 4 }, stars: 4, payId: 'p1', seen: true }
+  ];
+  S.payments = [
+    { id: 'p3', date: now - 3 * DAY, tutorId: 3, subj: 'fis', amount: 6, status: 'liberado' },
+    { id: 'p2', date: now - 8 * DAY, tutorId: 1, subj: 'mat', amount: 8.5, status: 'liberado' },
+    { id: 'p1', date: now - 15 * DAY, tutorId: 4, subj: 'mat', amount: 6, status: 'liberado' }
+  ];
+}
+function makeTutor(d) {
+  return { name: d.name, email: d.email, phone: d.phone || '', pass: d.pass || 'demo', grades: d.grades, bank: d.bank || BANKS[0], status: d.status || 'revision',
+    online: false, pending: null, active: null, view: 'panel', ledger: d.ledger || [], reviews: d.reviews || [], sessions: d.sessions || 0, color: '#0e9384' };
+}
+function ensureDemo() {
+  if (!S.parent || S.parent.pending) S.parent = { name: 'Ana Vera', email: 'ana.vera@gmail.com', phone: '0991234567', pass: 'demo', method: 'payphone', notify: { email: true, wa: true } };
+  if (!S.child) {
+    S.child = { name: 'Mateo Vera', user: 'mateo.vera', pass: 'demo', curso: '2.º de Bachillerato', colegio: '', birth: '2010-03-14', subjects: ['mat', 'fis'], status: 'activo', trialUsed: false,
+      rep: { punt: [5, 5, 4], resp: [5, 5, 5], cons: [4, 5, 4] } };
+    seedHistory();
+  }
+  S.child.status = 'activo';
+  if (!S.tutor) S.tutor = makeTutor({ name: 'Carlos Rivas', email: 'carivas@espol.edu.ec', phone: '0987654321', grades: { mat: 9.1, fis: 8.8 }, status: 'verificado',
+    ledger: [{ id: 'l1', date: Date.now() - 2 * DAY, student: 'Sebastián P.', subj: 'mat', price: 8.5, status: 'liberado' }],
+    reviews: [{ by: 'Sebastián (estudiante)', stars: 5, text: 'Me explicó límites mejor que en el colegio.' }], sessions: 1 });
+  if (S.tutor.status !== 'verificado') S.tutor.status = 'verificado';
+}
+
+/* =========================================================
+   Componentes compartidos
+   ========================================================= */
+function level(v) { v = Math.round(v * 10) / 10; return v >= 4.7 ? ['oro', 'Oro'] : v >= 4.2 ? ['plata', 'Plata'] : ['bronce', 'Bronce']; }
+function badgesCard(title, note) {
+  const r = S.child.rep, rows = [['punt', 'Puntual', '⏱'], ['resp', 'Respetuoso', '🤝'], ['cons', 'Constante', '🔥']];
+  const n = r.punt.length;
+  return `<div class="card" id="badges"><h3>${title}</h3>
+    <div class="badges">${rows.map(([k, l, ic]) => { if (!n) return `<div class="medal none"><div class="m">${ic}</div><b>${l}</b><span>Por ganar</span></div>`;
+      const v = avg(r[k]), [c, name] = level(v); return `<div class="medal ${c}"><div class="m">${ic}</div><b>${l}</b><span>${name} · ${v.toFixed(1)}</span></div>`; }).join('')}</div>
+    <p class="tiny muted">${note || `Según la evaluación de tus tutores (${n} ${n === 1 ? 'sesión' : 'sesiones'}). Solo las ven tú, tu representante y el tutor asignado.`}</p></div>`;
+}
+function reportHTML(r) {
+  const t = tutor(r.tutorId), s = SUBJECTS[r.subj], c = S.child;
+  return `<div class="report">
+    <div class="report-head" style="--c:${s.color}"><div class="tiny" style="opacity:.85">Reporte de avance · ${fdateL(r.date)}</div><h3>${s.name} · ${esc(r.topic)}</h3></div>
+    <div class="report-body">
+      <div class="row gap">${avatar(t, 'sm')}<div><b>${t.name}</b> <span class="verified">✓ Verificado ESPOL</span><div class="tiny muted">Sesión de ${r.min} min · duración real ${r.real} min</div></div></div>
+      <h4>Temas reforzados</h4><ul>${r.points.map(p => `<li>${esc(p)}</li>`).join('')}</ul>
+      <h4>Observaciones y próximos pasos</h4><p>${esc(r.obs)}</p>
+      <h4>Compromiso de ${esc(first(c.name))}</h4>
+      <div class="eval-row"><span>Puntualidad</span>${stars(r.ev.punt)}</div>
+      <div class="eval-row"><span>Respeto</span>${stars(r.ev.resp)}</div>
+      <div class="eval-row"><span>Constancia</span>${stars(r.ev.cons)}</div>
+      <div class="sent">✓ Enviado a ${esc(S.parent.name)} por ${[S.parent.notify?.email && 'correo', S.parent.notify?.wa && 'WhatsApp'].filter(Boolean).join(' y ') || 'la app'}</div>
+    </div></div>`;
+}
+const STATUS = { retenido: 'Retenido · en sesión', revision: 'Protegido · se libera en 24 h', liberado: 'Liberado al tutor', reembolsado: 'Reembolsado', gratis: 'Prueba gratis' };
+const stChip = s => `<span class="st ${s}">${STATUS[s]}</span>`;
+
+/* =========================================================
+   Header, simulador
+   ========================================================= */
+function renderTop() {
+  const logo = `<a class="logo" href="#inicio"><span class="mark">P</span><span>Poli<span class="t2">Tutors</span></span></a>`;
+  if (!S.user) {
+    $('#top').innerHTML = `<div class="wrap">${logo}
+      <nav class="pubnav"><button class="link" data-act="scrollTo" data-id="como">Cómo funciona</button><button class="link" data-act="scrollTo" data-id="seguridad">Seguridad</button><button class="link" data-act="scrollTo" data-id="precios">Precios</button><a class="link" href="#tutores">Para tutores</a></nav>
+      <div class="row gap"><a class="btn ghost sm" href="#ingresar">Ingresar</a><a class="btn primary sm" href="#registro-familia">Crear cuenta</a></div></div>`;
+    return;
+  }
+  const map = { parent: ['Representante', S.parent, '#padre'], student: ['Estudiante', S.child, '#estudiante'], tutor: ['Tutor ESPOL', S.tutor, '#tutor'] };
+  const [lbl, who, home] = map[S.user];
+  $('#top').innerHTML = `<div class="wrap">${logo}<span class="role-pill">${lbl}</span>
+    <div class="row gap" style="margin-left:auto"><a class="link" href="${home}">Mi panel</a><div class="user-chip">${avatar({ name: who.name, color: S.user === 'tutor' ? '#0e9384' : S.user === 'parent' ? '#7c3aed' : '#475569' }, 'sm')}<span>${esc(first(who.name))}</span></div>
+    <button class="btn ghost sm" data-act="logout">Salir</button></div></div>`;
+}
+function renderSim() {
+  if (S.tour.on) { $('#sim').innerHTML = ''; return; }
+  const acc = [];
+  if (S.parent && !S.parent.pending) acc.push(['parent', `${first(S.parent.name)} · representante`]);
+  if (S.child) acc.push(['student', `${first(S.child.name)} · estudiante${S.child.status === 'pendiente' ? ' (pendiente)' : ''}`]);
+  if (S.tutor) acc.push(['tutor', `${first(S.tutor.name)} · tutor${S.tutor.status === 'revision' ? ' (en revisión)' : ''}`]);
+  $('#sim').innerHTML = `${S.simOpen ? `<div class="sim-panel">
+      <div class="row between"><b>Simulador</b><button class="link" data-act="simToggle" aria-label="Cerrar">✕</button></div>
+      <p class="tiny muted">Herramientas para presentar el prototipo. No forman parte del producto.</p>
+      <h4>Recorrido</h4><button class="btn primary sm" data-act="tourStart">▶ Simulación guiada (15 pasos)</button>
+      <h4>Cambiar de cuenta</h4>${acc.length ? acc.map(([r, l]) => `<button class="btn ghost sm" data-act="loginAs" data-r="${r}">Entrar como ${esc(l)}</button>`).join('') : '<p class="tiny muted">Aún no hay cuentas creadas.</p>'}
+      <button class="btn ghost sm" data-act="loadDemo">Cargar cuentas de ejemplo</button>
+      <h4>Tiempo</h4><button class="btn ghost sm" data-act="advance">⏩ Adelantar 24 h (liberar pagos)</button>
+      ${S.parent && S.parent.pending ? `<button class="btn ghost sm" data-act="go" data-r="invitacion">✉ Abrir invitación del representante</button>` : ''}
+      ${S.tutor && S.tutor.status === 'revision' ? `<button class="btn ghost sm" data-act="approveTutor">✓ Aprobar al tutor en revisión</button>` : ''}
+      <h4>Datos</h4><button class="btn danger sm" data-act="resetAll">Reiniciar todo</button></div>` : ''}
+    <button class="sim-btn" data-act="simToggle">⚙ Simulador</button>`;
+}
+
+/* =========================================================
+   Vistas públicas
+   ========================================================= */
+const VIEWS = {}, AFTER = {};
+
+VIEWS.inicio = () => {
+  const online = TUTORS.filter(t => t.online).length;
+  const feats = [
+    ['Emparejamiento en tiempo real', 'Pides ayuda y te conectamos con un tutor disponible en menos de 3 minutos.', 5],
+    ['Sesiones de 30 a 60 minutos', 'Bloques cortos para una duda puntual o clases de nivelación. Puedes extender 15 min.', 7],
+    ['Tutores 100% verificados', 'Cédula, matrícula vigente, récord académico, nota mínima por materia y prueba.', 11],
+    ['Cobro seguro en garantía', 'El pago queda retenido y se libera al tutor 24 h después, si no hay reclamos.', 10],
+    ['Reporte automático a padres', 'Temas reforzados, próximos pasos y compromiso, por correo y WhatsApp.', 9],
+    ['App liviana y acceso web', 'Menos de 50 MB y versión web para celular, tablet o computadora.', 14],
+    ['Calificaciones y reseñas', 'Estudiantes y padres califican del 1 al 5 la paciencia y claridad del tutor.', 8],
+    ['Insignias del estudiante', 'Puntual, respetuoso y constante: solo insignias positivas y privadas.', 13]
+  ];
+  const fam = [['Crea la cuenta familiar', 'El representante se registra y agrega a su hijo (o el estudiante invita a su representante).'], ['Pide ayuda', 'Materia, tema, foto del ejercicio y duración. El cobro queda retenido.'], ['Aprende en vivo', 'Tutor ESPOL en menos de 3 min: video, chat y pizarra compartida.'], ['Reporte a casa', 'Al terminar, el representante recibe el reporte y el pago se libera.']];
+  const tut = [['Regístrate con tu correo ESPOL', 'Datos básicos, cédula, matrícula vigente y récord académico.'], ['Demuestra lo que sabes', 'Nota mínima de 8/10 por materia y una prueba corta.'], ['Activa tu disponibilidad', 'Ponte en línea cuando quieras y acepta solicitudes en 30 s.'], ['Enseña y cobra', 'Llenas el reporte en 2 min y recibes el 85% de cada sesión.']];
+  const steps = S.homeTab === 'fam' ? fam : tut;
+  const ctas = `<div class="role-ctas">
+      <a class="role-cta" href="#registro-familia"><span class="q">¿Eres padre, madre o estudiante?</span><span class="a">Crea tu cuenta aquí</span><span class="tiny muted">Ayuda en Matemáticas, Física y Química.</span><span class="go">Crear cuenta familiar →</span></a>
+      <a class="role-cta tut" href="#tutores"><span class="q">¿Eres estudiante de la ESPOL?</span><span class="a">Hazte tutor aquí</span><span class="tiny muted">Gana dinero en tus horas libres.</span><span class="go">Crear cuenta de tutor →</span></a></div>`;
+  return `
+  <section class="hero"><div class="wrap hero-grid">
+    <div>
+      <span class="pill">Tutorías STEM bajo demanda · Guayaquil</span>
+      <h1>Un tutor de la ESPOL, <span class="hl">en menos de 3 minutos.</span></h1>
+      <p class="lead">Para padres de bachilleres que quieren mejorar el rendimiento de sus hijos en matemáticas, física y química, sin búsquedas informales ni traslados. Dudas resueltas de joven a joven, con pago protegido y un reporte después de cada clase.</p>
+      ${ctas}
+      <button class="demo-link" data-act="tourStart"><span>▶</span>Ver simulación de cómo funciona</button>
+    </div>
+    <div class="phone">
+      <div class="ok-bar">✓ Tutor encontrado en 0:42</div>
+      <div class="row gap">${avatar(TUTORS[0])}<div><b>Andrea V.</b> <span class="verified">✓ ESPOL</span><div class="tiny muted">Ing. Computación · 6.º semestre</div></div></div>
+      <div class="rating">${stars(4.9)} <b>4.9</b> <span class="tiny muted">(58 reseñas)</span></div>
+      <div class="row between" style="margin-top:12px;font-size:13.5px"><span class="muted">Derivadas · 30 min</span><b>$6.00 protegido</b></div>
+      <div class="mini-rep"><b>Reporte enviado a mamá</b><ul><li>Regla de la cadena</li><li>3 ejercicios resueltos</li><li>Puntualidad ★★★★★</li></ul></div>
+    </div>
+  </div></section>
+
+  <section class="block" id="como"><div class="wrap center">
+    <span class="pill">Cómo funciona</span>
+    <div class="sec-head" style="margin-bottom:18px"><h2>De la duda al reporte en cuatro pasos</h2></div>
+    <div class="tabs"><button class="${S.homeTab === 'fam' ? 'on' : ''}" data-act="homeTab" data-t="fam">Para familias</button><button class="${S.homeTab === 'tut' ? 'on' : ''}" data-act="homeTab" data-t="tut">Para tutores</button></div>
+    <div class="steps" style="text-align:left">${steps.map((s, i) => `<div class="card"><div class="step-n">${i + 1}</div><h4>${s[0]}</h4><p class="muted tiny">${s[1]}</p></div>`).join('')}</div>
+    <div style="margin-top:20px">${S.homeTab === 'fam' ? '<a class="btn primary" href="#registro-familia">Crear cuenta familiar</a>' : '<a class="btn primary" href="#tutores">Quiero ser tutor</a>'}</div>
+  </div></section>
+
+  <section class="block white" id="atributos"><div class="wrap">
+    <div class="sec-head"><span class="pill amber">Lo que incluye</span><h2>Ocho razones para elegir PoliTutors</h2><p class="muted">Toca “Verlo funcionando” para saltar a ese momento de la simulación.</p></div>
+    <div class="feat-grid">${feats.map((f, i) => `<div class="card feat"><span class="num">0${i + 1}</span><h4>${f[0]}</h4><p>${f[1]}</p><button data-act="tourAt" data-i="${f[2]}">Verlo funcionando →</button></div>`).join('')}</div>
+  </div></section>
+
+  <section class="block" id="seguridad"><div class="wrap">
+    <div class="sec-head"><span class="pill">Confianza y seguridad</span><h2>Pensado para menores de edad</h2><p class="muted">Lo que hacemos para que los padres estén tranquilos.</p></div>
+    <div class="trust-grid">
+      <div class="card"><div class="trust-ic">✓</div><h4>Tutores verificados</h4><p class="tiny muted" style="margin-top:6px">Cédula con selfie, matrícula ESPOL vigente, récord académico y prueba por materia. Se revalida cada semestre.</p></div>
+      <div class="card"><div class="trust-ic">⛨</div><h4>Pago protegido</h4><p class="tiny muted" style="margin-top:6px">Retenemos el pago y lo liberamos 24 h después de la sesión. Si algo sale mal, lo reportas y te devolvemos el dinero.</p></div>
+      <div class="card"><div class="trust-ic">●</div><h4>Todo dentro de la plataforma</h4><p class="tiny muted" style="margin-top:6px">Sesiones grabadas, chat interno y sin datos de contacto compartidos entre tutor y estudiante.</p></div>
+      <div class="card"><div class="trust-ic">⚖</div><h4>Datos y consentimiento</h4><p class="tiny muted" style="margin-top:6px">El representante autoriza el uso de datos y la grabación, conforme a la Ley Orgánica de Protección de Datos Personales.</p></div>
+    </div>
+    <div class="center" style="margin-top:16px"><button class="btn ghost sm" data-act="coc">Leer el código de conducta del tutor</button></div>
+  </div></section>
+
+  <section class="block white" id="precios"><div class="wrap">
+    <div class="sec-head"><span class="pill">Precios</span><h2>Pagas solo por lo que usas</h2><p class="muted">Sin mensualidades. El cobro se hace al pedir la sesión y queda retenido hasta que termina.</p></div>
+    <div class="price-grid">
+      <div class="card price"><span class="muted">Prueba</span><b>Gratis</b><span class="tiny muted">15 min · primera sesión</span></div>
+      <div class="card price hot"><span class="muted">Consulta</span><b>$6.00</b><span class="tiny muted">30 min</span></div>
+      <div class="card price"><span class="muted">Nivelación</span><b>$8.50</b><span class="tiny muted">45 min</span></div>
+      <div class="card price"><span class="muted">Clase completa</span><b>$11.00</b><span class="tiny muted">60 min</span></div>
+    </div>
+    <div class="guarantee"><div class="trust-ic" style="margin:0;background:#fff">⛨</div><div><b>Garantía de primera sesión</b><div class="tiny">Si la primera sesión pagada con un tutor no te convence, la reportas dentro de 24 h y te devolvemos el 100%.</div></div></div>
+    <p class="tiny muted center" style="margin-top:10px">Precios referenciales del prototipo. Extensión de +15 min: ${money(EXT_PRICE)}.</p>
+  </div></section>
+
+  <section class="block" id="dispositivos"><div class="wrap devices">
+    <div><span class="pill">App liviana + web</span><h2 style="font-size:30px;font-weight:800;margin:12px 0 8px">Funciona en el celular que ya tienes</h2>
+      <p class="muted">La app pesa menos de 50 MB y consume pocos datos. Si no quieres instalar nada, entras desde el navegador en el celular, la tablet o la computadora.</p>
+      <ul style="color:var(--ink-2);margin-top:12px;padding-left:18px"><li>Notificaciones al instante para tutores</li><li>Panel web completo para padres</li><li>Sesiones optimizadas para conexiones lentas</li></ul></div>
+    <div class="dev-row"><div class="dev"><div class="scr" style="width:110px;height:200px">App<br>&lt; 50 MB</div></div><div class="dev" style="border-radius:14px"><div class="scr" style="width:260px;height:170px">Web</div></div></div>
+  </div></section>
+
+  <section class="block white"><div class="wrap">
+    <div class="sec-head"><span class="pill">Testimonios</span><h2>Lo que dicen las familias</h2><p class="tiny muted">Testimonios ilustrativos del prototipo.</p></div>
+    <div class="testi-grid">
+      <div class="card testi">${stars(5)}<p>“Ya no tengo que buscar profesor por WhatsApp. Mi hija pide ayuda y yo recibo el reporte.”</p><b>Patricia M.</b><div class="tiny muted">Mamá de estudiante de 2.º BGU</div></div>
+      <div class="card testi">${stars(5)}<p>“Me explican como un pana, sin miedo a preguntar. Subí en física el primer parcial.”</p><b>Joaquín L.</b><div class="tiny muted">Estudiante de 3.º BGU</div></div>
+      <div class="card testi">${stars(5)}<p>“Doy tutorías entre clases y cobro sin perseguir a nadie. El pago llega solo.”</p><b>Andrea V.</b><div class="tiny muted">Tutora, Ing. Computación ESPOL</div></div>
+    </div>
+  </div></section>
+
+  <section class="block" id="faq"><div class="wrap">
+    <div class="sec-head"><span class="pill">Preguntas frecuentes</span><h2>¿Tienes dudas?</h2></div>
+    <div class="faq-grid">
+      <div><h3>Para familias</h3>
+        <details><summary>¿Quién crea la cuenta, el padre o el estudiante?</summary><p>Lo ideal es que el representante cree la cuenta y agregue a su hijo. Si el estudiante se registra primero, debe ingresar el correo de su representante, que aprueba la cuenta y registra el método de pago.</p></details>
+        <details><summary>¿Cuándo se cobra?</summary><p>Cuando el estudiante pide una sesión. El dinero queda retenido y se libera al tutor 24 h después de terminar, si no hay reclamos. Si no encontramos tutor en 3 minutos, no se cobra nada.</p></details>
+        <details><summary>¿Cómo sé que el tutor es confiable?</summary><p>Todos son estudiantes activos de la ESPOL, verificados con cédula, matrícula, récord y una prueba por materia. Además ves sus calificaciones y reseñas.</p></details>
+        <details><summary>¿Las sesiones se graban?</summary><p>Sí. Toda la comunicación ocurre dentro de la plataforma y se graba por seguridad, con tu consentimiento como representante.</p></details></div>
+      <div><h3>Para tutores</h3>
+        <details><summary>¿Qué necesito para ser tutor?</summary><p>Ser estudiante activo de la ESPOL, tener 8/10 o más en la materia que vas a enseñar, aprobar una prueba corta y aceptar el código de conducta.</p></details>
+        <details><summary>¿Cuánto gano?</summary><p>Recibes el 85% de cada sesión. Por ejemplo, $5.10 por una consulta de 30 minutos.</p></details>
+        <details><summary>¿Cuándo me pagan?</summary><p>El pago se libera 24 h después de cada sesión y se transfiere a tu cuenta bancaria.</p></details>
+        <details><summary>¿Tengo horario fijo?</summary><p>No. Activas “En línea” cuando quieras y solo recibes solicitudes de tus materias.</p></details></div>
+    </div>
+  </div></section>
+
+  <section class="block" style="padding-top:0"><div class="wrap"><div class="final-cta"><h2>Empieza hoy</h2>${ctas}</div></div></section>
+  <footer><div class="wrap row between wrapf gap"><span><b>PoliTutors</b> · Proyecto de emprendimiento, ESPOL · Guayaquil</span>
+    <span class="row wrapf"><button class="link" data-act="coc">Código de conducta</button><button class="link" data-act="privacy">Privacidad (LOPDP)</button><a class="link" href="#tutores">Para tutores</a></span></div></footer>`;
+};
+AFTER.inicio = () => { if (S.pendingScroll) { const id = S.pendingScroll; S.pendingScroll = null; setTimeout(() => $('#' + id)?.scrollIntoView({ behavior: 'smooth' }), 60); } };
+
+VIEWS.tutores = () => `
+  <section class="hero" style="background:radial-gradient(900px 420px at 85% 0%,#d7f2ee 0%,transparent 60%)"><div class="wrap hero-grid">
+    <div><span class="pill" style="background:#d7f2ee;color:#0e7466">Para estudiantes de la ESPOL</span>
+      <h1>Enseña lo que dominas. <span style="color:#0e9384">Gana entre clases.</span></h1>
+      <p class="lead">Ayuda a bachilleres de Guayaquil con matemáticas, física o química desde tu celular. Tú decides cuándo estás en línea y cobras sin perseguir a nadie.</p>
+      <div class="row gap wrapf"><a class="btn lg" style="background:#0e9384;color:#fff" href="#registro-tutor">Crear mi cuenta de tutor</a><a class="btn ghost lg" href="#ingresar">Ya tengo cuenta</a></div>
+      <div class="trust"><span>Horario libre</span><span>85% de cada sesión</span><span>Pago a las 24 h</span></div></div>
+    <div class="calc"><b>¿Cuánto podrías ganar?</b>
+      <p class="tiny muted" style="margin:4px 0 14px">Horas de tutoría a la semana</p>
+      <input type="range" id="hrs" min="1" max="20" value="6">
+      <div class="row between tiny muted"><span>1 h</span><span id="hrsL">6 h por semana</span><span>20 h</span></div>
+      <div class="big" id="earn" style="margin-top:12px">$245</div><p class="tiny muted">al mes aprox. (sesiones de 30 min a $6, recibes $5.10 c/u)</p></div>
+  </div></section>
+  <section class="block"><div class="wrap">
+    <div class="sec-head"><h2>Requisitos y proceso</h2><p class="muted">La verificación toma hasta 3 días hábiles.</p></div>
+    <div class="steps">
+      <div class="card"><div class="step-n" style="background:#d7f2ee;color:#0e9384">1</div><h4>Cuenta con correo ESPOL</h4><p class="tiny muted">Tu correo @espol.edu.ec confirma que eres estudiante.</p></div>
+      <div class="card"><div class="step-n" style="background:#d7f2ee;color:#0e9384">2</div><h4>Documentos</h4><p class="tiny muted">Cédula (frente, reverso y selfie), matrícula vigente y récord académico.</p></div>
+      <div class="card"><div class="step-n" style="background:#d7f2ee;color:#0e9384">3</div><h4>Materias y prueba</h4><p class="tiny muted">Mínimo 8/10 en la materia y una prueba corta por cada una.</p></div>
+      <div class="card"><div class="step-n" style="background:#d7f2ee;color:#0e9384">4</div><h4>Código de conducta</h4><p class="tiny muted">Reglas para trabajar con menores y datos para recibir tus pagos.</p></div>
+    </div>
+    <div class="center" style="margin-top:24px"><a class="btn lg" style="background:#0e9384;color:#fff" href="#registro-tutor">Empezar registro</a></div>
+  </div></section>`;
+AFTER.tutores = () => {
+  const upd = () => { const h = +$('#hrs').value; $('#hrsL').textContent = h + ' h por semana'; $('#earn').textContent = '$' + Math.round(h * 2 * 5.1 * 4); };
+  $('#hrs').addEventListener('input', upd); upd();
+};
+
+/* ---------- Registro familiar ---------- */
+const wizSteps = (names, cur) => `<div class="wiz-steps">${names.map((s, i) => `<div class="ws ${i + 1 < cur ? 'done' : i + 1 === cur ? 'on' : ''}"><span>${i + 1 < cur ? '✓' : i + 1}</span>${s}</div>`).join('')}</div>`;
+const fld = (label, id, type, val, ph = '', extra = '', cls = '') => `<div class="${cls}"><label class="lbl" for="${id}">${label}</label><input type="${type}" id="${id}" value="${esc(val || '')}" placeholder="${esc(ph)}" ${extra}></div>`;
+const sel = (label, id, opts, val, cls = '') => `<div class="${cls}"><label class="lbl" for="${id}">${label}</label><select id="${id}">${opts.map(o => `<option ${o === val ? 'selected' : ''}>${o}</option>`).join('')}</select></div>`;
+const methodRadios = cur => Object.entries(METHODS).map(([k, [n, s]]) => `<label class="check"><input type="radio" name="method" value="${k}" ${k === (cur || 'payphone') ? 'checked' : ''}><span><b>${n}</b><small>${s}</small></span></label>`).join('');
+
+VIEWS['registro-familia'] = () => {
+  const R = S.reg, d = R.d;
+  if (!R.who) return `<div class="wrap page narrow">
+    <h2 style="font-size:28px;font-weight:800">Crear cuenta familiar</h2><p class="muted" style="margin:6px 0 20px">¿Quién está creando la cuenta?</p>
+    <div class="who-grid">
+      <button class="who" data-act="regWho" data-w="padre"><span class="ic">👨‍👩‍👦</span><b>Soy padre, madre o representante</b><span class="tiny muted">Creas tu cuenta, agregas a tu hijo y registras el método de pago. Recomendado.</span></button>
+      <button class="who" data-act="regWho" data-w="estudiante"><span class="ic">🎒</span><b>Soy estudiante de bachillerato</b><span class="tiny muted">Te registras y tu representante recibe una invitación para aprobar tu cuenta.</span></button>
+    </div>
+    <p class="tiny muted center" style="margin-top:18px">¿Ya tienes cuenta? <a href="#ingresar">Ingresa aquí</a> · ¿Eres universitario? <a href="#tutores">Hazte tutor</a></p></div>`;
+
+  if (R.who === 'padre') {
+    const names = ['Tus datos', 'Tu hijo/a', 'Permisos', 'Pago'];
+    if (R.step === 'done') {
+      const c = S.child;
+      return `<div class="wrap page narrow"><div class="card center"><div class="big-ok">✓</div><h2>¡Cuenta familiar creada!</h2>
+        <p class="muted" style="margin-top:6px">${esc(first(S.parent.name))}, ya puedes seguir el avance de ${esc(first(c.name))} desde tu panel.</p>
+        <div class="cred" style="text-align:left"><b>Acceso de ${esc(first(c.name))}</b><br>Usuario: <code>${esc(c.user)}</code> · Contraseña temporal: <code>${esc(c.pass)}</code>
+        <div class="tiny muted" style="margin-top:6px">También se lo enviamos por WhatsApp${S.parent.phone ? ' al ' + esc(S.parent.phone) : ''}. Deberá cambiar la contraseña al ingresar.</div></div>
+        <div class="row gap wrapf" style="justify-content:center"><button class="btn primary" data-act="loginAs" data-r="parent">Ir a mi panel</button><button class="btn ghost" data-act="loginAs" data-r="student">Entrar como ${esc(first(c.name))} (simulación)</button></div></div></div>`;
+    }
+    let body = '';
+    if (R.step === 1) body = `<h3>Tus datos</h3><div class="fgrid">
+        ${fld('Nombre completo', 'pName', 'text', d.pName, 'Ej.: Ana Vera', '', 'full')}
+        ${fld('Correo electrónico', 'pEmail', 'email', d.pEmail, 'tucorreo@gmail.com')}
+        ${fld('Celular (WhatsApp)', 'pPhone', 'tel', d.pPhone, '09XXXXXXXX')}
+        ${fld('Contraseña', 'pPass', 'password', d.pPass, 'Mínimo 6 caracteres', '', 'full')}</div>
+        <p class="hint">Eres el titular: pagas las sesiones y recibes los reportes.</p>`;
+    if (R.step === 2) body = `<h3>Datos de tu hijo o hija</h3><div class="fgrid">
+        ${fld('Nombre completo', 'cName', 'text', d.cName, 'Ej.: Mateo Vera', '', 'full')}
+        ${sel('Curso', 'cCurso', CURSOS, d.cCurso || CURSOS[1])}
+        ${fld('Fecha de nacimiento', 'cBirth', 'date', d.cBirth)}
+        ${fld('Colegio (opcional)', 'cColegio', 'text', d.cColegio, 'Nombre del colegio', '', 'full')}
+        <div class="full"><label class="lbl">¿En qué materias necesita apoyo?</label><div class="chips">${Object.entries(SUBJECTS).map(([k, s]) => `<label class="chip"><input type="checkbox" name="cSubj" value="${k}" ${d.cSubj.includes(k) ? 'checked' : ''}>${s.icon} ${s.name}</label>`).join('')}</div></div></div>
+        <p class="hint">Crearemos un usuario para tu hijo. Puedes agregar más hijos después.</p>`;
+    if (R.step === 3) {
+      const a = ageOf(d.cBirth);
+      body = `<h3>Permisos</h3>
+        <div class="info" style="margin-bottom:14px">${a !== null && a < 15 ? `${esc(first(d.cName))} tiene ${a} años. La LOPDP exige tu consentimiento como representante para tratar sus datos.` : `${esc(first(d.cName))} tiene ${a ?? '—'} años. Igual vinculamos tu cuenta porque eres quien paga y recibe los reportes.`}</div>
+        <label class="check"><input type="checkbox" id="kData" ${d.kData ? 'checked' : ''}><span><b>Autorizo el tratamiento de datos de mi hijo</b><small>Nombre, curso y avance académico, solo para el servicio de tutorías.</small></span></label>
+        <label class="check"><input type="checkbox" id="kRec" ${d.kRec ? 'checked' : ''}><span><b>Autorizo la grabación de las sesiones</b><small>Por seguridad. Las grabaciones solo se revisan ante un reclamo.</small></span></label>
+        <label class="lbl" style="margin-top:16px">¿Cómo quieres recibir los reportes?</label>
+        <label class="check"><input type="checkbox" id="kMail" ${d.kMail !== false ? 'checked' : ''}><span><b>Correo electrónico</b></span></label>
+        <label class="check"><input type="checkbox" id="kWa" ${d.kWa !== false ? 'checked' : ''}><span><b>WhatsApp</b></span></label>`;
+    }
+    if (R.step === 4) body = `<h3>Método de pago</h3>
+        <div class="info" style="margin-bottom:14px">No cobramos nada ahora. Cada sesión se cobra cuando tu hijo la pide y queda <b>retenida</b> hasta que termina. La primera sesión de 15 min es gratis.</div>
+        ${methodRadios(d.method)}
+        <p class="note" style="margin-top:6px">Pasarela simulada: no ingreses datos reales de tarjeta.</p>`;
+    return `<div class="wrap page narrow"><h2 style="font-size:26px;font-weight:800;margin-bottom:14px">Cuenta del representante</h2>${wizSteps(names, R.step)}
+      <form class="card" id="regForm">${body}<div id="fErr"></div>
+      <div class="wiz-foot"><button type="button" class="btn ghost" data-act="regBack">← Atrás</button><button class="btn primary">${R.step === 4 ? 'Crear cuenta familiar' : 'Continuar'}</button></div></form></div>`;
+  }
+
+  /* estudiante */
+  const names = ['Tus datos', 'Tu representante'];
+  if (R.step === 'done') return `<div class="wrap page narrow"><div class="card center"><div class="big-wait">✉</div><h2>¡Listo, ${esc(first(S.child.name))}!</h2>
+      <p class="muted" style="margin:6px 0 14px">Le enviamos una invitación a <b>${esc(S.parent.name)}</b> (${esc(S.parent.email)}) por correo y WhatsApp.</p>
+      <div class="info" style="text-align:left">Tu cuenta queda <b>pendiente</b>: puedes entrar y explorar, pero para pedir ayuda tu representante debe aprobarla y registrar un método de pago.</div>
+      <div class="row gap wrapf" style="justify-content:center;margin-top:16px"><button class="btn primary" data-act="loginAs" data-r="student">Entrar a mi cuenta</button><button class="btn ghost" data-act="go" data-r="invitacion">Simular: el representante abre la invitación</button></div></div></div>`;
+  let body = '';
+  if (R.step === 1) body = `<h3>Tus datos</h3><div class="fgrid">
+      ${fld('Nombre completo', 'sName', 'text', d.sName, 'Ej.: Mateo Vera', '', 'full')}
+      ${sel('Curso', 'sCurso', CURSOS, d.sCurso || CURSOS[1])}
+      ${fld('Fecha de nacimiento', 'sBirth', 'date', d.sBirth)}
+      ${fld('Correo o usuario', 'sEmail', 'text', d.sEmail, 'mateo@gmail.com')}
+      ${fld('Contraseña', 'sPass', 'password', d.sPass, 'Mínimo 6 caracteres')}</div>`;
+  if (R.step === 2) body = `<h3>Datos de tu representante</h3>
+      <div class="info" style="margin-bottom:14px">Tu representante aprueba tu cuenta, paga las sesiones y recibe tus reportes${ageOf(d.sBirth) !== null && ageOf(d.sBirth) < 15 ? '. Como tienes menos de 15 años, la ley exige su autorización' : ''}.</div>
+      <div class="fgrid">${fld('Nombre del representante', 'rName', 'text', d.rName, 'Ej.: Ana Vera', '', 'full')}
+      ${fld('Correo', 'rEmail', 'email', d.rEmail, 'correo@gmail.com')}${fld('Celular (WhatsApp)', 'rPhone', 'tel', d.rPhone, '09XXXXXXXX')}</div>`;
+  return `<div class="wrap page narrow"><h2 style="font-size:26px;font-weight:800;margin-bottom:14px">Cuenta de estudiante</h2>${wizSteps(names, R.step)}
+    <form class="card" id="regForm">${body}<div id="fErr"></div>
+    <div class="wiz-foot"><button type="button" class="btn ghost" data-act="regBack">← Atrás</button><button class="btn primary">${R.step === 2 ? 'Enviar invitación' : 'Continuar'}</button></div></form></div>`;
+};
+function handleRegForm() {
+  const R = S.reg, d = R.d, v = id => ($('#' + id)?.value || '').trim(), errs = [];
+  const isMail = x => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x), isPhone = x => x.replace(/\D/g, '').length >= 9;
+  if (R.who === 'padre') {
+    if (R.step === 1) {
+      Object.assign(d, { pName: v('pName'), pEmail: v('pEmail'), pPhone: v('pPhone'), pPass: v('pPass') });
+      if (!d.pName) errs.push('escribe tu nombre'); if (!isMail(d.pEmail)) errs.push('revisa el correo'); if (!isPhone(d.pPhone)) errs.push('revisa el celular'); if (d.pPass.length < 6) errs.push('la contraseña debe tener al menos 6 caracteres');
+    } else if (R.step === 2) {
+      Object.assign(d, { cName: v('cName'), cCurso: v('cCurso'), cBirth: v('cBirth'), cColegio: v('cColegio'), cSubj: $$('input[name=cSubj]:checked').map(x => x.value) });
+      if (!d.cName) errs.push('escribe el nombre de tu hijo'); if (!d.cBirth) errs.push('indica su fecha de nacimiento');
+    } else if (R.step === 3) {
+      Object.assign(d, { kData: $('#kData').checked, kRec: $('#kRec').checked, kMail: $('#kMail').checked, kWa: $('#kWa').checked });
+      if (!d.kData) errs.push('autoriza el tratamiento de datos'); if (!d.kRec) errs.push('autoriza la grabación de sesiones');
+    } else if (R.step === 4) {
+      d.method = $('input[name=method]:checked').value;
+    }
+    if (errs.length) return showErr(errs);
+    if (R.step < 4) { R.step++; return render(); }
+    S.parent = { name: d.pName, email: d.pEmail, phone: d.pPhone, pass: d.pPass, method: d.method, notify: { email: d.kMail, wa: d.kWa } };
+    const parts = d.cName.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/\s+/);
+    S.child = { name: d.cName, user: parts[0] + (parts[1] ? '.' + parts[1] : ''), pass: 'Poli-' + Math.floor(1000 + Math.random() * 9000), curso: d.cCurso, colegio: d.cColegio, birth: d.cBirth,
+      subjects: d.cSubj, status: 'activo', trialUsed: false, rep: { punt: [], resp: [], cons: [] } };
+    S.reports = []; S.payments = []; resetFlow();
+    R.step = 'done'; render(); toast('Cuenta familiar creada');
+  } else {
+    if (R.step === 1) {
+      Object.assign(d, { sName: v('sName'), sCurso: v('sCurso'), sBirth: v('sBirth'), sEmail: v('sEmail'), sPass: v('sPass') });
+      if (!d.sName) errs.push('escribe tu nombre'); if (!d.sBirth) errs.push('indica tu fecha de nacimiento'); if (!d.sEmail) errs.push('escribe tu correo o usuario'); if (d.sPass.length < 6) errs.push('la contraseña debe tener al menos 6 caracteres');
+    } else {
+      Object.assign(d, { rName: v('rName'), rEmail: v('rEmail'), rPhone: v('rPhone') });
+      if (!d.rName) errs.push('escribe el nombre de tu representante'); if (!isMail(d.rEmail)) errs.push('revisa el correo del representante'); if (!isPhone(d.rPhone)) errs.push('revisa el celular del representante');
+    }
+    if (errs.length) return showErr(errs);
+    if (R.step === 1) { R.step = 2; return render(); }
+    S.child = { name: d.sName, user: d.sEmail, pass: d.sPass, curso: d.sCurso, colegio: '', birth: d.sBirth, subjects: [], status: 'pendiente', trialUsed: false, rep: { punt: [], resp: [], cons: [] } };
+    S.parent = { name: d.rName, email: d.rEmail, phone: d.rPhone, pending: true, notify: { email: true, wa: true } };
+    S.reports = []; S.payments = []; resetFlow();
+    R.step = 'done'; render(); toast('Invitación enviada a tu representante');
+  }
+}
+function showErr(errs) { const e = $('#fErr'); if (e) e.innerHTML = `<div class="err">Para continuar: ${errs.join('; ')}.</div>`; }
+
+VIEWS.invitacion = () => {
+  const p = S.parent, c = S.child;
+  if (!p || !p.pending) return `<div class="wrap page narrow"><div class="card center"><h2>No hay invitaciones pendientes</h2><p class="muted" style="margin:8px 0 14px">Esta pantalla aparece cuando un estudiante se registra y pide la aprobación de su representante.</p><a class="btn primary" href="#inicio">Volver al inicio</a></div></div>`;
+  return `<div class="wrap page narrow">
+    <div class="card" style="margin-bottom:16px;background:var(--bg)"><div class="tiny muted">Mensaje recibido por WhatsApp y correo</div><p style="margin-top:6px">“Hola ${esc(first(p.name))}, <b>${esc(c.name)}</b> creó una cuenta en PoliTutors para recibir tutorías de Matemáticas, Física y Química con estudiantes de la ESPOL. Revisa y aprueba su cuenta aquí.”</p></div>
+    <form class="card" id="inviteForm"><h2 style="font-size:22px">Aprobar la cuenta de ${esc(first(c.name))}</h2>
+      <p class="muted" style="margin:6px 0 16px">Al aprobar, quedas como representante: pagas las sesiones y recibes los reportes.</p>
+      <div class="fgrid" style="margin-bottom:14px">${fld('Tu nombre', 'iName', 'text', p.name)}${fld('Crea una contraseña', 'iPass', 'password', '', 'Mínimo 6 caracteres')}</div>
+      <label class="check"><input type="checkbox" id="iData"><span><b>Autorizo el tratamiento de datos de ${esc(first(c.name))}</b><small>Solo para el servicio de tutorías (LOPDP).</small></span></label>
+      <label class="check"><input type="checkbox" id="iRec"><span><b>Autorizo la grabación de las sesiones</b><small>Por seguridad.</small></span></label>
+      <label class="lbl" style="margin-top:14px">Método de pago</label>${methodRadios('payphone')}
+      <div id="fErr"></div>
+      <div class="wiz-foot"><button type="button" class="btn danger" data-act="rejectInvite">No reconozco esta cuenta</button><button class="btn primary">Aprobar cuenta</button></div></form></div>`;
+};
+
+VIEWS.ingresar = () => {
+  const acc = [];
+  if (S.parent && !S.parent.pending) acc.push(['parent', S.parent.name, 'Representante', S.parent.email]);
+  if (S.child) acc.push(['student', S.child.name, 'Estudiante', S.child.user]);
+  if (S.tutor) acc.push(['tutor', S.tutor.name, 'Tutor ESPOL', S.tutor.email]);
+  return `<div class="wrap page" style="max-width:460px">
+    <form class="card" id="loginForm"><h2 style="font-size:24px;margin-bottom:4px">Ingresar</h2><p class="muted" style="margin-bottom:16px">Padres, estudiantes y tutores usan el mismo acceso.</p>
+      ${S.gateMsg ? `<div class="info" style="margin-bottom:14px">${S.gateMsg}</div>` : ''}
+      ${fld('Correo o usuario', 'lUser', 'text', '', 'correo o usuario')}<div style="height:12px"></div>${fld('Contraseña', 'lPass', 'password', '', '••••••')}
+      <div id="fErr"></div><button class="btn primary block lg" style="margin-top:16px">Ingresar</button>
+      <p class="tiny muted center" style="margin-top:12px">¿No tienes cuenta? <a href="#registro-familia">Familias</a> · <a href="#registro-tutor">Tutores</a></p></form>
+    ${acc.length ? `<div class="card" style="margin-top:16px"><b class="tiny">Cuentas de esta simulación</b>${acc.map(([r, n, l, u]) => `<button class="rep-item" style="margin-top:8px" data-act="loginAs" data-r="${r}">${avatar({ name: n, color: r === 'tutor' ? '#0e9384' : r === 'parent' ? '#7c3aed' : '#475569' }, 'sm')}<span class="grow"><span class="t">${esc(n)}</span><br><span class="s">${l} · ${esc(u)}</span></span></button>`).join('')}</div>`
+      : `<div class="card" style="margin-top:16px"><p class="tiny muted">Aún no hay cuentas en esta simulación.</p><button class="btn ghost sm" style="margin-top:8px" data-act="loadDemo">Cargar cuentas de ejemplo</button></div>`}
+  </div>`;
+};
+
+/* ---------- Registro de tutor ---------- */
+VIEWS['registro-tutor'] = () => {
+  const T = S.treg, d = T.d, names = ['Cuenta', 'Documentos', 'Materias', 'Prueba', 'Compromiso'];
+  let body = '';
+  if (T.step === 1) body = `<h3>Crea tu cuenta</h3><div class="fgrid">
+      ${fld('Nombre completo', 'tName', 'text', d.tName, 'Ej.: Carlos Rivas', '', 'full')}
+      ${fld('Correo ESPOL', 'tEmail', 'email', d.tEmail, 'usuario@espol.edu.ec')}${fld('Celular', 'tPhone', 'tel', d.tPhone, '09XXXXXXXX')}
+      ${fld('Contraseña', 'tPass', 'password', d.tPass, 'Mínimo 6 caracteres', '', 'full')}</div><p class="hint">Solo aceptamos correos @espol.edu.ec.</p>`;
+  if (T.step === 2) body = `<h3>Documentos</h3>
+      ${[['fCedF', 'Cédula · frente', 'Foto legible'], ['fCedB', 'Cédula · reverso', 'Foto legible'], ['fSelf', 'Selfie con tu cédula', 'Para confirmar tu identidad'], ['fMat', 'Matrícula vigente', 'Registro de materias del término actual'], ['fRec', 'Récord académico', 'Descargado del sistema académico']]
+        .map(([id, l, h]) => `<div class="file-row"><div><b>${l}</b><div class="tiny muted">${d.files?.[id] ? '✓ ' + esc(d.files[id]) : h}</div></div><input type="file" id="${id}" accept=".pdf,image/*"></div>`).join('')}
+      <p class="tiny muted">Prototipo: los archivos no salen de tu navegador.</p>`;
+  if (T.step === 3) body = `<h3>Materias que puedes enseñar</h3><p class="muted tiny" style="margin-bottom:12px">Necesitas 8/10 o más en la materia según tu récord. Se valida contra el documento que subiste.</p>
+      ${Object.entries(SUBJECTS).map(([k, s]) => `<div class="subj-row"><label><input type="checkbox" name="tS" value="${k}" ${d.subj[k] !== undefined ? 'checked' : ''}>${s.icon} ${s.name}</label><input type="number" id="g_${k}" min="0" max="10" step="0.01" placeholder="Nota /10" value="${d.subj[k] ?? ''}"></div>`).join('')}`;
+  if (T.step === 4) body = `<h3>Prueba corta</h3><p class="muted tiny" style="margin-bottom:12px">Una pregunta por cada materia que elegiste.</p>
+      ${Object.keys(d.subj).map(k => `<div class="quiz"><b>${SUBJECTS[k].icon} ${SUBJECTS[k].name}</b><p style="margin-top:4px">${QUIZ[k].q}</p><div class="opts">${QUIZ[k].o.map((o, i) => `<label><input type="radio" name="q_${k}" value="${i}" ${d.quiz?.[k] === i ? 'checked' : ''}>${o}</label>`).join('')}</div></div>`).join('')}`;
+  if (T.step === 5) body = `<h3>Código de conducta</h3>
+      <div class="coc">Trabajarás con menores de edad. Te comprometes a:<ul><li>Dar clases solo dentro de PoliTutors, donde las sesiones se graban</li><li>No pedir ni compartir datos de contacto ni redes sociales</li><li>No cobrar ni acordar pagos fuera de la plataforma</li><li>Mantener un trato respetuoso, puntual y paciente</li><li>Llenar el reporte para el representante al terminar cada sesión</li></ul></div>
+      <label class="check"><input type="checkbox" id="tCoc" ${d.coc ? 'checked' : ''}><span><b>Acepto el código de conducta</b><small>Su incumplimiento suspende la cuenta.</small></span></label>
+      <h3 style="margin-top:18px">¿Dónde recibes tus pagos?</h3><div class="fgrid">${sel('Banco', 'tBank', BANKS, d.bank)}${sel('Tipo de cuenta', 'tType', ['Ahorros', 'Corriente'], d.type)}</div>
+      <p class="hint">El número de cuenta se pide después de la aprobación.</p>`;
+  return `<div class="wrap page narrow"><h2 style="font-size:26px;font-weight:800;margin-bottom:14px">Registro de tutor</h2>${wizSteps(names, T.step)}
+    <form class="card" id="tregForm">${body}<div id="fErr"></div>
+    <div class="wiz-foot"><button type="button" class="btn ghost" data-act="tregBack">← Atrás</button><button class="btn primary">${T.step === 5 ? 'Enviar a verificación' : 'Continuar'}</button></div></form></div>`;
+};
+function handleTregForm() {
+  const T = S.treg, d = T.d, v = id => ($('#' + id)?.value || '').trim(), errs = [];
+  if (T.step === 1) {
+    Object.assign(d, { tName: v('tName'), tEmail: v('tEmail').toLowerCase(), tPhone: v('tPhone'), tPass: v('tPass') });
+    if (!d.tName) errs.push('escribe tu nombre'); if (!/^[^@\s]+@espol\.edu\.ec$/.test(d.tEmail)) errs.push('usa tu correo @espol.edu.ec');
+    if (d.tPhone.replace(/\D/g, '').length < 9) errs.push('revisa el celular'); if (d.tPass.length < 6) errs.push('la contraseña debe tener al menos 6 caracteres');
+  } else if (T.step === 2) {
+    d.files = d.files || {};
+    ['fCedF', 'fCedB', 'fSelf', 'fMat', 'fRec'].forEach(id => { const f = $('#' + id).files[0]; if (f) d.files[id] = f.name; });
+    const lab = { fCedF: 'cédula (frente)', fCedB: 'cédula (reverso)', fSelf: 'selfie', fMat: 'matrícula vigente', fRec: 'récord académico' };
+    Object.keys(lab).forEach(id => { if (!d.files[id]) errs.push('sube ' + lab[id]); });
+  } else if (T.step === 3) {
+    d.subj = {};
+    $$('input[name=tS]:checked').forEach(x => { d.subj[x.value] = parseFloat(v('g_' + x.value)); });
+    const ks = Object.keys(d.subj);
+    if (!ks.length) errs.push('elige al menos una materia');
+    ks.forEach(k => { if (isNaN(d.subj[k])) errs.push('ingresa tu nota en ' + SUBJECTS[k].name); else if (d.subj[k] < 8) errs.push(`necesitas 8/10 en ${SUBJECTS[k].name} (tienes ${d.subj[k]})`); });
+  } else if (T.step === 4) {
+    d.quiz = {};
+    Object.keys(d.subj).forEach(k => { const c = $(`input[name=q_${k}]:checked`); d.quiz[k] = c ? +c.value : null; if (d.quiz[k] === null) errs.push('responde ' + SUBJECTS[k].name); else if (d.quiz[k] !== QUIZ[k].a) errs.push(`revisa tu respuesta de ${SUBJECTS[k].name}`); });
+  } else {
+    d.coc = $('#tCoc').checked; d.bank = v('tBank'); d.type = v('tType');
+    if (!d.coc) errs.push('acepta el código de conducta');
+  }
+  if (errs.length) return showErr(errs);
+  if (T.step < 5) { T.step++; return render(); }
+  S.tutor = makeTutor({ name: d.tName, email: d.tEmail, phone: d.tPhone, pass: d.tPass, grades: { ...d.subj }, bank: d.bank, status: 'revision' });
+  S.user = 'tutor'; S.treg = { step: 1, d: { subj: {} } };
+  go('tutor'); toast('Solicitud enviada a verificación');
+}
+
+/* =========================================================
+   Estudiante
+   ========================================================= */
+VIEWS.estudiante = () => {
+  if (S.flow.step === 'session' && (!S.live || S.live.role !== 'student')) resetFlow();
+  const f = S.flow;
+  return ({ form: vForm, confirm: vConfirm, matching: vMatching, match: vMatch, session: vLive, rate: vRate, reporting: vReporting, done: vDone })[f.step]();
+};
+function vForm() {
+  const f = S.flow, c = S.child, sub = SUBJECTS[f.subj], d = DURATIONS[f.dur], pend = c.status === 'pendiente';
+  const online = TUTORS.filter(t => t.online && t.grades[f.subj]).length;
+  const recent = S.reports.slice(0, 3);
+  return `<div class="wrap page">
+    ${pend ? `<div class="banner amber"><div><b>Tu cuenta está pendiente de aprobación</b><div class="tiny">Le enviamos una invitación a ${esc(S.parent.name)}. Cuando la apruebe podrás pedir ayuda.</div></div><button class="btn sm dark" data-act="go" data-r="invitacion">Simular aprobación</button></div>` : ''}
+    <div class="page-head"><div><h2>Hola, ${esc(first(c.name))}</h2><p class="muted">${esc(c.curso)} · ¿En qué te ayudamos hoy?</p></div>
+      <div class="online-pill"><span class="dot"></span>${online} tutores en línea en ${sub.name}</div></div>
+    <div class="grid-2-1">
+      <div class="card ${pend ? 'locked' : ''}">
+        <h3>1. Materia</h3>
+        <div class="subj-grid">${Object.entries(SUBJECTS).map(([k, s]) => `<button class="subj ${k === f.subj ? 'on' : ''}" data-act="subj" data-k="${k}" style="--c:${s.color}"><span class="subj-ic">${s.icon}</span>${s.name}</button>`).join('')}</div>
+        <h3>2. Tema</h3>
+        <div class="chips">${sub.topics.map(t => `<button class="chip ${t === f.topic ? 'on' : ''}" data-act="topic" data-t="${esc(t)}">${t}</button>`).join('')}</div>
+        <textarea id="detail" rows="3" placeholder="Cuéntale al tutor tu duda (opcional). Ej.: no entiendo cuándo usar la regla de la cadena">${esc(f.detail)}</textarea>
+        <label class="photo-drop">${f.photo ? `<img src="${f.photo}" alt="Ejercicio">` : '<span style="font-size:24px">📷</span>'}<span style="flex:1"><b>${f.photo ? 'Foto del ejercicio adjunta' : 'Sube una foto del ejercicio'}</b><br><span class="tiny muted">${f.photo ? 'Toca para cambiarla' : 'Opcional · el tutor la verá al conectarse'}</span></span><input type="file" id="photoIn" accept="image/*" style="display:none"></label>
+        <h3 style="margin-top:20px">3. Duración</h3>
+        <div class="dur-grid">${DURATIONS.map((x, i) => { const dis = x.trial && c.trialUsed;
+          return `<button class="dur ${i === f.dur ? 'on' : ''}" data-act="dur" data-i="${i}" ${dis ? 'disabled' : ''}><b>${x.min} min</b><span>${x.trial ? (dis ? 'Prueba usada' : 'Prueba gratis') : money(x.price)}</span></button>`; }).join('')}</div>
+      </div>
+      <aside class="stack">
+        <div class="card">
+          <h3>Resumen</h3>
+          <div class="kv"><span>Materia</span><b>${sub.name}</b></div>
+          <div class="kv"><span>Tema</span><b>${f.topic || '—'}</b></div>
+          <div class="kv"><span>Duración</span><b>${d.min} min</b></div>
+          <div class="kv total"><span>Total</span><b>${d.trial ? 'Gratis' : money(d.price)}</b></div>
+          <button class="btn primary block lg" data-act="toConfirm" ${f.topic && !pend ? '' : 'disabled'}>Pedir ayuda ahora</button>
+          <p class="tiny muted center" style="margin-top:8px">${pend ? 'Disponible cuando se apruebe tu cuenta' : f.topic ? 'Te conectamos en menos de 3 minutos' : 'Elige un tema para continuar'}</p>
+        </div>
+        ${badgesCard('Mis insignias')}
+        <div class="card"><h3>Mis sesiones</h3>${recent.length ? recent.map(r => `<div class="row between" style="padding:6px 0;font-size:13.5px"><span>${SUBJECTS[r.subj].icon} ${esc(r.topic)}</span><span class="muted">${fdate(r.date)}</span></div>`).join('') : '<p class="tiny muted">Aún no tienes sesiones. ¡La primera de 15 min es gratis!</p>'}</div>
+      </aside>
+    </div></div>`;
+}
+function vConfirm() {
+  const f = S.flow, d = DURATIONS[f.dur], p = S.parent, m = METHODS[p.method || 'payphone'];
+  return `<div class="wrap page narrow"><div class="card">
+    <h2 style="font-size:22px;margin-bottom:4px">Confirma tu solicitud</h2>
+    <p class="muted" style="margin-bottom:14px">${SUBJECTS[f.subj].name} · ${esc(f.topic)} · ${d.min} min</p>
+    ${d.trial ? `<div class="success-banner">Tu primera sesión de 15 minutos es gratis.</div>` : `
+      <div class="kv"><span>Se carga a</span><b>Cuenta de ${esc(p.name)} · ${m[0]}</b></div>
+      <div class="kv total"><span>Total</span><b>${money(d.price)}</b></div>
+      <div class="escrow"><div><b>1. Se retiene</b>${money(d.price)} queda protegido mientras dura la sesión.</div><div><b>2. Termina la clase</b>${esc(first(p.name))} recibe el reporte.</div><div><b>3. Se libera</b>El tutor cobra 24 h después si no hay reclamos.</div></div>`}
+    <div class="info" style="margin-bottom:16px">Si no encontramos tutor en 3 minutos, cancelamos la solicitud y no se cobra nada.</div>
+    <div class="row gap end wrapf"><button class="btn ghost" data-act="backForm">Volver</button><button class="btn primary lg" data-act="confirmReq">${d.trial ? 'Buscar tutor' : 'Confirmar y buscar tutor'}</button></div>
+  </div></div>`;
+}
+function confirmRequest() {
+  const f = S.flow, d = DURATIONS[f.dur];
+  const p = { id: 'p' + Date.now(), date: Date.now(), tutorId: null, subj: f.subj, amount: d.price, status: d.trial ? 'gratis' : 'retenido' };
+  S.payments.unshift(p); f.payId = p.id; f.step = 'matching'; f.matchStart = Date.now();
+}
+function vMatching() {
+  const f = S.flow, pool = TUTORS.filter(t => t.online && t.grades[f.subj]).sort((a, b) => b.rating - a.rating);
+  return `<div class="wrap page center-page"><div class="card match-card">
+    <div class="radar"><span></span><span></span><span></span><div class="radar-core">${SUBJECTS[f.subj].icon}</div></div>
+    <h2 style="margin-top:20px">Buscando tu tutor…</h2>
+    <p class="muted" id="mStatus">Buscando tutores verificados en línea</p>
+    <div class="notified" id="notif">${pool.map(t => avatar(t)).join('')}</div>
+    <div class="big-timer" id="mTimer">3:00</div><p class="tiny muted" style="margin-bottom:18px">Tiempo máximo · si llega a 0:00 no se cobra</p>
+    <button class="btn ghost" data-act="cancelMatch">Cancelar solicitud</button></div></div>`;
+}
+function foundTutor() {
+  const f = S.flow;
+  let pool = TUTORS.filter(t => t.online && t.grades[f.subj] && !f.skipped.includes(t.id));
+  if (!pool.length) { f.skipped = []; pool = TUTORS.filter(t => t.online && t.grades[f.subj]); }
+  pool.sort((a, b) => b.rating - a.rating);
+  f.tutorId = pool[0].id; f.matchSecs = Math.max(1, Math.round((Date.now() - f.matchStart) / 1000)); f.step = 'match';
+  const p = S.payments.find(x => x.id === f.payId); if (p) p.tutorId = f.tutorId;
+}
+function vMatch() {
+  const f = S.flow, t = tutor(f.tutorId);
+  return `<div class="wrap page narrow">
+    <div class="success-banner">✓ Tutor encontrado en <b>${fmt(f.matchSecs)}</b>, dentro de la meta de 3 minutos</div>
+    <div class="card">
+      <div class="row gap">${avatar(t, 'lg')}<div><h2 style="font-size:22px">${short(t.name)}<span class="verified">✓ Verificado ESPOL</span></h2>
+        <p class="muted">${t.carrera} · ${t.sem}.º semestre</p>
+        <div class="rating">${stars(t.rating)} <b>${t.rating.toFixed(1)}</b> <span class="muted tiny">(${t.count} reseñas · ${t.sessions} sesiones)</span></div>
+        <div class="vbadges">${Object.entries(t.grades).map(([k, g]) => `<span class="vbadge">${SUBJECTS[k].name} · ${g.toFixed(1)}/10</span>`).join('')}</div></div></div>
+      <div class="verif-list"><div>Cédula y selfie validadas</div><div>Matrícula ESPOL vigente</div><div>Prueba de ${SUBJECTS[f.subj].name} aprobada</div><div>Código de conducta firmado</div></div>
+      <h4 style="font-size:14px;margin-bottom:4px">Reseñas recientes</h4>
+      ${t.reviews.slice(0, 2).map(r => `<div class="review"><div class="row between"><span class="rv-who">${esc(r.by)}</span>${stars(r.stars)}</div>${esc(r.text)}</div>`).join('') || '<p class="muted tiny">Aún sin reseñas.</p>'}
+      <div class="row gap end wrapf" style="margin-top:16px"><button class="btn ghost" data-act="otherTutor">Buscar otro tutor</button><button class="btn primary" data-act="enterSession">Entrar a la sesión</button></div>
+    </div></div>`;
+}
+function startStudentLive() {
+  const f = S.flow, t = tutor(f.tutorId);
+  f.step = 'session';
+  S.live = { role: 'student', subj: f.subj, topic: f.topic, min: DURATIONS[f.dur].min, start: Date.now(), oName: short(t.name), oColor: t.color, meName: S.child.name,
+    chat: [{ from: 'sys', text: 'Te uniste a la sala' }], board: null, drew: false, ri: 0, ext: false };
+  if (f.photo) S.live.chat.push({ from: 'me', text: 'Este es el ejercicio:', img: f.photo });
+  S.live.chat.push({ from: 'o', text: `¡Hola, ${first(S.child.name)}! Soy ${first(t.name)}. Vi que necesitas ayuda con ${f.topic.toLowerCase()}. ${f.detail ? 'Leí tu duda, vamos con eso.' : '¿Qué parte te cuesta más?'}` });
+}
+function vRate() {
+  const f = S.flow, t = tutor(f.tutorId), tags = ['Paciencia', 'Claridad', 'Puntualidad', 'Dominio del tema', 'Buena onda'];
+  return `<div class="wrap page narrow"><div class="card center">
+    <div class="row" style="justify-content:center">${avatar(t, 'lg')}</div>
+    <h2 style="font-size:22px;margin-top:12px">¿Cómo estuvo tu sesión con ${first(t.name)}?</h2>
+    <p class="muted">Duró ${fmt(f.elapsed)}. Calificar es obligatorio para cerrar la sesión.</p>
+    <div class="star-pick">${[1, 2, 3, 4, 5].map(n => `<button class="${n <= f.stars ? 'on' : ''}" data-act="star" data-n="${n}" aria-label="${n} estrellas">★</button>`).join('')}</div>
+    <div class="chips" style="justify-content:center">${tags.map(x => `<button class="chip ${f.tags.includes(x) ? 'on' : ''}" data-act="tag" data-t="${x}">${x}</button>`).join('')}</div>
+    <textarea id="comment" rows="3" placeholder="Comenta sobre su paciencia y claridad (opcional)">${esc(f.comment)}</textarea>
+    <button class="btn primary lg block" style="margin-top:14px" data-act="submitRate" ${f.stars ? '' : 'disabled'}>Enviar calificación</button>
+  </div></div>`;
+}
+const vReporting = () => `<div class="wrap page center-page"><div class="card match-card"><div class="spinner"></div><h2 style="margin:0 0 6px">${first(tutor(S.flow.tutorId).name)} está completando el reporte…</h2><p class="muted">Se enviará a ${esc(S.parent.name)} en unos segundos.</p></div></div>`;
+function finishStudentSession() {
+  const f = S.flow, t = tutor(f.tutorId), d = DURATIONS[f.dur], c = S.child;
+  t.reviews.unshift({ by: first(c.name) + ' (estudiante)', stars: f.stars, text: f.comment || f.tags.join(', ') || 'Sin comentario.' });
+  t.rating = Math.round(((t.rating * t.count + f.stars) / (t.count + 1)) * 10) / 10; t.count++; t.sessions++;
+  const p = S.payments.find(x => x.id === f.payId); if (p && p.status === 'retenido') { p.status = 'revision'; p.releaseAt = Date.now() + DAY; }
+  const ev = { punt: pick([5, 5, 4]), resp: 5, cons: pick([4, 5, 5]) };
+  c.rep.punt.push(ev.punt); c.rep.resp.push(ev.resp); c.rep.cons.push(ev.cons);
+  const points = TOPIC_POINTS(f.topic); if (f.detail) points.unshift(`Duda específica: “${f.detail}”`);
+  const r = { id: 'r' + Date.now(), date: Date.now(), subj: f.subj, topic: f.topic, tutorId: f.tutorId, min: S.live ? S.live.min : d.min, real: Math.max(1, Math.round(f.elapsed / 60)), points, obs: pick(OBS[f.subj]), ev, stars: f.stars, payId: f.payId, seen: false };
+  S.reports.unshift(r); f.reportId = r.id;
+  if (d.trial) c.trialUsed = true;
+  S.live = null; f.step = 'done';
+}
+function vDone() {
+  const r = S.reports.find(x => x.id === S.flow.reportId);
+  return `<div class="wrap page narrow">
+    <div class="success-banner">✓ ¡Sesión completada! El reporte ya llegó a ${esc(S.parent.name)}.</div>
+    ${reportHTML(r)}
+    <div class="row gap end wrapf" style="margin-top:16px"><button class="btn primary" data-act="newFlow">Nueva consulta</button></div></div>`;
+}
+AFTER.estudiante = () => {
+  const f = S.flow;
+  if (f.step === 'matching') {
+    const msgs = ['Buscando tutores verificados en línea', `Notificando a los mejor calificados en ${f.topic}`, 'Esperando que un tutor acepte', 'Un tutor está aceptando tu solicitud…'];
+    const tick = () => { const s = (Date.now() - f.matchStart) / 1000; const el = $('#mTimer'); if (el) el.textContent = fmt(Math.max(0, 180 - s));
+      const st = $('#mStatus'); if (st) st.textContent = msgs[Math.min(msgs.length - 1, Math.floor(s / 1.2))];
+      $$('#notif .av').forEach((a, i) => a.classList.toggle('lit', s > 1 + i * .5)); };
+    tick(); every(tick, 200);
+    later(() => { foundTutor(); render(); toast(`${short(tutor(f.tutorId).name)} aceptó tu solicitud`); }, Math.max(300, 4800 - (Date.now() - f.matchStart)));
+  }
+  if (f.step === 'reporting') later(() => { finishStudentSession(); render(); toast(`Reporte enviado a ${S.parent.name}`); }, 1800);
+  if (f.step === 'session') setupLive();
+  if (f.step === 'form') { const pi = $('#photoIn'); if (pi) pi.addEventListener('change', () => { const fl = pi.files[0]; if (fl) { S.flow.photo = URL.createObjectURL(fl); render(); } }); }
+};
+
+/* ---------- Sala en vivo (compartida por estudiante y tutor) ---------- */
+const pen = { c: '#0f172a', erase: false };
+const chatMsg = m => `<div class="msg ${m.from}">${esc(m.text)}${m.img ? `<img src="${m.img}" alt="Foto del ejercicio">` : ''}</div>`;
+function vLive() {
+  const L = S.live;
+  return `<div class="wrap page" style="max-width:1240px">
+    <div class="card session-head">${avatar({ name: L.oName, color: L.oColor })}<div><b>${esc(L.oName)}</b><div class="tiny muted">${SUBJECTS[L.subj].name} · ${esc(L.topic)}</div></div>
+      <span class="rec">Grabando · solo dentro de PoliTutors</span>
+      <span class="s-timer" id="sTimer"></span>
+      ${L.role === 'student' ? `<button class="btn ghost sm" data-act="extend" ${L.ext ? 'disabled' : ''}>${L.ext ? '+15 min añadidos' : `+15 min (${money(EXT_PRICE)})`}</button>` : ''}
+      <button class="btn danger sm" data-act="endLive">Finalizar sesión</button></div>
+    <div class="session-grid">
+      <div class="card board-card">
+        <div class="board-tools"><b class="tiny" style="margin-right:4px">Pizarra compartida</b>
+          ${['#0f172a', '#2450c7', '#dc2626', '#15803d'].map(c => `<button class="swatch ${pen.c === c && !pen.erase ? 'on' : ''}" style="background:${c}" data-act="pen" data-c="${c}" aria-label="Color"></button>`).join('')}
+          <button class="tool ${pen.erase ? 'on' : ''}" data-act="eraser">Borrador</button><button class="tool" data-act="clearBoard">Limpiar</button></div>
+        <canvas id="board"></canvas></div>
+      <div class="stack">
+        <div class="videos"><div class="vid talk">${avatar({ name: L.oName, color: L.oColor })}<span>${esc(first(L.oName))}</span></div><div class="vid">${avatar({ name: L.meName, color: '#475569' })}<span>Tú</span></div></div>
+        <div class="card chat"><div class="chat-box" id="chatBox">${L.chat.map(chatMsg).join('')}</div>
+          <form class="chat-form" id="chatForm"><input type="text" id="chatIn" placeholder="Escribe un mensaje…" autocomplete="off"><button class="btn primary sm">Enviar</button></form></div>
+        <p class="tiny muted">Video simulado. En la versión final se integra con Jitsi o WebRTC. No se comparten teléfonos ni redes sociales.</p>
+      </div></div></div>`;
+}
+function pushChat(m) { if (!S.live) return; S.live.chat.push(m); const b = $('#chatBox'); if (b) { b.insertAdjacentHTML('beforeend', chatMsg(m)); b.scrollTop = b.scrollHeight; } }
+function autoReply() {
+  const L = S.live; if (!L) return;
+  setTimeout(() => { if (S.live !== L) return; const list = L.role === 'student' ? REPLIES : STUDENT_MSGS; pushChat({ from: 'o', text: list[L.ri % list.length] }); L.ri++; }, 1100);
+}
+function setupLive() {
+  const L = S.live;
+  const tick = () => { const s = (Date.now() - L.start) / 1000; const el = $('#sTimer'); if (el) { el.textContent = `${fmt(s)} / ${L.min}:00`; el.style.color = s >= L.min * 60 ? 'var(--bad)' : ''; } };
+  tick(); every(tick, 1000);
+  const box = $('#chatBox'); box.scrollTop = box.scrollHeight;
+  const c = $('#board'), rect = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  c.width = rect.width * dpr; c.height = rect.height * dpr;
+  const ctx = c.getContext('2d'); ctx.scale(dpr, dpr); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const save = () => { try { L.board = c.toDataURL(); } catch (e) {} };
+  if (L.board) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height); img.src = L.board; }
+  else { ctx.fillStyle = '#94a3b8'; ctx.font = '600 14px "Plus Jakarta Sans", sans-serif'; ctx.fillText('Tema: ' + L.topic, 18, 28); save(); }
+  if (L.role === 'student' && !L.drew) later(() => {
+    L.drew = true; const cur = $('#board'); if (!cur) return; const cx = cur.getContext('2d');
+    cx.globalCompositeOperation = 'source-over'; cx.fillStyle = L.oColor; cx.font = '600 22px "Plus Jakarta Sans", sans-serif';
+    BOARD_EX[L.subj].forEach((line, i) => cx.fillText(line, 28, 80 + i * 40));
+    cx.font = '500 12px "Plus Jakarta Sans", sans-serif'; cx.fillText('— escrito por ' + first(L.oName), 28, 80 + BOARD_EX[L.subj].length * 40);
+    try { L.board = cur.toDataURL(); } catch (e) {}
+    pushChat({ from: 'sys', text: 'El tutor escribió en la pizarra' });
+  }, 2500);
+  let drawing = false, last = null;
+  const pos = e => { const b = c.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top }; };
+  c.onpointerdown = e => { drawing = true; last = pos(e); try { c.setPointerCapture(e.pointerId); } catch (_) {} };
+  c.onpointermove = e => { if (!drawing) return; const p = pos(e);
+    ctx.globalCompositeOperation = pen.erase ? 'destination-out' : 'source-over'; ctx.strokeStyle = pen.c; ctx.lineWidth = pen.erase ? 24 : 3;
+    ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p; };
+  const end = () => { if (drawing) { drawing = false; save(); } };
+  c.onpointerup = end; c.onpointercancel = end;
+}
+
+/* =========================================================
+   Panel del representante
+   ========================================================= */
+VIEWS.padre = () => {
+  const c = S.child, p = S.parent, reps = S.reports;
+  const mins = reps.reduce((a, r) => a + r.real, 0);
+  const spent = S.payments.filter(x => ['liberado', 'revision'].includes(x.status)).reduce((a, x) => a + x.amount, 0);
+  const prot = S.payments.filter(x => ['retenido', 'revision'].includes(x.status)).reduce((a, x) => a + x.amount, 0);
+  const bySub = Object.keys(SUBJECTS).map(k => [k, reps.filter(x => x.subj === k).length]), maxS = Math.max(1, ...bySub.map(x => x[1]));
+  const unseen = reps.filter(r => !r.seen).length;
+  return `<div class="wrap page">
+    <div class="page-head"><div><h2>Hola, ${esc(first(p.name))}</h2><p class="muted">Panel del representante</p></div></div>
+    <div class="card" style="margin-bottom:20px"><div class="kid">${avatar({ name: c.name, color: '#475569' }, 'lg')}
+      <div style="flex:1;min-width:200px"><b style="font-size:18px">${esc(c.name)}</b> <span class="verified">Cuenta activa</span>
+        <div class="muted tiny">${esc(c.curso)}${c.birth ? ' · ' + ageOf(c.birth) + ' años' : ''} · Usuario: <b>${esc(c.user)}</b></div>
+        <div class="vbadges">${(c.subjects.length ? c.subjects : Object.keys(SUBJECTS)).map(k => `<span class="vbadge">${SUBJECTS[k].icon} ${SUBJECTS[k].name}</span>`).join('')}</div></div>
+      <button class="btn ghost sm" data-act="addKid">+ Agregar otro hijo</button></div></div>
+    ${c.trialUsed ? '' : `<div class="banner"><div><b>La primera sesión de 15 minutos es gratis</b><div class="tiny" style="opacity:.9">Pídele a ${esc(first(c.name))} que la use: recibirás el reporte igual que en una clase normal.</div></div></div>`}
+    <div class="kpis">
+      <div class="kpi"><span>Sesiones</span><b>${reps.length}</b></div>
+      <div class="kpi"><span>Horas de tutoría</span><b>${(mins / 60).toFixed(1)} h</b></div>
+      <div class="kpi"><span>Invertido</span><b>${money(spent)}</b></div>
+      <div class="kpi"><span>Pagos protegidos ahora</span><b>${money(prot)}</b></div>
+    </div>
+    <div class="grid-2-1">
+      <div class="stack">
+        <div class="card"><div class="row between"><h3>Reportes de avance</h3>${unseen ? `<span class="new-dot">${unseen} nuevo${unseen > 1 ? 's' : ''}</span>` : ''}</div>
+          ${reps.length ? reps.map(x => { const s = SUBJECTS[x.subj]; return `<button class="rep-item" data-act="openReport" data-id="${x.id}"><span class="ic" style="background:color-mix(in srgb,${s.color} 12%,white);color:${s.color}">${s.icon}</span><span class="grow"><span class="t">${s.name} · ${esc(x.topic)} ${x.seen ? '' : '<span class="new-dot">Nuevo</span>'}</span><br><span class="s">${short(tutor(x.tutorId).name)} · ${x.real} min · ${fdate(x.date)}</span></span>${stars(x.stars)}</button>`; }).join('')
+            : `<div class="empty">Cuando ${esc(first(c.name))} termine su primera sesión, el reporte aparecerá aquí y te llegará por ${p.notify?.wa ? 'WhatsApp' : 'correo'}.</div>`}</div>
+        <div class="card" id="pagos"><h3>Pagos</h3>
+          <p class="tiny muted" style="margin:-6px 0 10px">Cada pago queda retenido durante la sesión y se libera al tutor 24 h después, salvo que reportes un problema.</p>
+          ${S.payments.length ? `<div style="overflow-x:auto"><table><thead><tr><th>Fecha</th><th>Sesión</th><th>Monto</th><th>Estado</th><th></th></tr></thead><tbody>
+          ${S.payments.map(x => `<tr><td>${fdate(x.date)}</td><td>${SUBJECTS[x.subj].name}${x.tutorId ? '<br><span class="tiny muted">' + short(tutor(x.tutorId).name) + '</span>' : ''}</td><td>${x.status === 'gratis' ? '—' : money(x.amount)}</td><td>${stChip(x.status)}</td><td>${x.status === 'revision' ? `<button class="btn danger sm" data-act="claim" data-id="${x.id}">Reportar</button>` : ''}</td></tr>`).join('')}
+          </tbody></table></div>` : '<p class="tiny muted">Aún no hay pagos.</p>'}</div>
+      </div>
+      <aside class="stack">
+        ${badgesCard('Insignias de ' + esc(first(c.name)), c.rep.punt.length ? 'Las asignan los tutores al terminar cada sesión. Solo son positivas y no se publican.' : 'Aparecerán después de la primera sesión.')}
+        <div class="card"><h3>Sesiones por materia</h3>${bySub.map(([k, n]) => `<div class="hbar" style="--c:${SUBJECTS[k].color}"><div class="row"><span>${SUBJECTS[k].name}</span><span>${n}</span></div><div class="bar"><i style="width:${n / maxS * 100}%"></i></div></div>`).join('')}</div>
+        <div class="card"><h3>Ajustes</h3>
+          <div class="toggle-row"><span>Reportes por correo</span><button class="mini-switch ${p.notify?.email ? 'on' : ''}" data-act="notif" data-k="email" aria-label="Correo"></button></div>
+          <div class="toggle-row"><span>Reportes por WhatsApp</span><button class="mini-switch ${p.notify?.wa ? 'on' : ''}" data-act="notif" data-k="wa" aria-label="WhatsApp"></button></div>
+          <div class="kv" style="border:0"><span>Método de pago</span><b>${METHODS[p.method || 'payphone'][0]}</b></div></div>
+      </aside>
+    </div></div>`;
+};
+
+/* =========================================================
+   Panel del tutor
+   ========================================================= */
+VIEWS.tutor = () => {
+  const T = S.tutor;
+  if (T.status === 'revision') return `<div class="wrap page narrow"><div class="card">
+    <div class="big-wait">⏳</div><h2 class="center">Estamos verificando tu perfil</h2><p class="muted center" style="margin-top:6px">${esc(first(T.name))}, la revisión manual toma hasta 3 días hábiles. Te avisaremos por correo.</p>
+    <ul class="timeline">
+      <li><span class="d ok">✓</span><div><b>Cuenta con correo ESPOL</b><div class="tiny muted">${esc(T.email)}</div></div></li>
+      <li><span class="d ok">✓</span><div><b>Documentos recibidos</b><div class="tiny muted">Cédula, selfie, matrícula y récord académico</div></div></li>
+      <li><span class="d ok">✓</span><div><b>Prueba aprobada</b><div class="tiny muted">${Object.keys(T.grades).map(k => SUBJECTS[k].name).join(', ')}</div></div></li>
+      <li><span class="d wait">…</span><div><b>Revisión del equipo</b><div class="tiny muted">Comparamos tus documentos y notas</div></div></li>
+      <li><span class="d no">5</span><div><b>Insignias y activación</b><div class="tiny muted">Podrás ponerte en línea</div></div></li></ul>
+    <button class="btn primary block" data-act="approveTutor">Simular aprobación del equipo</button></div></div>`;
+  if (T.view === 'session' && (!S.live || S.live.role !== 'tutor')) T.view = T.active ? 'report' : 'panel';
+  if (T.view === 'session') return vLive();
+  if (T.view === 'report') return vTutorReport();
+  const held = T.ledger.filter(l => l.status === 'retenido').reduce((a, l) => a + l.price * SHARE, 0);
+  const rev = T.ledger.filter(l => l.status === 'revision').reduce((a, l) => a + l.price * SHARE, 0);
+  const rel = T.ledger.filter(l => l.status === 'liberado').reduce((a, l) => a + l.price * SHARE, 0);
+  const rt = T.reviews.length ? avg(T.reviews.map(r => r.stars)) : 0;
+  let req;
+  if (T.pending) { const p = T.pending; req = `<div class="req"><div class="row between"><b>Nueva solicitud</b><span class="tiny muted">Expira en <b id="reqT">${p.left}</b> s</span></div>
+      <div class="req-grid"><span>Estudiante</span><b>${p.name} · ${p.curso}</b><span>Materia</span><b>${SUBJECTS[p.subj].name}</b><span>Tema</span><b>${p.topic}</b><span>Duración</span><b>${p.min} min</b><span>Recibes</span><b>${money(p.price * SHARE)}</b></div>
+      <div class="row gap"><button class="btn ghost" style="flex:1" data-act="tDecline">Rechazar</button><button class="btn primary" style="flex:2" data-act="tAccept">Aceptar</button></div></div>`; }
+  else if (T.online) req = `<div class="empty"><div class="mini-radar"><span></span><span></span></div>Esperando solicitudes de ${Object.keys(T.grades).map(k => SUBJECTS[k].name).join(', ')}…</div>`;
+  else req = `<div class="empty">Activa “En línea” para empezar a recibir solicitudes.</div>`;
+  return `<div class="wrap page">
+    <div class="page-head"><div><h2>Hola, ${esc(first(T.name))}</h2>
+      <div class="vbadges">${Object.entries(T.grades).map(([k, g]) => `<span class="verified" style="margin:0">✓ Verificado ESPOL · ${SUBJECTS[k].name} ${(+g).toFixed(1)}</span>`).join('')}</div></div>
+      <button class="switch ${T.online ? 'on' : ''}" data-act="toggleOnline"><span class="knob"></span>${T.online ? 'En línea' : 'Desconectado'}</button></div>
+    <div class="kpis">
+      <div class="kpi"><span>Retenido (en sesión)</span><b>${money(held)}</b></div>
+      <div class="kpi"><span>Por liberar (24 h)</span><b>${money(rev)}</b></div>
+      <div class="kpi"><span>Liberado</span><b>${money(rel)}</b></div>
+      <div class="kpi"><span>Mi calificación</span><b>${rt ? rt.toFixed(1) + ' ★' : '—'}</b></div>
+    </div>
+    <div class="grid-2-1">
+      <div class="stack"><div class="card"><h3>Solicitudes</h3>${req}</div>
+        <div class="card"><h3>Mis sesiones y cobros</h3>${T.ledger.length ? `<div style="overflow-x:auto"><table><thead><tr><th>Fecha</th><th>Estudiante</th><th>Materia</th><th>Recibes</th><th>Estado</th></tr></thead><tbody>
+          ${T.ledger.map(l => `<tr><td>${fdate(l.date)}</td><td>${l.student}</td><td>${SUBJECTS[l.subj].name}</td><td>${money(l.price * SHARE)}</td><td>${stChip(l.status)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="tiny muted">Aún no tienes sesiones.</p>'}</div></div>
+      <aside class="stack">
+        <div class="card"><h3>Mis reseñas</h3>${T.reviews.length ? T.reviews.slice(0, 4).map(r => `<div class="review"><div class="row between"><span class="rv-who">${esc(r.by)}</span>${stars(r.stars)}</div>${esc(r.text)}</div>`).join('') : '<p class="muted tiny">Aparecerán aquí después de tus primeras sesiones.</p>'}</div>
+        <div class="card"><h3>Cómo cobras</h3><p class="tiny muted">El pago del estudiante queda retenido durante la sesión. 24 h después de enviar el reporte, si no hay reclamos, recibes el ${SHARE * 100}% en tu cuenta de ${esc(T.bank)}.</p></div>
+        <div class="card"><h3>Recuerda</h3><ul class="tiny muted" style="margin:0;padding-left:18px"><li>No compartas tu número ni redes</li><li>Todo pago va por la plataforma</li><li>Llena el reporte al terminar</li></ul></div>
+      </aside></div></div>`;
+};
+let tEval = { punt: 0, resp: 0, cons: 0 };
+function vTutorReport() {
+  const a = S.tutor.active, rows = [['punt', 'Puntualidad'], ['resp', 'Respeto'], ['cons', 'Constancia']];
+  return `<div class="wrap page narrow"><form class="card" id="tReportForm">
+    <h2 style="font-size:22px">Reporte para el representante de ${a.name}</h2><p class="muted" style="margin:6px 0 16px">Toma 2 minutos. Se envía automáticamente por correo y WhatsApp.</p>
+    <label class="lbl">Temas reforzados</label><div class="chips">${TOPIC_POINTS(a.topic).map(t => `<label class="chip"><input type="checkbox" name="tp" value="${esc(t)}" checked>${esc(t)}</label>`).join('')}</div>
+    <label class="lbl">Observaciones y próximos pasos</label><textarea id="tObs" rows="3" placeholder="Ej.: ya resuelve los ejercicios básicos; practicar 3 más antes del examen">${esc(a.obs || '')}</textarea>
+    <label class="lbl" style="margin-top:16px">Compromiso del estudiante</label>
+    ${rows.map(([k, l]) => `<div class="row between" style="padding:4px 0"><span style="font-size:14px">${l}</span><span class="star-pick" style="margin:0">${[1, 2, 3, 4, 5].map(n => `<button type="button" style="font-size:26px" class="${n <= tEval[k] ? 'on' : ''}" data-act="evalStar" data-k="${k}" data-n="${n}">★</button>`).join('')}</span></div>`).join('')}
+    <p class="hint">Esta evaluación alimenta las insignias del estudiante. Solo se muestran insignias positivas.</p>
+    <div id="fErr"></div><button class="btn primary block lg" style="margin-top:14px">Enviar reporte y cerrar sesión</button></form></div>`;
+}
+AFTER.tutor = () => {
+  const T = S.tutor;
+  if (!T || T.status !== 'verificado') return;
+  if (T.view === 'session') return setupLive();
+  if (T.view !== 'panel') return;
+  if (T.online && !T.pending) later(() => {
+    const pool = REQS.filter(r => T.grades[r.subj] !== undefined);
+    T.pending = { ...pick(pool.length ? pool : REQS), left: 30 }; render(); toast('Nueva solicitud de tutoría', 'info');
+  }, 3500);
+  if (T.pending) every(() => {
+    T.pending.left--; const el = $('#reqT'); if (el) el.textContent = T.pending.left;
+    if (T.pending.left <= 0) { T.pending = null; render(); toast('La solicitud expiró y pasó a otro tutor', 'info'); }
+  }, 1000);
+};
+
+/* =========================================================
+   Acciones
+   ========================================================= */
+function login(role) { S.user = role; S.gateMsg = null; go({ parent: 'padre', student: 'estudiante', tutor: 'tutor' }[role]); }
+const ACT = {
+  go: el => { closeModal(); go(el.dataset.r); },
+  scrollTo: el => { S.pendingScroll = el.dataset.id; if (route() === 'inicio') AFTER.inicio(); else go('inicio'); },
+  homeTab: el => { S.homeTab = el.dataset.t; render(); setTimeout(() => $('#como').scrollIntoView(), 0); },
+  coc: () => openModal(`<h3 style="font-size:19px">Código de conducta del tutor</h3><ul style="color:var(--ink-2);padding-left:18px;margin:10px 0 16px"><li>Dar clases solo dentro de PoliTutors (sesiones grabadas).</li><li>No pedir ni compartir teléfonos, correos personales o redes sociales.</li><li>No cobrar ni acordar pagos fuera de la plataforma.</li><li>Trato respetuoso, puntual y paciente; lenguaje apropiado.</li><li>Llenar el reporte para el representante después de cada sesión.</li><li>Reportar cualquier situación de riesgo para el estudiante.</li></ul><p class="tiny muted">El incumplimiento suspende la cuenta y puede reportarse a la ESPOL.</p><div class="row end" style="margin-top:14px"><button class="btn primary" data-act="closeModal">Entendido</button></div>`),
+  privacy: () => openModal(`<h3 style="font-size:19px">Privacidad y datos (LOPDP)</h3><p style="color:var(--ink-2);margin:10px 0">Tratamos solo los datos necesarios para el servicio: nombre, curso, avance académico y grabaciones de sesión. Para menores de 15 años se requiere el consentimiento del representante. El representante puede pedir acceso, corrección o eliminación de los datos en cualquier momento.</p><p class="tiny muted">Texto de ejemplo del prototipo; la política final debe validarse con un asesor legal.</p><div class="row end" style="margin-top:14px"><button class="btn primary" data-act="closeModal">Cerrar</button></div>`),
+  regWho: el => { S.reg = { who: el.dataset.w, step: 1, d: { cSubj: [] } }; render(); },
+  regBack: () => { const R = S.reg; if (R.step === 1) R.who = null; else R.step--; render(); },
+  tregBack: () => { if (S.treg.step === 1) go('tutores'); else { S.treg.step--; render(); } },
+  rejectInvite: () => { S.child = null; S.parent = null; go('inicio'); toast('Cuenta rechazada y eliminada', 'info'); },
+  loginAs: el => login(el.dataset.r),
+  logout: () => { S.user = null; go('inicio'); },
+  simToggle: () => { S.simOpen = !S.simOpen; renderSim(); },
+  loadDemo: () => { ensureDemo(); render(); toast('Cuentas de ejemplo listas: Ana, Mateo y Carlos'); },
+  advance: () => {
+    let n = 0;
+    S.payments.forEach(p => { if (p.status === 'revision') { p.status = 'liberado'; n++; } });
+    if (S.tutor) S.tutor.ledger.forEach(l => { if (l.status === 'revision') { l.status = 'liberado'; n++; } });
+    render(); toast(n ? `Pasaron 24 h: ${n} pago${n > 1 ? 's' : ''} liberado${n > 1 ? 's' : ''}` : 'Pasaron 24 h: no había pagos por liberar', n ? 'ok' : 'info');
+  },
+  approveTutor: () => { S.tutor.status = 'verificado'; render(); toast('¡Perfil verificado! Ya puedes ponerte en línea'); },
+  resetAll: () => { Object.assign(S, { parent: null, child: null, tutor: null, reports: [], payments: [], user: null, live: null, reg: { who: null, step: 1, d: { cSubj: [] } }, treg: { step: 1, d: { subj: {} } } }); S.flow = newFlow(); go('inicio'); toast('Simulación reiniciada', 'info'); },
+  /* estudiante */
+  subj: el => { S.flow.subj = el.dataset.k; S.flow.topic = ''; render(); },
+  topic: el => { S.flow.topic = el.dataset.t; render(); },
+  dur: el => { S.flow.dur = +el.dataset.i; render(); },
+  toConfirm: () => { S.flow.step = 'confirm'; render(); },
+  backForm: () => { S.flow.step = 'form'; render(); },
+  confirmReq: () => { const d = DURATIONS[S.flow.dur]; confirmRequest(); render(); if (!d.trial) toast(`${money(d.price)} retenido en garantía`); },
+  cancelMatch: () => { const f = S.flow; S.payments = S.payments.filter(p => p.id !== f.payId); f.payId = null; f.step = 'form'; render(); toast('Solicitud cancelada. No se realizó ningún cobro', 'info'); },
+  otherTutor: () => { const f = S.flow; f.skipped.push(f.tutorId); f.step = 'matching'; f.matchStart = Date.now(); render(); },
+  enterSession: () => { startStudentLive(); render(); },
+  extend: () => { const L = S.live; L.ext = true; render(); toast(`Solicitud enviada a ${first(S.parent.name)}`, 'info');
+    setTimeout(() => { if (S.live !== L) return; L.min += 15; const p = S.payments.find(x => x.id === S.flow.payId); if (p && p.status === 'retenido') p.amount += EXT_PRICE;
+      const t = $('#sTimer'); if (t) t.textContent = t.textContent.replace(/\/ .*/, `/ ${L.min}:00`); pushChat({ from: 'sys', text: `${first(S.parent.name)} aprobó +15 min` }); toast('Extensión aprobada: +15 min'); }, 1800); },
+  pen: el => { pen.c = el.dataset.c; pen.erase = false; $$('.swatch').forEach(s => s.classList.toggle('on', s === el)); $('[data-act=eraser]').classList.remove('on'); },
+  eraser: el => { pen.erase = !pen.erase; el.classList.toggle('on', pen.erase); $$('.swatch').forEach(s => s.classList.toggle('on', !pen.erase && s.dataset.c === pen.c)); },
+  clearBoard: () => { const c = $('#board'); c.getContext('2d').clearRect(0, 0, c.width, c.height); try { S.live.board = c.toDataURL(); } catch (e) {} },
+  endLive: () => {
+    const L = S.live;
+    if (L.role === 'student') { S.flow.elapsed = Math.round((Date.now() - L.start) / 1000); S.flow.step = 'rate'; }
+    else { S.tutor.active.real = Math.max(1, Math.round((Date.now() - L.start) / 60000)); S.tutor.view = 'report'; S.live = null; tEval = { punt: 0, resp: 0, cons: 0 }; }
+    render();
+  },
+  star: el => { S.flow.stars = +el.dataset.n; keepComment(); render(); },
+  tag: el => { const f = S.flow, t = el.dataset.t; f.tags = f.tags.includes(t) ? f.tags.filter(x => x !== t) : [...f.tags, t]; keepComment(); render(); },
+  submitRate: () => { keepComment(); S.flow.step = 'reporting'; render(); },
+  newFlow: () => { resetFlow(); render(); window.scrollTo(0, 0); },
+  /* padre */
+  openReport: el => { const r = S.reports.find(x => x.id === el.dataset.id); r.seen = true; openReportModal(r); if (route() === 'padre') render(); },
+  copyReport: async el => { const r = S.reports.find(x => x.id === el.dataset.id), t = tutor(r.tutorId);
+    const txt = `PoliTutors · Reporte de avance\n${SUBJECTS[r.subj].name}: ${r.topic}\nTutor: ${t.name} (${r.real} min)\nTemas reforzados:\n- ${r.points.join('\n- ')}\nObservaciones: ${r.obs}\nPuntualidad ${r.ev.punt}/5 · Respeto ${r.ev.resp}/5 · Constancia ${r.ev.cons}/5`;
+    try { await navigator.clipboard.writeText(txt); toast('Reporte copiado'); } catch (e) { toast('No se pudo copiar en este navegador', 'info'); } },
+  pStar: el => { const r = S.reports.find(x => x.id === el.dataset.id), t = tutor(r.tutorId), n = +el.dataset.n;
+    if (!r.pStars) { t.reviews.unshift({ by: first(S.parent.name) + ' (representante)', stars: n, text: 'Calificación del representante.' }); t.count++; }
+    else { const rv = t.reviews.find(v => v.by.startsWith(first(S.parent.name))); if (rv) rv.stars = n; }
+    r.pStars = n; openReportModal(r); toast('Gracias, tu calificación se publicó'); },
+  claim: el => openModal(claimModal(el.dataset.id)),
+  sendClaim: el => { const p = S.payments.find(x => x.id === el.dataset.id); p.status = 'reembolsado'; closeModal(); render(); toast(`Reembolso de ${money(p.amount)} en proceso (3–5 días hábiles)`); },
+  notif: el => { const k = el.dataset.k; S.parent.notify[k] = !S.parent.notify[k]; render(); },
+  addKid: () => toast('Agregar más hijos estará disponible en la versión completa', 'info'),
+  closeModal: () => closeModal(),
+  /* tutor */
+  toggleOnline: () => { const T = S.tutor; T.online = !T.online; if (!T.online) T.pending = null; render(); toast(T.online ? 'Estás en línea: recibirás solicitudes de tus materias' : 'Te desconectaste', 'info'); },
+  tAccept: () => { const T = S.tutor, p = T.pending; T.active = { ...p, id: 'l' + Date.now() }; T.pending = null;
+    T.ledger.unshift({ id: T.active.id, date: Date.now(), student: p.name, subj: p.subj, price: p.price, status: 'retenido' });
+    S.live = { role: 'tutor', subj: p.subj, topic: p.topic, min: p.min, start: Date.now(), oName: p.name, oColor: '#475569', meName: T.name,
+      chat: [{ from: 'sys', text: `${p.name} se unió a la sala` }, { from: 'o', text: `Hola, tengo dudas con ${p.topic.toLowerCase()}. Mañana tengo prueba 😅` }], board: null, drew: true, ri: 0 };
+    T.view = 'session'; render(); toast(`Sesión con ${p.name} iniciada`); },
+  tDecline: () => { S.tutor.pending = null; render(); toast('Solicitud rechazada: pasó al siguiente tutor', 'info'); },
+  evalStar: el => { tEval[el.dataset.k] = +el.dataset.n; const obs = $('#tObs')?.value; if (obs !== undefined) S.tutor.active.obs = obs; render(); },
+  /* tour */
+  tourStart: () => tourGo(0),
+  tourAt: el => tourGo(+el.dataset.i),
+  tourNext: () => tourGo(S.tour.i + 1),
+  tourPrev: () => tourGo(Math.max(0, S.tour.i - 1)),
+  tourAuto: () => { S.tour.auto = !S.tour.auto; renderTour(); if (S.tour.auto) scheduleTour(); else clearTimeout(tourTimer); },
+  tourExit: () => { clearTimeout(tourTimer); S.tour.on = false; S.tour.auto = false; document.body.classList.remove('touring'); renderTour(); renderSim(); }
+};
+function keepComment() { const c = $('#comment'); if (c) S.flow.comment = c.value; }
+function openReportModal(r) {
+  openModal(`${reportHTML(r)}
+    <div class="card" style="margin-top:12px;padding:14px;box-shadow:none"><div class="row between wrapf gap"><b style="font-size:14px">Califica al tutor como representante</b><span class="star-pick" style="margin:0">${[1, 2, 3, 4, 5].map(n => `<button style="font-size:26px" class="${n <= (r.pStars || 0) ? 'on' : ''}" data-act="pStar" data-id="${r.id}" data-n="${n}">★</button>`).join('')}</span></div></div>
+    <div class="row gap end wrapf" style="margin-top:14px">${S.payments.find(p => p.id === r.payId && p.status === 'revision') ? `<button class="btn danger" data-act="claim" data-id="${r.payId}">Reportar un problema</button>` : ''}<button class="btn ghost" data-act="copyReport" data-id="${r.id}">Copiar</button><button class="btn primary" data-act="closeModal">Cerrar</button></div>`);
+}
+function claimModal(id) {
+  const p = S.payments.find(x => x.id === id);
+  return `<h3 style="font-size:19px">Reportar un problema</h3><p class="muted tiny" style="margin:4px 0 14px">El pago de ${money(p.amount)} sigue protegido. Revisaremos la grabación de la sesión.</p>
+    <label class="lbl">¿Qué pasó?</label><select id="cReason"><option>El tutor no se presentó</option><option>La sesión no resolvió la duda</option><option>Problemas técnicos</option><option>Comportamiento inapropiado</option><option>Otro</option></select>
+    <label class="lbl" style="margin-top:12px">Detalles (opcional)</label><textarea rows="3" placeholder="Cuéntanos más"></textarea>
+    <div class="row gap end" style="margin-top:14px"><button class="btn ghost" data-act="closeModal">Cancelar</button><button class="btn danger" data-act="sendClaim" data-id="${id}">Enviar y pedir reembolso</button></div>`;
+}
+
+/* =========================================================
+   Simulación guiada
+   ========================================================= */
+let tourTimer = null;
+function prepForm() { ensureDemo(); S.user = 'student'; resetFlow(); Object.assign(S.flow, { subj: 'mat', topic: 'Derivadas', detail: 'No entiendo cuándo usar la regla de la cadena', dur: 1 }); }
+function prepMatching() { prepForm(); confirmRequest(); }
+function prepMatch() { prepMatching(); S.flow.matchStart = Date.now() - 42000; foundTutor(); }
+function prepSession() { prepMatch(); startStudentLive(); }
+function prepRate() { prepSession(); Object.assign(S.flow, { elapsed: 1712, step: 'rate', stars: 5, tags: ['Paciencia', 'Claridad'], comment: 'Me explicó la regla de la cadena con ejemplos.' }); }
+function ensureRevision() { if (!S.payments.some(p => p.status === 'revision')) { prepRate(); finishStudentSession(); } }
+const TOUR = [
+  { tag: 'Homepage', t: 'Explica todo y separa los dos caminos', d: 'Arriba, dos entradas: “¿Eres padre o estudiante? Crea tu cuenta aquí” y “¿Eres estudiante ESPOL? Hazte tutor aquí”.', run: () => { S.user = null; go('inicio'); setTimeout(() => window.scrollTo(0, 0), 50); } },
+  { tag: 'Registro familiar', t: '¿Quién crea la cuenta?', d: 'El representante (recomendado) o el estudiante, que luego invita a su representante para que apruebe.', run: () => { S.user = null; S.reg = { who: null, step: 1, d: { cSubj: [] } }; go('registro-familia'); } },
+  { tag: 'Registro familiar', t: 'El padre agrega a su hijo', d: 'El representante es el titular: paga y recibe reportes. Crea el perfil del hijo con su curso y materias.', run: () => { S.user = null; S.reg = { who: 'padre', step: 2, d: { pName: 'Ana Vera', pEmail: 'ana.vera@gmail.com', pPhone: '0991234567', pPass: 'demo123', cName: 'Mateo Vera', cCurso: CURSOS[1], cBirth: '2010-03-14', cSubj: ['mat', 'fis'] } }; go('registro-familia'); } },
+  { tag: 'Seguridad', t: 'Consentimiento de datos y grabación', d: 'Antes de activar la cuenta, el representante autoriza el tratamiento de datos (LOPDP) y la grabación de sesiones.', run: () => { S.user = null; S.reg = { who: 'padre', step: 3, d: { pName: 'Ana Vera', cName: 'Mateo Vera', cBirth: '2010-03-14', cSubj: ['mat'], kData: true, kRec: true } }; go('registro-familia'); } },
+  { tag: 'Atributo 2', t: 'Pedir ayuda: materia, tema, foto y duración', d: 'El estudiante elige bloques de 30, 45 o 60 min (o la prueba gratis de 15). Puede subir una foto del ejercicio.', run: () => { prepForm(); go('estudiante'); } },
+  { tag: 'Atributo 1', t: 'Emparejamiento en menos de 3 minutos', d: 'Se notifica primero a los tutores mejor calificados en el tema. El primero que acepta toma la sesión.', ms: 8000, run: () => { prepMatching(); go('estudiante'); } },
+  { tag: 'Atributos 3 y 7', t: 'Tutor verificado, con notas y reseñas', d: 'Insignias por materia, verificación visible, calificación promedio y número de reseñas.', run: () => { prepMatch(); go('estudiante'); } },
+  { tag: 'Atributo 2', t: 'Sesión en vivo con pizarra y chat', d: 'Video, chat interno y pizarra compartida. Se graba por seguridad y se puede extender +15 min con aprobación del padre.', ms: 9000, run: () => { prepSession(); go('estudiante'); tourT(() => { pushChat({ from: 'me', text: '¿Por qué se multiplica por 6x?' }); autoReply(); }, 3800); } },
+  { tag: 'Atributo 7', t: 'Calificación obligatoria al cerrar', d: 'El estudiante califica de 1 a 5 y deja un comentario. El padre también puede calificar desde el reporte.', run: () => { prepRate(); go('estudiante'); } },
+  { tag: 'Atributo 5', t: 'Reporte automático para el representante', d: 'Temas reforzados, próximos pasos y compromiso del estudiante, por correo y WhatsApp.', run: () => { ensureDemo(); prepRate(); finishStudentSession(); S.user = 'parent'; go('padre'); tourT(() => { const r = S.reports[0]; r.seen = true; openReportModal(r); }, 250); } },
+  { tag: 'Atributo 4', t: 'Pago protegido con ventana de reclamo', d: 'El pago queda retenido durante la sesión y se libera 24 h después. El padre puede reportar un problema y pedir reembolso.', run: () => { ensureDemo(); ensureRevision(); S.user = 'parent'; go('padre'); tourT(() => { closeModal(); $('#pagos')?.scrollIntoView({ behavior: 'smooth' }); }, 250); } },
+  { tag: 'Atributo 3', t: 'El tutor demuestra que está calificado', d: 'Correo ESPOL, cédula con selfie, matrícula, récord, nota mínima 8/10 por materia y una prueba corta.', run: () => { S.user = null; S.treg = { step: 3, d: { tName: 'Carlos Rivas', tEmail: 'carivas@espol.edu.ec', tPhone: '0987654321', tPass: 'demo123', files: { fCedF: 'cedula_frente.jpg', fCedB: 'cedula_reverso.jpg', fSelf: 'selfie.jpg', fMat: 'matricula_2026.pdf', fRec: 'record.pdf' }, subj: { mat: 9.1, fis: 8.8 } } }; go('registro-tutor'); } },
+  { tag: 'Oferta', t: 'El tutor se pone en línea y acepta', d: 'Recibe solicitudes solo de sus materias, con 30 s para aceptar. Ve cuánto recibe y su dinero retenido, por liberar y liberado.', run: () => { ensureDemo(); S.user = 'tutor'; const T = S.tutor; T.view = 'panel'; T.online = true; T.active = null; T.pending = { ...(REQS.find(r => T.grades[r.subj] !== undefined) || REQS[1]), left: 30 }; go('tutor'); } },
+  { tag: 'Atributo 8', t: 'Insignias positivas del estudiante', d: 'Puntual, respetuoso y constante, según la evaluación del tutor. Solo las ven el estudiante, su representante y el tutor asignado.', run: () => { ensureDemo(); S.user = 'student'; resetFlow(); go('estudiante'); tourT(() => $('#badges')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250); } },
+  { tag: 'Atributo 6', t: 'App liviana y acceso web', d: 'Menos de 50 MB y versión web responsive. Fin de la simulación: puedes explorar libremente desde el simulador.', run: () => { S.user = null; go('inicio'); S.pendingScroll = 'dispositivos'; tourT(() => AFTER.inicio(), 200); } }
+];
+let tourTs = [];
+function tourT(fn, ms) { tourTs.push(setTimeout(fn, ms)); }
+function tourGo(i) {
+  if (i >= TOUR.length) return ACT.tourExit();
+  tourTs.forEach(clearTimeout); tourTs = []; clearTimeout(tourTimer);
+  closeModal(); S.tour.on = true; S.tour.i = i; S.simOpen = false; document.body.classList.add('touring');
+  TOUR[i].run(); renderTour(); renderSim();
+  if (S.tour.auto) scheduleTour();
+}
+function scheduleTour() { clearTimeout(tourTimer); tourTimer = setTimeout(() => tourGo(S.tour.i + 1), TOUR[S.tour.i].ms || 7000); }
+function renderTour() {
+  const el = $('#tour');
+  if (!S.tour.on) { el.classList.add('hidden'); return; }
+  const s = TOUR[S.tour.i], last = S.tour.i === TOUR.length - 1;
+  el.classList.remove('hidden');
+  el.innerHTML = `<div class="tour-prog"><i style="width:${(S.tour.i + 1) / TOUR.length * 100}%"></i></div><div class="tour-in">
+    <span class="tour-n">${S.tour.i + 1} / ${TOUR.length}</span>
+    <div class="tour-txt"><span class="tour-tag">${s.tag}</span><b>${s.t}</b><p>${s.d}</p></div>
+    <div class="tour-ctrl"><button data-act="tourPrev" ${S.tour.i ? '' : 'disabled'}>◀</button><button data-act="tourAuto">${S.tour.auto ? '❚❚ Pausar' : '▶ Auto'}</button>
+    <button class="main" data-act="${last ? 'tourExit' : 'tourNext'}">${last ? 'Terminar' : 'Siguiente ▶'}</button><button data-act="tourExit" aria-label="Salir">✕</button></div></div>`;
+}
+
+/* =========================================================
+   Eventos y router
+   ========================================================= */
+document.addEventListener('click', e => {
+  if (e.target.id === 'modal') return closeModal();
+  const el = e.target.closest('[data-act]'); if (!el || el.disabled) return;
+  if (el.closest('.sim-panel') && el.dataset.act !== 'simToggle') S.simOpen = false;
+  const fn = ACT[el.dataset.act]; if (fn) { e.preventDefault(); fn(el, e); renderSim(); }
+});
+document.addEventListener('input', e => { if (e.target.id === 'detail') S.flow.detail = e.target.value; if (e.target.id === 'tObs' && S.tutor?.active) S.tutor.active.obs = e.target.value; });
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  const id = e.target.id;
+  if (id === 'regForm') return handleRegForm();
+  if (id === 'tregForm') return handleTregForm();
+  if (id === 'chatForm') { const inp = $('#chatIn'), txt = inp.value.trim(); if (!txt) return; inp.value = ''; pushChat({ from: 'me', text: txt }); autoReply(); return; }
+  if (id === 'loginForm') {
+    const u = $('#lUser').value.trim().toLowerCase(), pw = $('#lPass').value;
+    const cand = [['parent', S.parent && !S.parent.pending && S.parent.email], ['student', S.child && S.child.user], ['tutor', S.tutor && S.tutor.email]].find(([, x]) => x && x.toLowerCase() === u);
+    if (!cand) return showErr(['no encontramos esa cuenta (usa las cuentas de esta simulación)']);
+    const acc = { parent: S.parent, student: S.child, tutor: S.tutor }[cand[0]];
+    if (acc.pass && acc.pass !== pw) return showErr(['contraseña incorrecta']);
+    return login(cand[0]);
+  }
+  if (id === 'inviteForm') {
+    const errs = []; if (($('#iPass').value || '').length < 6) errs.push('crea una contraseña de al menos 6 caracteres');
+    if (!$('#iData').checked) errs.push('autoriza el tratamiento de datos'); if (!$('#iRec').checked) errs.push('autoriza la grabación');
+    if (errs.length) return showErr(errs);
+    Object.assign(S.parent, { name: $('#iName').value.trim() || S.parent.name, pass: $('#iPass').value, method: $('input[name=method]:checked').value, pending: false });
+    S.child.status = 'activo'; login('parent'); toast(`Aprobaste la cuenta de ${first(S.child.name)}`); return;
+  }
+  if (id === 'tReportForm') {
+    const T = S.tutor, a = T.active;
+    if (!tEval.punt || !tEval.resp || !tEval.cons) return showErr(['califica puntualidad, respeto y constancia']);
+    const l = T.ledger.find(x => x.id === a.id); if (l) l.status = 'revision';
+    T.sessions++; T.active = null; T.view = 'panel'; render();
+    toast(`Reporte enviado al representante de ${a.name}`);
+    setTimeout(() => { T.reviews.unshift({ by: first(a.name) + ' (estudiante)', stars: pick([5, 5, 4]), text: pick(['Explica muy claro, gracias.', 'Muy paciente, entendí todo.', 'Buena clase, me ayudó para la prueba.']) }); if (route() === 'tutor' && T.view === 'panel') render(); toast('Recibiste una nueva reseña', 'info'); }, 2500);
+  }
+});
+function openModal(html) { $('#modalCard').innerHTML = html; $('#modal').classList.remove('hidden'); }
+function closeModal() { $('#modal').classList.add('hidden'); }
+function toast(msg, kind = 'ok') {
+  const el = document.createElement('div'); el.className = 'toast ' + kind; el.textContent = msg; $('#toasts').appendChild(el);
+  setTimeout(() => el.classList.add('out'), 3200); setTimeout(() => el.remove(), 3600);
+}
+const ROUTES = ['inicio', 'tutores', 'registro-familia', 'registro-tutor', 'ingresar', 'invitacion', 'padre', 'estudiante', 'tutor'];
+const PRIVATE = { padre: 'parent', estudiante: 'student', tutor: 'tutor' };
+function route() { const h = location.hash.slice(1); return ROUTES.includes(h) ? h : 'inicio'; }
+function go(r) { if (location.hash === '#' + r) render(); else location.hash = r; }
+function render() {
+  ticks.forEach(id => { clearInterval(id); clearTimeout(id); }); ticks = [];
+  let r = route();
+  if (PRIVATE[r] && (S.user !== PRIVATE[r] || !{ parent: S.parent, student: S.child, tutor: S.tutor }[PRIVATE[r]])) {
+    S.gateMsg = { padre: 'Ingresa con la cuenta del representante para ver este panel.', estudiante: 'Ingresa con la cuenta del estudiante.', tutor: 'Ingresa con tu cuenta de tutor.' }[r];
+    r = 'ingresar';
+  } else if (r !== 'ingresar') S.gateMsg = null;
+  renderTop(); renderSim();
+  $('#app').innerHTML = VIEWS[r]();
+  (AFTER[r] || (() => {}))();
+}
+window.addEventListener('hashchange', () => { if (!S.tour.on) closeModal(); render(); if (!S.pendingScroll) window.scrollTo(0, 0); });
+render();
+</script>
+</body>
+</html>
