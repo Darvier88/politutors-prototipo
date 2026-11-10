@@ -3,6 +3,7 @@
 Prototipo funcional de **PoliTutors**, una plataforma bajo demanda (*on-demand*) que conecta en tiempo real a estudiantes de bachillerato que necesitan apoyo en **Matemáticas, Física y Química** con **tutores universitarios verificados de la ESPOL**. El servicio garantiza cobros seguros y envía reportes automáticos de avance a los padres de familia.
 
 > Proyecto académico de la materia de Emprendimiento · ESPOL · Guayaquil, Ecuador.
+> La identidad visual («Cuaderno politécnico», basada en la colorimetría de la ESPOL) está documentada en [`DESIGN.md`](DESIGN.md).
 > Es un **prototipo**: los pagos, el video y la subida de documentos son simulados.
 
 ![Homepage](docs/capturas/01-homepage.png)
@@ -20,6 +21,7 @@ Prototipo funcional de **PoliTutors**, una plataforma bajo demanda (*on-demand*)
 - [Simulación guiada (17 pasos)](#simulación-guiada-17-pasos)
 - [Dónde ver cada atributo](#dónde-ver-cada-atributo)
 - [Qué está simulado y supuestos de negocio](#qué-está-simulado-y-supuestos-de-negocio)
+- [Identidad visual](#identidad-visual)
 - [Cómo modificarlo](#cómo-modificarlo)
 - [Estructura del código](#estructura-del-código)
 - [Capturas](#capturas)
@@ -254,6 +256,18 @@ Desde la homepage, cada tarjeta de atributo tiene **“Verlo funcionando →”*
 
 ---
 
+## Identidad visual
+
+El prototipo sigue el sistema **«Cuaderno politécnico»**, documentado en [`DESIGN.md`](DESIGN.md):
+
+- **Colorimetría de la ESPOL:** azul institucional como único color de acción, celeste en la cuadrícula del cuaderno y en los gráficos, y grises plata. Se suma el tramado diagonal a 133° de la textura corporativa.
+- **Tipografía libre latinoamericana:** Archivo para titulares e interfaz, Chivo Mono para cifras y etiquetas, y Alegreya itálica para las notas del tutor.
+- **Tres registros visuales:** boletín para los padres, cuaderno para los estudiantes y **modo pizarra** oscuro para la sesión en vivo.
+- **Sin el look de plantilla:** iconos SVG propios en lugar de emojis, hojas con filetes en lugar de tarjetas con sombra, sellos en lugar de píldoras de color, y ni degradados ni Inter.
+- **Uso de la marca ESPOL:** el prototipo no usa el logotipo, el sello ni la tortuga de la ESPOL. Los códigos exactos de color del manual oficial están pendientes de confirmar; ver la nota en `DESIGN.md`.
+
+---
+
 ## Cómo modificarlo
 
 Todo se edita en `index.html`, dentro de la etiqueta `<script>`. Busca estas constantes:
@@ -271,7 +285,7 @@ Todo se edita en `index.html`, dentro de la etiqueta `<script>`. Busca estas con
 | Técnicas de estudio recomendadas | `const METHOD_TIPS = {...}` |
 | Pesos y niveles del diagnóstico | `function computeDiag()` |
 | Pasos de la simulación guiada | `const TOUR = [...]` |
-| Colores de la marca | Variables `--brand`, `--accent`, etc. al inicio de `<style>` |
+| Colores de la marca | Variables `--azul`, `--celeste`, `--paper`, `--ink`, etc. al inicio de `<style>` (ver `DESIGN.md`) |
 
 ---
 
