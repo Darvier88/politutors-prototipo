@@ -3,6 +3,7 @@
 Prototipo funcional de **PoliTutors**, una plataforma bajo demanda (*on-demand*) que conecta en tiempo real a estudiantes de bachillerato que necesitan apoyo en **Matemáticas, Física y Química** con **tutores universitarios verificados de la ESPOL**. El servicio garantiza cobros seguros y envía reportes automáticos de avance a los padres de familia.
 
 > Proyecto académico de la materia de Emprendimiento · ESPOL · Guayaquil, Ecuador.
+> La identidad visual («Cuaderno politécnico», basada en la colorimetría de la ESPOL) está documentada en [`DESIGN.md`](DESIGN.md).
 > Es un **prototipo**: los pagos, el video y la subida de documentos son simulados.
 
 ![Homepage](docs/capturas/01-homepage.png)
@@ -18,8 +19,10 @@ Prototipo funcional de **PoliTutors**, una plataforma bajo demanda (*on-demand*)
 - [Diagnóstico de aprendizaje](#diagnóstico-de-aprendizaje)
 - [El simulador](#el-simulador)
 - [Simulación guiada (17 pasos)](#simulación-guiada-17-pasos)
+- [Simulación por rol](#simulación-por-rol)
 - [Dónde ver cada atributo](#dónde-ver-cada-atributo)
 - [Qué está simulado y supuestos de negocio](#qué-está-simulado-y-supuestos-de-negocio)
+- [Identidad visual](#identidad-visual)
 - [Cómo modificarlo](#cómo-modificarlo)
 - [Estructura del código](#estructura-del-código)
 - [Capturas](#capturas)
@@ -55,9 +58,11 @@ python3 -m http.server 8000
 ## Cómo presentarlo en 2 minutos
 
 1. Abre `index.html`.
-2. En la homepage, haz clic en **▶ Ver simulación de cómo funciona**.
-3. Usa **Siguiente ▶** para avanzar paso a paso, o **▶ Auto** para que avance solo (~7 s por paso).
-4. Al terminar, abre el botón **⚙ Simulador** (abajo a la izquierda) para explorar libremente con las cuentas de ejemplo.
+2. En la homepage, elige una opción:
+   - **▶ Ver la simulación de cómo funciona:** el recorrido completo de 17 pasos.
+   - **Simular como** → **Padre o madre**, **Estudiante** o **Tutor ESPOL:** la app vista solo desde ese rol (ver [Simulación por rol](#simulación-por-rol)).
+3. Usa **Siguiente ▶** para avanzar paso a paso, o **▶ Auto** para que avance solo (~7 s por paso). Las simulaciones por rol arrancan en automático.
+4. Al terminar, abre el botón **Simulador** (abajo a la derecha) para explorar libremente con las cuentas de ejemplo.
 
 ---
 
@@ -163,11 +168,12 @@ Además pregunta **cómo prefiere que le expliquen** y **cómo se siente antes d
 
 ## El simulador
 
-El botón **⚙ Simulador** (abajo a la izquierda) es una herramienta para presentar el prototipo. **No forma parte del producto.**
+El botón **Simulador** (abajo a la derecha) es una herramienta para presentar el prototipo. **No forma parte del producto.**
 
 | Opción | Para qué sirve |
 |---|---|
 | ▶ Simulación guiada | Inicia el recorrido de 17 pasos |
+| Simular como padre / estudiante / tutor | Inicia la simulación de un solo rol |
 | Entrar como… | Cambia entre las cuentas creadas (representante, estudiante, tutor) sin cerrar sesión |
 | Cargar cuentas de ejemplo | Crea a **Ana Vera** (representante), **Mateo Vera** (estudiante, con historial y diagnóstico) y **Carlos Rivas** (tutor verificado) |
 | ⏩ Adelantar 24 h | Libera los pagos que estaban en la ventana de reclamo |
@@ -214,6 +220,24 @@ Desde la homepage, cada tarjeta de atributo tiene **“Verlo funcionando →”*
 
 ---
 
+## Simulación por rol
+
+Muestra cómo usaría la app cada tipo de usuario, de principio a fin. Avanza sola; se puede pausar, retroceder o salir.
+
+Se abre desde **Simular como** en la portada, desde el **Simulador**, o directamente agregando un `#` a la dirección. Así puedes compartir un enlace que abre la simulación de un rol:
+
+| Rol | Pasos | Qué recorre | Enlace directo |
+|---|---|---|---|
+| Padre o madre | 7 | Portada → ¿quién crea la cuenta? → agrega a su hijo → permisos → diagnóstico del hijo → reporte de una clase → pago protegido y reclamo | `index.html#sim-padre` |
+| Estudiante | 9 | Portada → test de diagnóstico → resultados → pedir ayuda → emparejamiento → tutor verificado → sesión en la pizarra → calificación → insignias | `index.html#sim-estudiante` |
+| Tutor ESPOL | 8 | Página para tutores → materias y notas → prueba corta → revisión → solicitudes en línea → sesión en la pizarra → reporte para el padre → dinero por liberar | `index.html#sim-tutor` |
+
+Con GitHub Pages, el enlace queda, por ejemplo, como `https://darvier88.github.io/politutors-prototipo/#sim-tutor`.
+
+> En el código, los recorridos por rol están en `ROLE_TOURS`. Los pasos que solo existen en ellos (por ejemplo, la sesión desde el lado del tutor) están en `EXTRA_STEPS`.
+
+---
+
 ## Dónde ver cada atributo
 
 | # | Atributo | Dónde se ve en el prototipo |
@@ -254,6 +278,18 @@ Desde la homepage, cada tarjeta de atributo tiene **“Verlo funcionando →”*
 
 ---
 
+## Identidad visual
+
+El prototipo sigue el sistema **«Cuaderno politécnico»**, documentado en [`DESIGN.md`](DESIGN.md):
+
+- **Colorimetría de la ESPOL:** azul institucional como único color de acción, celeste en la cuadrícula del cuaderno y en los gráficos, y grises plata. Se suma el tramado diagonal a 133° de la textura corporativa.
+- **Tipografía libre latinoamericana:** Archivo para titulares e interfaz, Chivo Mono para cifras y etiquetas, y Alegreya itálica para las notas del tutor.
+- **Tres registros visuales:** boletín para los padres, cuaderno para los estudiantes y **modo pizarra** oscuro para la sesión en vivo.
+- **Sin el look de plantilla:** iconos SVG propios en lugar de emojis, hojas con filetes en lugar de tarjetas con sombra, sellos en lugar de píldoras de color, y ni degradados ni Inter.
+- **Uso de la marca ESPOL:** el prototipo no usa el logotipo, el sello ni la tortuga de la ESPOL. Los códigos exactos de color del manual oficial están pendientes de confirmar; ver la nota en `DESIGN.md`.
+
+---
+
 ## Cómo modificarlo
 
 Todo se edita en `index.html`, dentro de la etiqueta `<script>`. Busca estas constantes:
@@ -271,7 +307,8 @@ Todo se edita en `index.html`, dentro de la etiqueta `<script>`. Busca estas con
 | Técnicas de estudio recomendadas | `const METHOD_TIPS = {...}` |
 | Pesos y niveles del diagnóstico | `function computeDiag()` |
 | Pasos de la simulación guiada | `const TOUR = [...]` |
-| Colores de la marca | Variables `--brand`, `--accent`, etc. al inicio de `<style>` |
+| Simulaciones por rol | `const ROLE_TOURS = {...}` y `const EXTRA_STEPS = [...]` |
+| Colores de la marca | Variables `--azul`, `--celeste`, `--paper`, `--ink`, etc. al inicio de `<style>` (ver `DESIGN.md`) |
 
 ---
 
@@ -291,7 +328,7 @@ index.html
     ├── Diagnóstico   DX_M, DX_T, computeDiag(), diagHTML()
     ├── Sala en vivo  Pizarra (canvas), chat y temporizador, compartidos por estudiante y tutor
     ├── Acciones      ACT: manejadores de clics mediante data-act="..."
-    ├── Simulación    TOUR: los 17 pasos de la simulación guiada
+    ├── Simulación    TOUR (17 pasos), ROLE_TOURS y EXTRA_STEPS (por rol)
     └── Router        route(), go(), render()
 ```
 
@@ -305,3 +342,4 @@ index.html
 | **Sesión en vivo**<br>![](docs/capturas/04-sesion-en-vivo.png) | **Panel del representante**<br>![](docs/capturas/05-panel-padre.png) |
 | **Panel del tutor**<br>![](docs/capturas/06-panel-tutor.png) | **Verificación del tutor**<br>![](docs/capturas/07-verificacion-tutor.png) |
 | **Diagnóstico: test**<br>![](docs/capturas/09-diagnostico-test.png) | **Diagnóstico: resultados**<br>![](docs/capturas/08-diagnostico-resultados.png) |
+| **Simulación por rol (tutor)**<br>![](docs/capturas/10-simulacion-tutor.png) | |
