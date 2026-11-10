@@ -375,6 +375,34 @@ body.touring #toasts{bottom:150px}
 .tour-ctrl button{background:#1e293b;border:1px solid #334155;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700;font-size:13px}
 .tour-ctrl button.main{background:var(--accent);border-color:var(--accent);color:#3b2600}
 
+/* diagnóstico */
+.dx-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start;margin-bottom:20px}
+.dx-subjs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.dx-subj{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:2px;background:#fff}
+.dx-subj .btn{margin-top:auto}
+.dx-lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:12px 0 6px}
+.dx-rec{font-size:13.5px;color:var(--ink-2);margin:10px 0 12px}
+.gapchip{font-size:12.5px;font-weight:700;background:var(--accent-soft);color:#7a4a00;padding:4px 10px;border-radius:999px}
+.gapchip i{font-weight:500;font-style:normal;opacity:.75}
+.lvl{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.lvl.ok{background:var(--ok-soft);color:var(--ok)}.lvl.amber{background:var(--accent-soft);color:#9a5b00}.lvl.bad{background:var(--bad-soft);color:var(--bad)}
+.tip{border-left:3px solid var(--brand);background:var(--bg);border-radius:0 12px 12px 0;padding:10px 14px;margin-bottom:10px}
+.tip p{font-size:13.5px;color:var(--ink-2);margin-top:2px}
+.plan-row{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.plan-row:last-child{border:0}
+.plan-row span{font-weight:800;width:80px;flex:none;color:var(--brand)}
+.dx-parts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.dx-parts>div{background:var(--bg);border-radius:14px;padding:14px}
+.dx-parts .step-n{margin-bottom:8px}
+.dx-strip{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px;border-left:4px solid var(--brand)}
+.dx-strip .grow{flex:1;min-width:220px}
+.chip.gap-topic{border-style:dashed;border-color:#f5a524}
+.chip.gap-topic::after{content:"por reforzar";font-size:10.5px;font-weight:800;color:#9a5b00;background:var(--accent-soft);padding:1px 6px;border-radius:99px}
+.chip.gap-topic.on::after{background:#fff}
+.dx-hero{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:center}
+@media (max-width:920px){.dx-grid,.dx-hero{grid-template-columns:1fr}.dx-subjs{grid-template-columns:1fr}}
+.dx-modal .dx-grid{grid-template-columns:1fr}
+@media (max-width:620px){.dx-parts{grid-template-columns:1fr}.top .link{display:none}}
 @media (max-width:920px){
   .hero-grid,.grid-2-1,.session-grid,.devices,.faq-grid{grid-template-columns:1fr}
   .phone{margin:0 auto}
@@ -491,7 +519,7 @@ const S = {
   reg: { who: null, step: 1, d: { cSubj: [] } },
   treg: { step: 1, d: { subj: {} } },
   homeTab: 'fam', simOpen: false, pendingScroll: null,
-  tour: { on: false, i: 0, auto: false }
+  tour: { on: false, i: 0, auto: false }, dx: null
 };
 function newFlow() {
   return { step: 'form', subj: 'mat', topic: '', detail: '', photo: null, dur: S.child && S.child.trialUsed ? 1 : 0, tutorId: null, skipped: [],
@@ -529,6 +557,7 @@ function ensureDemo() {
     seedHistory();
   }
   S.child.status = 'activo';
+  if (!S.child.diag) S.child.diag = makeDiag(DEMO_DX);
   if (!S.tutor) S.tutor = makeTutor({ name: 'Carlos Rivas', email: 'carivas@espol.edu.ec', phone: '0987654321', grades: { mat: 9.1, fis: 8.8 }, status: 'verificado',
     ledger: [{ id: 'l1', date: Date.now() - 2 * DAY, student: 'Sebastián P.', subj: 'mat', price: 8.5, status: 'liberado' }],
     reviews: [{ by: 'Sebastián (estudiante)', stars: 5, text: 'Me explicó límites mejor que en el colegio.' }], sessions: 1 });
@@ -579,7 +608,7 @@ function renderTop() {
   const map = { parent: ['Representante', S.parent, '#padre'], student: ['Estudiante', S.child, '#estudiante'], tutor: ['Tutor ESPOL', S.tutor, '#tutor'] };
   const [lbl, who, home] = map[S.user];
   $('#top').innerHTML = `<div class="wrap">${logo}<span class="role-pill">${lbl}</span>
-    <div class="row gap" style="margin-left:auto"><a class="link" href="${home}">Mi panel</a><div class="user-chip">${avatar({ name: who.name, color: S.user === 'tutor' ? '#0e9384' : S.user === 'parent' ? '#7c3aed' : '#475569' }, 'sm')}<span>${esc(first(who.name))}</span></div>
+    <div class="row gap" style="margin-left:auto"><a class="link" href="${home}">Mi panel</a>${S.user === 'student' ? '<a class="link" href="#diagnostico">Mi diagnóstico</a>' : ''}<div class="user-chip">${avatar({ name: who.name, color: S.user === 'tutor' ? '#0e9384' : S.user === 'parent' ? '#7c3aed' : '#475569' }, 'sm')}<span>${esc(first(who.name))}</span></div>
     <button class="btn ghost sm" data-act="logout">Salir</button></div></div>`;
 }
 function renderSim() {
@@ -591,7 +620,7 @@ function renderSim() {
   $('#sim').innerHTML = `${S.simOpen ? `<div class="sim-panel">
       <div class="row between"><b>Simulador</b><button class="link" data-act="simToggle" aria-label="Cerrar">✕</button></div>
       <p class="tiny muted">Herramientas para presentar el prototipo. No forman parte del producto.</p>
-      <h4>Recorrido</h4><button class="btn primary sm" data-act="tourStart">▶ Simulación guiada (15 pasos)</button>
+      <h4>Recorrido</h4><button class="btn primary sm" data-act="tourStart">▶ Simulación guiada (17 pasos)</button>
       <h4>Cambiar de cuenta</h4>${acc.length ? acc.map(([r, l]) => `<button class="btn ghost sm" data-act="loginAs" data-r="${r}">Entrar como ${esc(l)}</button>`).join('') : '<p class="tiny muted">Aún no hay cuentas creadas.</p>'}
       <button class="btn ghost sm" data-act="loadDemo">Cargar cuentas de ejemplo</button>
       <h4>Tiempo</h4><button class="btn ghost sm" data-act="advance">⏩ Adelantar 24 h (liberar pagos)</button>
@@ -609,16 +638,16 @@ const VIEWS = {}, AFTER = {};
 VIEWS.inicio = () => {
   const online = TUTORS.filter(t => t.online).length;
   const feats = [
-    ['Emparejamiento en tiempo real', 'Pides ayuda y te conectamos con un tutor disponible en menos de 3 minutos.', 5],
-    ['Sesiones de 30 a 60 minutos', 'Bloques cortos para una duda puntual o clases de nivelación. Puedes extender 15 min.', 7],
-    ['Tutores 100% verificados', 'Cédula, matrícula vigente, récord académico, nota mínima por materia y prueba.', 11],
-    ['Cobro seguro en garantía', 'El pago queda retenido y se libera al tutor 24 h después, si no hay reclamos.', 10],
-    ['Reporte automático a padres', 'Temas reforzados, próximos pasos y compromiso, por correo y WhatsApp.', 9],
-    ['App liviana y acceso web', 'Menos de 50 MB y versión web para celular, tablet o computadora.', 14],
-    ['Calificaciones y reseñas', 'Estudiantes y padres califican del 1 al 5 la paciencia y claridad del tutor.', 8],
-    ['Insignias del estudiante', 'Puntual, respetuoso y constante: solo insignias positivas y privadas.', 13]
+    ['Emparejamiento en tiempo real', 'Pides ayuda y te conectamos con un tutor disponible en menos de 3 minutos.', 'match1'],
+    ['Sesiones de 30 a 60 minutos', 'Bloques cortos para una duda puntual o clases de nivelación. Puedes extender 15 min.', 'sesion'],
+    ['Tutores 100% verificados', 'Cédula, matrícula vigente, récord académico, nota mínima por materia y prueba.', 'verif'],
+    ['Cobro seguro en garantía', 'El pago queda retenido y se libera al tutor 24 h después, si no hay reclamos.', 'pago'],
+    ['Reporte automático a padres', 'Temas reforzados, próximos pasos y compromiso, por correo y WhatsApp.', 'reporte'],
+    ['App liviana y acceso web', 'Menos de 50 MB y versión web para celular, tablet o computadora.', 'app'],
+    ['Calificaciones y reseñas', 'Estudiantes y padres califican del 1 al 5 la paciencia y claridad del tutor.', 'calif'],
+    ['Insignias del estudiante', 'Puntual, respetuoso y constante: solo insignias positivas y privadas.', 'insignias']
   ];
-  const fam = [['Crea la cuenta familiar', 'El representante se registra y agrega a su hijo (o el estudiante invita a su representante).'], ['Pide ayuda', 'Materia, tema, foto del ejercicio y duración. El cobro queda retenido.'], ['Aprende en vivo', 'Tutor ESPOL en menos de 3 min: video, chat y pizarra compartida.'], ['Reporte a casa', 'Al terminar, el representante recibe el reporte y el pago se libera.']];
+  const fam = [['Crea la cuenta familiar', 'El representante se registra y agrega a su hijo (o el estudiante invita a su representante).'], ['Diagnóstico y pide ayuda', 'Un test de 5 min detecta qué le falta. Luego pide ayuda en ese tema; el cobro queda retenido.'], ['Aprende en vivo', 'Tutor ESPOL en menos de 3 min: video, chat y pizarra compartida.'], ['Reporte a casa', 'Al terminar, el representante recibe el reporte y el pago se libera.']];
   const tut = [['Regístrate con tu correo ESPOL', 'Datos básicos, cédula, matrícula vigente y récord académico.'], ['Demuestra lo que sabes', 'Nota mínima de 8/10 por materia y una prueba corta.'], ['Activa tu disponibilidad', 'Ponte en línea cuando quieras y acepta solicitudes en 30 s.'], ['Enseña y cobra', 'Llenas el reporte en 2 min y recibes el 85% de cada sesión.']];
   const steps = S.homeTab === 'fam' ? fam : tut;
   const ctas = `<div class="role-ctas">
@@ -650,9 +679,22 @@ VIEWS.inicio = () => {
     <div style="margin-top:20px">${S.homeTab === 'fam' ? '<a class="btn primary" href="#registro-familia">Crear cuenta familiar</a>' : '<a class="btn primary" href="#tutores">Quiero ser tutor</a>'}</div>
   </div></section>
 
+  <section class="block" id="diagnostico-info" style="padding-top:0"><div class="wrap"><div class="card dx-hero" style="padding:28px">
+    <div><span class="pill amber">Nuevo · Diagnóstico de aprendizaje</span>
+      <h2 style="font-size:28px;font-weight:800;margin:12px 0 8px">Sabemos qué le falta antes de la primera clase</h2>
+      <p class="muted">En 5 minutos, el estudiante cuenta cómo estudia, se autoevalúa y resuelve una mini prueba. Recibe su nivel por materia, los temas que le faltan, técnicas para estudiar mejor y un plan semanal.</p>
+      <ul class="check-list"><li>Metodología: planificación, técnica, constancia, concentración y manejo de errores</li><li>Vacíos por materia, detectados con ejercicios reales</li><li>El tutor adapta la explicación y el padre ve el resumen</li></ul>
+      <button class="btn primary" style="margin-top:16px" data-act="tourAt" data-id="diag-res">Ver un diagnóstico de ejemplo</button></div>
+    <div class="dx-subj" style="--c:#0e9384"><div class="row between"><b>⚛ Física</b><span class="lvl bad">Necesita refuerzo</span></div>
+      <div class="bar" style="margin:10px 0 4px"><i style="width:38%;background:#0e9384"></i></div><div class="tiny muted">Prueba 1/2 · Confianza 2/5 · Nota 6.5</div>
+      <div class="dx-lbl">Le falta reforzar</div><div class="chips" style="margin:0"><span class="gapchip">Leyes de Newton</span></div>
+      <div class="tip" style="margin-top:14px"><b>Práctica de recuperación</b><p>Cambia releer por resolver ejercicios sin mirar la solución.</p></div>
+      <div class="dx-rec">Recomendado: sesión de 60 min de nivelación en <b>Leyes de Newton</b>.</div></div>
+  </div></div></section>
+
   <section class="block white" id="atributos"><div class="wrap">
     <div class="sec-head"><span class="pill amber">Lo que incluye</span><h2>Ocho razones para elegir PoliTutors</h2><p class="muted">Toca “Verlo funcionando” para saltar a ese momento de la simulación.</p></div>
-    <div class="feat-grid">${feats.map((f, i) => `<div class="card feat"><span class="num">0${i + 1}</span><h4>${f[0]}</h4><p>${f[1]}</p><button data-act="tourAt" data-i="${f[2]}">Verlo funcionando →</button></div>`).join('')}</div>
+    <div class="feat-grid">${feats.map((f, i) => `<div class="card feat"><span class="num">0${i + 1}</span><h4>${f[0]}</h4><p>${f[1]}</p><button data-act="tourAt" data-id="${f[2]}">Verlo funcionando →</button></div>`).join('')}</div>
   </div></section>
 
   <section class="block" id="seguridad"><div class="wrap">
@@ -699,6 +741,7 @@ VIEWS.inicio = () => {
     <div class="faq-grid">
       <div><h3>Para familias</h3>
         <details><summary>¿Quién crea la cuenta, el padre o el estudiante?</summary><p>Lo ideal es que el representante cree la cuenta y agregue a su hijo. Si el estudiante se registra primero, debe ingresar el correo de su representante, que aprueba la cuenta y registra el método de pago.</p></details>
+        <details><summary>¿Qué es el diagnóstico de aprendizaje?</summary><p>Un test de 5 minutos: preguntas sobre cómo estudia, una autoevaluación por materia y 7 ejercicios cortos. Con eso recomendamos qué temas reforzar, técnicas de estudio y un plan semanal. Lo ven el estudiante, su representante y el tutor asignado.</p></details>
         <details><summary>¿Cuándo se cobra?</summary><p>Cuando el estudiante pide una sesión. El dinero queda retenido y se libera al tutor 24 h después de terminar, si no hay reclamos. Si no encontramos tutor en 3 minutos, no se cobra nada.</p></details>
         <details><summary>¿Cómo sé que el tutor es confiable?</summary><p>Todos son estudiantes activos de la ESPOL, verificados con cédula, matrícula, récord y una prueba por materia. Además ves sus calificaciones y reseñas.</p></details>
         <details><summary>¿Las sesiones se graban?</summary><p>Sí. Toda la comunicación ocurre dentro de la plataforma y se graba por seguridad, con tu consentimiento como representante.</p></details></div>
@@ -969,12 +1012,13 @@ function vForm() {
     ${pend ? `<div class="banner amber"><div><b>Tu cuenta está pendiente de aprobación</b><div class="tiny">Le enviamos una invitación a ${esc(S.parent.name)}. Cuando la apruebe podrás pedir ayuda.</div></div><button class="btn sm dark" data-act="go" data-r="invitacion">Simular aprobación</button></div>` : ''}
     <div class="page-head"><div><h2>Hola, ${esc(first(c.name))}</h2><p class="muted">${esc(c.curso)} · ¿En qué te ayudamos hoy?</p></div>
       <div class="online-pill"><span class="dot"></span>${online} tutores en línea en ${sub.name}</div></div>
+    ${dxStrip()}
     <div class="grid-2-1">
       <div class="card ${pend ? 'locked' : ''}">
         <h3>1. Materia</h3>
         <div class="subj-grid">${Object.entries(SUBJECTS).map(([k, s]) => `<button class="subj ${k === f.subj ? 'on' : ''}" data-act="subj" data-k="${k}" style="--c:${s.color}"><span class="subj-ic">${s.icon}</span>${s.name}</button>`).join('')}</div>
         <h3>2. Tema</h3>
-        <div class="chips">${sub.topics.map(t => `<button class="chip ${t === f.topic ? 'on' : ''}" data-act="topic" data-t="${esc(t)}">${t}</button>`).join('')}</div>
+        <div class="chips">${sub.topics.map(t => `<button class="chip ${t === f.topic ? 'on' : ''} ${c.diag && c.diag.res.subj[f.subj].gaps.includes(t) ? 'gap-topic' : ''}" data-act="topic" data-t="${esc(t)}">${t}</button>`).join('')}</div>
         <textarea id="detail" rows="3" placeholder="Cuéntale al tutor tu duda (opcional). Ej.: no entiendo cuándo usar la regla de la cadena">${esc(f.detail)}</textarea>
         <label class="photo-drop">${f.photo ? `<img src="${f.photo}" alt="Ejercicio">` : '<span style="font-size:24px">📷</span>'}<span style="flex:1"><b>${f.photo ? 'Foto del ejercicio adjunta' : 'Sube una foto del ejercicio'}</b><br><span class="tiny muted">${f.photo ? 'Toca para cambiarla' : 'Opcional · el tutor la verá al conectarse'}</span></span><input type="file" id="photoIn" accept="image/*" style="display:none"></label>
         <h3 style="margin-top:20px">3. Duración</h3>
@@ -995,6 +1039,15 @@ function vForm() {
         <div class="card"><h3>Mis sesiones</h3>${recent.length ? recent.map(r => `<div class="row between" style="padding:6px 0;font-size:13.5px"><span>${SUBJECTS[r.subj].icon} ${esc(r.topic)}</span><span class="muted">${fdate(r.date)}</span></div>`).join('') : '<p class="tiny muted">Aún no tienes sesiones. ¡La primera de 15 min es gratis!</p>'}</div>
       </aside>
     </div></div>`;
+}
+function dxStrip() {
+  const c = S.child, d = c.diag;
+  if (!d) return `<div class="card dx-strip"><span style="font-size:28px">📋</span><div class="grow"><b>Haz tu diagnóstico de aprendizaje (5 min)</b><div class="tiny muted">Descubre cómo estudias y qué te falta reforzar en cada materia. Tu tutor lo usará para explicarte mejor.</div></div><a class="btn primary" href="#diagnostico">Empezar</a></div>`;
+  const r = d.res, w = r.order.find(k => r.subj[k].level !== 'fuerte');
+  return `<div class="card dx-strip"><span style="font-size:28px">📋</span><div class="grow"><b>Tu perfil: ${r.profile.toLowerCase()}</b>
+    <div class="row gap wrapf" style="margin-top:6px">${r.order.map(k => `<span class="tiny"><b>${SUBJECTS[k].name}</b> ${lvlChip(r.subj[k].level)}</span>`).join('')}</div>
+    ${w ? `<div class="tiny muted" style="margin-top:6px">Recomendado: reforzar <b>${esc(r.subj[w].gaps[0] || '')}</b> en ${SUBJECTS[w].name}. Los temas marcados “por reforzar” salen de tu diagnóstico.</div>` : ''}</div>
+    <a class="btn ghost" href="#diagnostico">Ver mi diagnóstico</a></div>`;
 }
 function vConfirm() {
   const f = S.flow, d = DURATIONS[f.dur], p = S.parent, m = METHODS[p.method || 'payphone'];
@@ -1042,6 +1095,7 @@ function vMatch() {
         <div class="rating">${stars(t.rating)} <b>${t.rating.toFixed(1)}</b> <span class="muted tiny">(${t.count} reseñas · ${t.sessions} sesiones)</span></div>
         <div class="vbadges">${Object.entries(t.grades).map(([k, g]) => `<span class="vbadge">${SUBJECTS[k].name} · ${g.toFixed(1)}/10</span>`).join('')}</div></div></div>
       <div class="verif-list"><div>Cédula y selfie validadas</div><div>Matrícula ESPOL vigente</div><div>Prueba de ${SUBJECTS[f.subj].name} aprobada</div><div>Código de conducta firmado</div></div>
+      ${S.child.diag ? `<div class="info" style="margin-bottom:14px">📋 ${first(t.name)} verá tu perfil de aprendizaje: prefieres <b>${esc(S.child.diag.res.pref.toLowerCase())}</b>${S.child.diag.res.subj[f.subj].gaps.length ? ` y te cuesta <b>${esc(S.child.diag.res.subj[f.subj].gaps.slice(0, 2).join(' y '))}</b>` : ''}.</div>` : ''}
       <h4 style="font-size:14px;margin-bottom:4px">Reseñas recientes</h4>
       ${t.reviews.slice(0, 2).map(r => `<div class="review"><div class="row between"><span class="rv-who">${esc(r.by)}</span>${stars(r.stars)}</div>${esc(r.text)}</div>`).join('') || '<p class="muted tiny">Aún sin reseñas.</p>'}
       <div class="row gap end wrapf" style="margin-top:16px"><button class="btn ghost" data-act="otherTutor">Buscar otro tutor</button><button class="btn primary" data-act="enterSession">Entrar a la sesión</button></div>
@@ -1053,7 +1107,7 @@ function startStudentLive() {
   S.live = { role: 'student', subj: f.subj, topic: f.topic, min: DURATIONS[f.dur].min, start: Date.now(), oName: short(t.name), oColor: t.color, meName: S.child.name,
     chat: [{ from: 'sys', text: 'Te uniste a la sala' }], board: null, drew: false, ri: 0, ext: false };
   if (f.photo) S.live.chat.push({ from: 'me', text: 'Este es el ejercicio:', img: f.photo });
-  S.live.chat.push({ from: 'o', text: `¡Hola, ${first(S.child.name)}! Soy ${first(t.name)}. Vi que necesitas ayuda con ${f.topic.toLowerCase()}. ${f.detail ? 'Leí tu duda, vamos con eso.' : '¿Qué parte te cuesta más?'}` });
+  S.live.chat.push({ from: 'o', text: `¡Hola, ${first(S.child.name)}! Soy ${first(t.name)}. Vi que necesitas ayuda con ${f.topic.toLowerCase()}. ${f.detail ? 'Leí tu duda, vamos con eso.' : '¿Qué parte te cuesta más?'}${S.child.diag ? ' Vi en tu diagnóstico que prefieres ' + S.child.diag.res.pref.toLowerCase() + ', así que lo haremos así.' : ''}` });
 }
 function vRate() {
   const f = S.flow, t = tutor(f.tutorId), tags = ['Paciencia', 'Claridad', 'Puntualidad', 'Dominio del tema', 'Buena onda'];
@@ -1102,6 +1156,179 @@ AFTER.estudiante = () => {
   if (f.step === 'session') setupLive();
   if (f.step === 'form') { const pi = $('#photoIn'); if (pi) pi.addEventListener('change', () => { const fl = pi.files[0]; if (fl) { S.flow.photo = URL.createObjectURL(fl); render(); } }); }
 };
+
+/* =========================================================
+   Diagnóstico de aprendizaje del estudiante
+   ========================================================= */
+const DIMS = { plan: 'Planificación', tecnica: 'Técnica de estudio', const: 'Constancia', foco: 'Concentración', errores: 'Aprender de los errores' };
+const DX_M = [
+  { id: 'm1', dim: 'const', q: '¿Cuántas horas a la semana estudias fuera de clases?', o: [['Menos de 1 hora', 0], ['De 1 a 3 horas', 1], ['De 4 a 6 horas', 2], ['Más de 6 horas', 3]] },
+  { id: 'm2', dim: 'plan', q: '¿Cuándo empiezas a estudiar para un examen?', o: [['La noche anterior', 0], ['1 o 2 días antes', 1], ['3 a 5 días antes', 2], ['Voy repasando cada semana', 3]] },
+  { id: 'm3', dim: 'tecnica', q: '¿Qué haces casi siempre cuando estudias?', o: [['Releo los apuntes o el libro', 0], ['Subrayo y hago resúmenes', 1], ['Veo videos explicativos', 1], ['Resuelvo ejercicios sin mirar la solución', 3]] },
+  { id: 'm4', dim: 'errores', q: 'Cuando no entiendes un ejercicio, ¿qué haces?', o: [['Lo dejo pasar', 0], ['Copio la solución de internet', 1], ['Le pregunto a alguien', 2], ['Busco un ejemplo parecido y lo vuelvo a intentar', 3]] },
+  { id: 'm5', dim: 'foco', q: '¿Dónde está tu celular mientras estudias?', o: [['En la mano, con notificaciones', 0], ['Sobre la mesa', 1], ['En silencio y boca abajo', 2], ['En otro cuarto', 3]] },
+  { id: 'm6', dim: 'foco', q: '¿Cuánto tiempo puedes estudiar sin distraerte?', o: [['Menos de 10 minutos', 0], ['De 10 a 20 minutos', 1], ['De 20 a 40 minutos', 2], ['Más de 40 minutos', 3]] },
+  { id: 'm7', dim: 'errores', q: 'Cuando te devuelven una prueba corregida…', o: [['Solo veo la nota', 0], ['Miro qué estuvo mal', 1], ['Corrijo los errores', 2], ['Los corrijo y practico ejercicios parecidos', 3]] },
+  { id: 'm8', dim: 'plan', q: '¿Organizas tu semana de estudio?', o: [['Nunca', 0], ['A veces', 1], ['Casi siempre', 2], ['Siempre, con un horario', 3]] },
+  { id: 'm9', dim: 'tecnica', q: '¿Explicas con tus palabras lo que aprendiste (a ti mismo o a otros)?', o: [['Nunca', 0], ['Rara vez', 1], ['A veces', 2], ['Seguido', 3]] },
+  { id: 'm10', key: 'pref', q: '¿Cómo prefieres que te expliquen?', o: [['Con ejemplos resueltos paso a paso'], ['Con dibujos y gráficos'], ['Practicando yo, con guía'], ['Primero la teoría y luego ejercicios']] },
+  { id: 'm11', key: 'nervios', q: '¿Cómo te sientes antes de un examen de ciencias?', o: [['Tranquilo/a', 3], ['Algo nervioso/a', 2], ['Muy nervioso/a', 1], ['Me bloqueo', 0]] }
+];
+const DX_T = [
+  { id: 'tm1', s: 'mat', topic: 'Ecuaciones', q: 'Resuelve: 2x + 5 = 17', o: ['x = 6', 'x = 11', 'x = 8,5'], a: 0 },
+  { id: 'tm2', s: 'mat', topic: 'Trigonometría', q: '¿Cuánto vale sen(30°)?', o: ['√3/2', '1/2', '1'], a: 1 },
+  { id: 'tm3', s: 'mat', topic: 'Funciones', q: 'Si f(x) = 2x + 1, ¿cuánto es f(3)?', o: ['6', '7', '9'], a: 1 },
+  { id: 'tf1', s: 'fis', topic: 'Cinemática', q: 'Un ciclista recorre 100 m en 20 s. ¿Cuál es su rapidez media?', o: ['2000 m/s', '5 m/s', '0,2 m/s'], a: 1 },
+  { id: 'tf2', s: 'fis', topic: 'Leyes de Newton', q: '¿Qué fuerza neta se necesita para acelerar 2 kg a 3 m/s²?', o: ['6 N', '1,5 N', '5 N'], a: 0 },
+  { id: 'tq1', s: 'qui', topic: 'Nomenclatura', q: '¿Cuántos átomos de oxígeno tiene una molécula de H₂SO₄?', o: ['2', '4', '1'], a: 1 },
+  { id: 'tq2', s: 'qui', topic: 'Balanceo de ecuaciones', q: 'Para balancear __ H₂ + O₂ → __ H₂O, los coeficientes que faltan son:', o: ['1 y 1', '2 y 2', '2 y 1'], a: 1 }
+];
+const METHOD_TIPS = {
+  plan: ['Repaso espaciado', 'Empieza 3 a 5 días antes del examen con bloques cortos diarios, en lugar de estudiar todo la noche anterior.'],
+  tecnica: ['Práctica de recuperación', 'Cambia releer por resolver ejercicios sin mirar la solución y explicar en voz alta cómo lo hiciste.'],
+  const: ['Hábito diario', 'Reserva 30 minutos al día, a la misma hora, para ciencias. La constancia pesa más que las maratones de estudio.'],
+  foco: ['Bloques sin distracciones', 'Estudia en bloques de 25 minutos con el celular en otro cuarto y descansa 5 minutos entre bloques.'],
+  errores: ['Cuaderno de errores', 'Anota cada ejercicio que fallaste, por qué lo fallaste y la forma correcta. Vuelve a resolverlo a los 3 días.']
+};
+const LEVEL = { fuerte: ['Fuerte', 'ok'], desarrollo: ['En desarrollo', 'amber'], refuerzo: ['Necesita refuerzo', 'bad'] };
+const LEVEL_DUR = { refuerzo: 3, desarrollo: 2, fuerte: 1 };   // índice en DURATIONS
+const DEMO_DX = {
+  m: { m1: 1, m2: 0, m3: 0, m4: 1, m5: 1, m6: 1, m7: 1, m8: 1, m9: 0, m10: 0, m11: 1 },
+  s: { mat: { grade: '7.2', conf: 3, hard: ['Derivadas'] }, fis: { grade: '6.5', conf: 2, hard: ['Leyes de Newton'] }, qui: { grade: '8.4', conf: 4, hard: [] } },
+  t: { tm1: 0, tm2: -1, tm3: 1, tf1: 1, tf2: 2, tq1: 1, tq2: 1 }
+};
+const newDx = () => ({ step: 1, m: {}, s: { mat: { grade: '', conf: 0, hard: [] }, fis: { grade: '', conf: 0, hard: [] }, qui: { grade: '', conf: 0, hard: [] } }, t: {} });
+const dxOpt = id => DX_M.find(q => q.id === id);
+
+function computeDiag(m, s, t) {
+  const dims = {};
+  Object.keys(DIMS).forEach(k => { const qs = DX_M.filter(q => q.dim === k); dims[k] = Math.round(avg(qs.map(q => q.o[m[q.id]][1])) / 3 * 100); });
+  const subj = {};
+  Object.keys(SUBJECTS).forEach(k => {
+    const qs = DX_T.filter(q => q.s === k), ok = qs.filter(q => t[q.id] === q.a).length;
+    const test = ok / qs.length * 100, conf = (s[k].conf - 1) / 4 * 100, g = parseFloat(String(s[k].grade).replace(',', '.'));
+    const score = Math.round(isNaN(g) ? test * .7 + conf * .3 : test * .6 + conf * .2 + g * 10 * .2);
+    const wrong = qs.filter(q => t[q.id] !== q.a).map(q => q.topic);
+    const gaps = [...new Set([...wrong, ...s[k].hard])];
+    subj[k] = { score, ok, n: qs.length, grade: isNaN(g) ? null : g, conf: s[k].conf, gaps, wrong, level: score >= 75 ? 'fuerte' : score >= 50 ? 'desarrollo' : 'refuerzo' };
+  });
+  const mAvg = Math.round(avg(Object.values(dims)));
+  const profile = mAvg >= 70 ? 'Método sólido' : mAvg >= 45 ? 'Método en desarrollo' : 'Método por construir';
+  const tips = Object.entries(dims).filter(([, v]) => v < 60).sort((a, b) => a[1] - b[1]).map(([k]) => ({ dim: k, t: METHOD_TIPS[k][0], d: METHOD_TIPS[k][1] }));
+  const nerv = dxOpt('m11').o[m.m11][1];
+  if (nerv <= 1) tips.push({ dim: 'nervios', t: 'Simulacros con tiempo', d: 'Resuelve pruebas de práctica cronometradas para que el examen real se sienta conocido, y respira profundo antes de empezar.' });
+  if (!tips.length) tips.push({ dim: 'ok', t: 'Práctica intercalada', d: 'Tus hábitos son buenos. Mezcla ejercicios de varios temas en una misma sesión para subir de nivel.' });
+  const pref = dxOpt('m10').o[m.m10][0];
+  const order = Object.keys(subj).sort((a, b) => subj[a].score - subj[b].score);
+  const gapOf = k => subj[k].gaps[0] || SUBJECTS[k].topics[0];
+  const w = order[0], w2 = order[1];
+  const plan = [
+    ['Lunes', `25 min de ejercicios de ${gapOf(w)} sin mirar la solución`],
+    ['Miércoles', `Sesión PoliTutors de ${DURATIONS[LEVEL_DUR[subj[w].level]].min} min: ${SUBJECTS[w].name} · ${gapOf(w)}`],
+    ['Viernes', '20 min: repasa tu cuaderno de errores de la semana'],
+    ['Sábado', `30 min mezclando ejercicios de ${SUBJECTS[w].name} y ${SUBJECTS[w2].name} (${gapOf(w2)})`]
+  ];
+  return { dims, mAvg, profile, subj, tips, pref, nerv, plan, order };
+}
+const makeDiag = x => ({ date: Date.now(), m: { ...x.m }, s: JSON.parse(JSON.stringify(x.s)), t: { ...x.t }, res: computeDiag(x.m, x.s, x.t) });
+const lvlChip = l => `<span class="lvl ${LEVEL[l][1]}">${LEVEL[l][0]}</span>`;
+
+function diagHTML(d, mode) {
+  const r = d.res, c = S.child, isStu = mode === 'student', nm = esc(first(c.name));
+  const subjCards = r.order.map(k => { const x = r.subj[k], s = SUBJECTS[k], dur = DURATIONS[LEVEL_DUR[x.level]];
+    return `<div class="dx-subj" style="--c:${s.color}">
+      <div class="row between"><b>${s.icon} ${s.name}</b>${lvlChip(x.level)}</div>
+      <div class="bar" style="margin:10px 0 4px"><i style="width:${x.score}%;background:${s.color}"></i></div>
+      <div class="tiny muted">Índice ${x.score}/100 · Prueba ${x.ok}/${x.n} · Confianza ${x.conf}/5${x.grade !== null ? ' · Nota ' + x.grade : ''}</div>
+      <div class="dx-lbl">${isStu ? 'Te falta reforzar' : 'Le falta reforzar'}</div>
+      <div class="chips" style="margin:0">${x.gaps.length ? x.gaps.map(g => `<span class="gapchip">${esc(g)}${x.wrong.includes(g) ? '' : ' <i>(autoevaluación)</i>'}</span>`).join('') : '<span class="tiny muted">Sin vacíos detectados</span>'}</div>
+      <div class="dx-rec">${x.level === 'fuerte' ? `Mantén la práctica; una sesión de ${dur.min} min antes de cada examen.` : `Recomendado: sesión de ${dur.min} min de ${x.level === 'refuerzo' ? 'nivelación' : 'refuerzo'} en <b>${esc(x.gaps[0] || s.topics[0])}</b>.`}</div>
+      ${isStu ? `<button class="btn ${x.level === 'fuerte' ? 'ghost' : 'primary'} sm block" data-act="dxAsk" data-s="${k}" data-t="${esc(x.gaps[0] || s.topics[0])}" data-l="${x.level}">Pedir ayuda en ${esc(x.gaps[0] || s.topics[0])}</button>` : ''}</div>`; }).join('');
+  const dims = Object.entries(r.dims).map(([k, v]) => `<div class="hbar" style="--c:${v >= 70 ? 'var(--ok)' : v >= 45 ? 'var(--accent)' : 'var(--bad)'}"><div class="row"><span>${DIMS[k]}</span><span>${v}</span></div><div class="bar"><i style="width:${Math.max(4, v)}%"></i></div></div>`).join('');
+  const strong = Object.entries(r.dims).filter(([, v]) => v >= 70).map(([k]) => DIMS[k]);
+  return `
+    <div class="dx-grid">
+      <div class="card"><div class="row between wrapf gap"><h3 style="margin:0">Materias</h3><span class="tiny muted">De menor a mayor dominio</span></div>
+        <div class="dx-subjs">${subjCards}</div></div>
+      <div class="card"><h3>Metodología de estudio</h3>
+        <div class="row gap" style="margin-bottom:6px"><b style="font-size:20px">${r.profile}</b><span class="tiny muted">${r.mAvg}/100</span></div>
+        ${dims}
+        <p class="tiny muted" style="margin-top:8px">${strong.length ? 'Fortalezas: ' + strong.join(', ') + '.' : 'Aún no hay dimensiones fuertes: es normal, se construyen con práctica.'}</p></div>
+    </div>
+    <div class="dx-grid">
+      <div class="card"><h3>${isStu ? 'Cómo mejorar tu forma de estudiar' : 'Recomendaciones de estudio'}</h3>
+        ${r.tips.map(x => `<div class="tip"><b>${x.t}</b><p>${x.d}</p></div>`).join('')}</div>
+      <div class="stack">
+        <div class="card"><h3>Plan sugerido para esta semana</h3>${r.plan.map(([d, t]) => `<div class="plan-row"><span>${d}</span><p>${esc(t)}</p></div>`).join('')}</div>
+        <div class="card"><h3>${isStu ? 'Lo que verá tu tutor' : 'Lo que verá el tutor'}</h3><ul class="tiny" style="margin:0;padding-left:18px;color:var(--ink-2)">
+          <li>Prefiere: <b>${esc(r.pref.toLowerCase())}</b></li>
+          <li>Temas por reforzar en la materia de la sesión</li>
+          ${r.nerv <= 1 ? '<li>Se pone nervioso/a en los exámenes: practicar con tiempo</li>' : ''}</ul>
+          <p class="tiny muted" style="margin-top:8px">Solo lo ven ${isStu ? 'tú, tu representante' : nm + ', usted'} y el tutor asignado. Sirve para recomendar, no limita a qué tutores ${isStu ? 'accedes' : 'accede'}.</p></div>
+      </div>
+    </div>`;
+}
+
+VIEWS.diagnostico = () => S.dx ? vDxTest() : S.child.diag ? vDxResult() : vDxIntro();
+function vDxIntro() {
+  return `<div class="wrap page narrow"><div class="card">
+    <span class="pill">5 minutos</span>
+    <h2 style="font-size:26px;font-weight:800;margin:12px 0 6px">Diagnóstico de aprendizaje</h2>
+    <p class="muted">Descubre cómo estudias, qué te falta reforzar en cada materia y recibe recomendaciones personalizadas. No es un examen con nota: responde con sinceridad.</p>
+    <div class="dx-parts">
+      <div><span class="step-n">1</span><b>Cómo estudias</b><p class="tiny muted">11 preguntas sobre tus hábitos, concentración y cómo prefieres aprender.</p></div>
+      <div><span class="step-n">2</span><b>Tus materias</b><p class="tiny muted">Tu última nota, qué tan seguro te sientes y los temas que más te cuestan.</p></div>
+      <div><span class="step-n">3</span><b>Mini prueba</b><p class="tiny muted">7 ejercicios cortos de Matemáticas, Física y Química para detectar vacíos.</p></div>
+    </div>
+    <div class="info">Tus resultados los ven solo tú, tu representante y el tutor que te atienda, para explicarte de la forma que mejor te funciona.</div>
+    <div class="row gap end" style="margin-top:16px"><a class="btn ghost" href="#estudiante">Ahora no</a><button class="btn primary lg" data-act="dxStart">Empezar diagnóstico</button></div>
+  </div></div>`;
+}
+function vDxTest() {
+  const D = S.dx, names = ['Cómo estudias', 'Tus materias', 'Mini prueba'];
+  let body = '';
+  if (D.step === 1) body = `<h3>¿Cómo estudias?</h3><p class="tiny muted" style="margin:-6px 0 14px">No hay respuestas buenas ni malas.</p>
+    ${DX_M.map((q, i) => `<div class="quiz"><b>${i + 1}. ${q.q}</b><div class="opts">${q.o.map((o, j) => `<label><input type="radio" name="${q.id}" value="${j}" ${D.m[q.id] === j ? 'checked' : ''}>${o[0]}</label>`).join('')}</div></div>`).join('')}`;
+  if (D.step === 2) body = `<h3>Tus materias</h3><p class="tiny muted" style="margin:-6px 0 14px">La nota es opcional; si no la recuerdas, déjala en blanco.</p>
+    ${Object.entries(SUBJECTS).map(([k, s]) => `<div class="quiz"><b>${s.icon} ${s.name}</b>
+      <div class="fgrid" style="margin-top:10px"><div><label class="lbl" for="dg_${k}">Última nota (sobre 10)</label><input type="number" id="dg_${k}" min="0" max="10" step="0.1" placeholder="Ej.: 7.5" value="${esc(D.s[k].grade)}"></div>
+      <div><label class="lbl">¿Qué tan seguro te sientes?</label><div class="chips" style="margin:0">${[1, 2, 3, 4, 5].map(n => `<label class="chip"><input type="radio" name="dc_${k}" value="${n}" ${D.s[k].conf === n ? 'checked' : ''}>${n}</label>`).join('')}</div><div class="hint">1 = nada · 5 = muy seguro</div></div></div>
+      <label class="lbl" style="margin-top:10px">Temas que más te cuestan</label>
+      <div class="chips" style="margin:0">${s.topics.map(t => `<label class="chip"><input type="checkbox" name="dh_${k}" value="${esc(t)}" ${D.s[k].hard.includes(t) ? 'checked' : ''}>${t}</label>`).join('')}</div></div>`).join('')}`;
+  if (D.step === 3) body = `<h3>Mini prueba</h3><p class="tiny muted" style="margin:-6px 0 14px">Si no sabes, marca “No lo sé”: nos ayuda a encontrar lo que te falta.</p>
+    ${DX_T.map((q, i) => `<div class="quiz"><div class="row between"><b>${i + 1}. ${q.q}</b><span class="tiny muted">${SUBJECTS[q.s].icon} ${q.topic}</span></div><div class="opts">${q.o.map((o, j) => `<label><input type="radio" name="${q.id}" value="${j}" ${D.t[q.id] === j ? 'checked' : ''}>${o}</label>`).join('')}<label><input type="radio" name="${q.id}" value="-1" ${D.t[q.id] === -1 ? 'checked' : ''}><span class="muted">No lo sé</span></label></div></div>`).join('')}`;
+  return `<div class="wrap page narrow"><h2 style="font-size:26px;font-weight:800;margin-bottom:14px">Diagnóstico de aprendizaje</h2>${wizSteps(names, D.step)}
+    <form class="card" id="dxForm">${body}<div id="fErr"></div>
+    <div class="wiz-foot"><button type="button" class="btn ghost" data-act="dxBack">← ${D.step === 1 ? 'Salir' : 'Atrás'}</button><button class="btn primary">${D.step === 3 ? 'Ver mis resultados' : 'Continuar'}</button></div></form></div>`;
+}
+function vDxResult() {
+  const d = S.child.diag, r = d.res, weak = r.order.filter(k => r.subj[k].level !== 'fuerte');
+  return `<div class="wrap page">
+    <div class="page-head"><div><span class="pill">Diagnóstico · ${fdate(d.date)}</span><h2 style="margin-top:10px">Tu perfil de aprendizaje</h2>
+      <p class="muted">${weak.length ? `Te conviene empezar por <b>${SUBJECTS[weak[0]].name}</b> (${esc(r.subj[weak[0]].gaps[0] || '')}). ` : '¡Vas muy bien en las tres materias! '}Tu metodología: <b>${r.profile.toLowerCase()}</b>.</p></div>
+      <div class="row gap"><button class="btn ghost sm" data-act="dxStart">Repetir diagnóstico</button><a class="btn primary sm" href="#estudiante">Ir a pedir ayuda</a></div></div>
+    ${diagHTML(d, 'student')}
+    <p class="tiny muted center" style="margin-top:16px">Te recomendamos repetir el diagnóstico cada mes para medir tu avance.</p></div>`;
+}
+function collectDx() {
+  const D = S.dx; if (!D || !$('#dxForm')) return;
+  const val = n => { const x = $(`input[name="${n}"]:checked`); return x ? +x.value : undefined; };
+  if (D.step === 1) DX_M.forEach(q => { const v = val(q.id); if (v !== undefined) D.m[q.id] = v; });
+  if (D.step === 2) Object.keys(SUBJECTS).forEach(k => { D.s[k].grade = $('#dg_' + k).value; D.s[k].conf = val('dc_' + k) || 0; D.s[k].hard = $$(`input[name="dh_${k}"]:checked`).map(x => x.value); });
+  if (D.step === 3) DX_T.forEach(q => { const v = val(q.id); if (v !== undefined) D.t[q.id] = v; });
+}
+function handleDxForm() {
+  collectDx();
+  const D = S.dx, errs = [];
+  if (D.step === 1) { const miss = DX_M.filter(q => D.m[q.id] === undefined).length; if (miss) errs.push(`responde las ${miss} pregunta${miss > 1 ? 's' : ''} que faltan`); }
+  if (D.step === 2) Object.entries(SUBJECTS).forEach(([k, s]) => { if (!D.s[k].conf) errs.push('indica qué tan seguro te sientes en ' + s.name);
+    const g = parseFloat(String(D.s[k].grade).replace(',', '.')); if (D.s[k].grade !== '' && (isNaN(g) || g < 0 || g > 10)) errs.push('la nota de ' + s.name + ' debe estar entre 0 y 10'); });
+  if (D.step === 3) { const miss = DX_T.filter(q => D.t[q.id] === undefined).length; if (miss) errs.push(`responde los ${miss} ejercicio${miss > 1 ? 's' : ''} que faltan (o marca “No lo sé”)`); }
+  if (errs.length) { showErr(errs); $('#fErr').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  if (D.step < 3) { D.step++; render(); window.scrollTo(0, 0); return; }
+  S.child.diag = makeDiag(D); S.dx = null; render(); window.scrollTo(0, 0);
+  toast(`Diagnóstico listo. Resumen enviado a ${S.parent.name}`);
+}
 
 /* ---------- Sala en vivo (compartida por estudiante y tutor) ---------- */
 const pen = { c: '#0f172a', erase: false };
@@ -1164,6 +1391,16 @@ function setupLive() {
 /* =========================================================
    Panel del representante
    ========================================================= */
+function parentDxCard() {
+  const c = S.child, d = c.diag;
+  if (!d) return `<div class="card"><h3>Diagnóstico de aprendizaje</h3><p class="tiny muted">${esc(first(c.name))} aún no hace su diagnóstico. Cuando lo haga verás cómo estudia, qué le falta reforzar y recomendaciones.</p><button class="btn ghost sm" style="margin-top:10px" data-act="dxRemind">Recordárselo</button></div>`;
+  const r = d.res;
+  return `<div class="card"><h3>Diagnóstico de ${esc(first(c.name))}</h3>
+    ${r.order.map(k => `<div class="row between" style="padding:5px 0;font-size:13.5px"><span>${SUBJECTS[k].icon} ${SUBJECTS[k].name}</span>${lvlChip(r.subj[k].level)}</div>`).join('')}
+    <div class="kv" style="margin-top:4px"><span>Metodología</span><b>${r.profile}</b></div>
+    <div class="tip" style="margin-top:12px"><b>${r.tips[0].t}</b><p>${r.tips[0].d}</p></div>
+    <button class="btn ghost sm block" data-act="parentDx">Ver diagnóstico completo</button></div>`;
+}
 VIEWS.padre = () => {
   const c = S.child, p = S.parent, reps = S.reports;
   const mins = reps.reduce((a, r) => a + r.real, 0);
@@ -1197,6 +1434,7 @@ VIEWS.padre = () => {
           </tbody></table></div>` : '<p class="tiny muted">Aún no hay pagos.</p>'}</div>
       </div>
       <aside class="stack">
+        ${parentDxCard()}
         ${badgesCard('Insignias de ' + esc(first(c.name)), c.rep.punt.length ? 'Las asignan los tutores al terminar cada sesión. Solo son positivas y no se publican.' : 'Aparecerán después de la primera sesión.')}
         <div class="card"><h3>Sesiones por materia</h3>${bySub.map(([k, n]) => `<div class="hbar" style="--c:${SUBJECTS[k].color}"><div class="row"><span>${SUBJECTS[k].name}</span><span>${n}</span></div><div class="bar"><i style="width:${n / maxS * 100}%"></i></div></div>`).join('')}</div>
         <div class="card"><h3>Ajustes</h3>
@@ -1357,8 +1595,13 @@ const ACT = {
   tDecline: () => { S.tutor.pending = null; render(); toast('Solicitud rechazada: pasó al siguiente tutor', 'info'); },
   evalStar: el => { tEval[el.dataset.k] = +el.dataset.n; const obs = $('#tObs')?.value; if (obs !== undefined) S.tutor.active.obs = obs; render(); },
   /* tour */
+  dxStart: () => { S.dx = newDx(); go('diagnostico'); window.scrollTo(0, 0); },
+  dxBack: () => { collectDx(); if (S.dx.step === 1) { S.dx = null; go(S.child.diag ? 'diagnostico' : 'estudiante'); } else { S.dx.step--; render(); window.scrollTo(0, 0); } },
+  dxAsk: el => { resetFlow(); Object.assign(S.flow, { subj: el.dataset.s, topic: el.dataset.t, dur: S.child.trialUsed ? LEVEL_DUR[el.dataset.l] : 0 }); go('estudiante'); toast(`Listo: ${el.dataset.t} seleccionado`, 'info'); },
+  parentDx: () => { const d = S.child.diag; openModal(`<div class="row between wrapf gap"><h3 style="font-size:19px;margin:0">Diagnóstico de ${esc(first(S.child.name))}</h3><span class="pill">${fdate(d.date)}</span></div><p class="muted tiny" style="margin:6px 0 14px">Metodología: <b>${d.res.profile.toLowerCase()}</b>.</p><div class="dx-modal">${diagHTML(d, 'parent')}</div><div class="row end"><button class="btn primary" data-act="closeModal">Cerrar</button></div>`); $('#modalCard').style.maxWidth = '980px'; },
+  dxRemind: () => toast(`Le enviamos un recordatorio a ${first(S.child.name)}`, 'info'),
   tourStart: () => tourGo(0),
-  tourAt: el => tourGo(+el.dataset.i),
+  tourAt: el => tourGo(Math.max(0, TOUR.findIndex(x => x.id === el.dataset.id))),
   tourNext: () => tourGo(S.tour.i + 1),
   tourPrev: () => tourGo(Math.max(0, S.tour.i - 1)),
   tourAuto: () => { S.tour.auto = !S.tour.auto; renderTour(); if (S.tour.auto) scheduleTour(); else clearTimeout(tourTimer); },
@@ -1389,21 +1632,23 @@ function prepSession() { prepMatch(); startStudentLive(); }
 function prepRate() { prepSession(); Object.assign(S.flow, { elapsed: 1712, step: 'rate', stars: 5, tags: ['Paciencia', 'Claridad'], comment: 'Me explicó la regla de la cadena con ejemplos.' }); }
 function ensureRevision() { if (!S.payments.some(p => p.status === 'revision')) { prepRate(); finishStudentSession(); } }
 const TOUR = [
-  { tag: 'Homepage', t: 'Explica todo y separa los dos caminos', d: 'Arriba, dos entradas: “¿Eres padre o estudiante? Crea tu cuenta aquí” y “¿Eres estudiante ESPOL? Hazte tutor aquí”.', run: () => { S.user = null; go('inicio'); setTimeout(() => window.scrollTo(0, 0), 50); } },
-  { tag: 'Registro familiar', t: '¿Quién crea la cuenta?', d: 'El representante (recomendado) o el estudiante, que luego invita a su representante para que apruebe.', run: () => { S.user = null; S.reg = { who: null, step: 1, d: { cSubj: [] } }; go('registro-familia'); } },
-  { tag: 'Registro familiar', t: 'El padre agrega a su hijo', d: 'El representante es el titular: paga y recibe reportes. Crea el perfil del hijo con su curso y materias.', run: () => { S.user = null; S.reg = { who: 'padre', step: 2, d: { pName: 'Ana Vera', pEmail: 'ana.vera@gmail.com', pPhone: '0991234567', pPass: 'demo123', cName: 'Mateo Vera', cCurso: CURSOS[1], cBirth: '2010-03-14', cSubj: ['mat', 'fis'] } }; go('registro-familia'); } },
-  { tag: 'Seguridad', t: 'Consentimiento de datos y grabación', d: 'Antes de activar la cuenta, el representante autoriza el tratamiento de datos (LOPDP) y la grabación de sesiones.', run: () => { S.user = null; S.reg = { who: 'padre', step: 3, d: { pName: 'Ana Vera', cName: 'Mateo Vera', cBirth: '2010-03-14', cSubj: ['mat'], kData: true, kRec: true } }; go('registro-familia'); } },
-  { tag: 'Atributo 2', t: 'Pedir ayuda: materia, tema, foto y duración', d: 'El estudiante elige bloques de 30, 45 o 60 min (o la prueba gratis de 15). Puede subir una foto del ejercicio.', run: () => { prepForm(); go('estudiante'); } },
-  { tag: 'Atributo 1', t: 'Emparejamiento en menos de 3 minutos', d: 'Se notifica primero a los tutores mejor calificados en el tema. El primero que acepta toma la sesión.', ms: 8000, run: () => { prepMatching(); go('estudiante'); } },
-  { tag: 'Atributos 3 y 7', t: 'Tutor verificado, con notas y reseñas', d: 'Insignias por materia, verificación visible, calificación promedio y número de reseñas.', run: () => { prepMatch(); go('estudiante'); } },
-  { tag: 'Atributo 2', t: 'Sesión en vivo con pizarra y chat', d: 'Video, chat interno y pizarra compartida. Se graba por seguridad y se puede extender +15 min con aprobación del padre.', ms: 9000, run: () => { prepSession(); go('estudiante'); tourT(() => { pushChat({ from: 'me', text: '¿Por qué se multiplica por 6x?' }); autoReply(); }, 3800); } },
-  { tag: 'Atributo 7', t: 'Calificación obligatoria al cerrar', d: 'El estudiante califica de 1 a 5 y deja un comentario. El padre también puede calificar desde el reporte.', run: () => { prepRate(); go('estudiante'); } },
-  { tag: 'Atributo 5', t: 'Reporte automático para el representante', d: 'Temas reforzados, próximos pasos y compromiso del estudiante, por correo y WhatsApp.', run: () => { ensureDemo(); prepRate(); finishStudentSession(); S.user = 'parent'; go('padre'); tourT(() => { const r = S.reports[0]; r.seen = true; openReportModal(r); }, 250); } },
-  { tag: 'Atributo 4', t: 'Pago protegido con ventana de reclamo', d: 'El pago queda retenido durante la sesión y se libera 24 h después. El padre puede reportar un problema y pedir reembolso.', run: () => { ensureDemo(); ensureRevision(); S.user = 'parent'; go('padre'); tourT(() => { closeModal(); $('#pagos')?.scrollIntoView({ behavior: 'smooth' }); }, 250); } },
-  { tag: 'Atributo 3', t: 'El tutor demuestra que está calificado', d: 'Correo ESPOL, cédula con selfie, matrícula, récord, nota mínima 8/10 por materia y una prueba corta.', run: () => { S.user = null; S.treg = { step: 3, d: { tName: 'Carlos Rivas', tEmail: 'carivas@espol.edu.ec', tPhone: '0987654321', tPass: 'demo123', files: { fCedF: 'cedula_frente.jpg', fCedB: 'cedula_reverso.jpg', fSelf: 'selfie.jpg', fMat: 'matricula_2026.pdf', fRec: 'record.pdf' }, subj: { mat: 9.1, fis: 8.8 } } }; go('registro-tutor'); } },
-  { tag: 'Oferta', t: 'El tutor se pone en línea y acepta', d: 'Recibe solicitudes solo de sus materias, con 30 s para aceptar. Ve cuánto recibe y su dinero retenido, por liberar y liberado.', run: () => { ensureDemo(); S.user = 'tutor'; const T = S.tutor; T.view = 'panel'; T.online = true; T.active = null; T.pending = { ...(REQS.find(r => T.grades[r.subj] !== undefined) || REQS[1]), left: 30 }; go('tutor'); } },
-  { tag: 'Atributo 8', t: 'Insignias positivas del estudiante', d: 'Puntual, respetuoso y constante, según la evaluación del tutor. Solo las ven el estudiante, su representante y el tutor asignado.', run: () => { ensureDemo(); S.user = 'student'; resetFlow(); go('estudiante'); tourT(() => $('#badges')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250); } },
-  { tag: 'Atributo 6', t: 'App liviana y acceso web', d: 'Menos de 50 MB y versión web responsive. Fin de la simulación: puedes explorar libremente desde el simulador.', run: () => { S.user = null; go('inicio'); S.pendingScroll = 'dispositivos'; tourT(() => AFTER.inicio(), 200); } }
+  { id: 'home', tag: 'Homepage', t: 'Explica todo y separa los dos caminos', d: 'Arriba, dos entradas: “¿Eres padre o estudiante? Crea tu cuenta aquí” y “¿Eres estudiante ESPOL? Hazte tutor aquí”.', run: () => { S.user = null; go('inicio'); setTimeout(() => window.scrollTo(0, 0), 50); } },
+  { id: 'quien', tag: 'Registro familiar', t: '¿Quién crea la cuenta?', d: 'El representante (recomendado) o el estudiante, que luego invita a su representante para que apruebe.', run: () => { S.user = null; S.reg = { who: null, step: 1, d: { cSubj: [] } }; go('registro-familia'); } },
+  { id: 'hijo', tag: 'Registro familiar', t: 'El padre agrega a su hijo', d: 'El representante es el titular: paga y recibe reportes. Crea el perfil del hijo con su curso y materias.', run: () => { S.user = null; S.reg = { who: 'padre', step: 2, d: { pName: 'Ana Vera', pEmail: 'ana.vera@gmail.com', pPhone: '0991234567', pPass: 'demo123', cName: 'Mateo Vera', cCurso: CURSOS[1], cBirth: '2010-03-14', cSubj: ['mat', 'fis'] } }; go('registro-familia'); } },
+  { id: 'permisos', tag: 'Seguridad', t: 'Consentimiento de datos y grabación', d: 'Antes de activar la cuenta, el representante autoriza el tratamiento de datos (LOPDP) y la grabación de sesiones.', run: () => { S.user = null; S.reg = { who: 'padre', step: 3, d: { pName: 'Ana Vera', cName: 'Mateo Vera', cBirth: '2010-03-14', cSubj: ['mat'], kData: true, kRec: true } }; go('registro-familia'); } },
+  { id: 'diag', tag: 'Diagnóstico', t: 'Test de metodología y conocimientos', d: 'El estudiante responde cómo estudia, se autoevalúa por materia y hace una mini prueba de 7 ejercicios para detectar vacíos.', run: () => { ensureDemo(); S.user = 'student'; S.dx = { ...newDx(), step: 1, m: { m1: 1, m2: 0, m3: 0, m4: 1 } }; go('diagnostico'); } },
+  { id: 'diag-res', tag: 'Diagnóstico', t: 'Qué le falta y cómo mejorar', d: 'Nivel por materia, temas por reforzar, perfil de metodología, técnicas de estudio y un plan semanal. El tutor y el padre también lo ven.', run: () => { ensureDemo(); S.user = 'student'; S.dx = null; S.child.diag = makeDiag(DEMO_DX); go('diagnostico'); } },
+  { id: 'pedir', tag: 'Atributo 2', t: 'Pedir ayuda: materia, tema, foto y duración', d: 'El estudiante elige bloques de 30, 45 o 60 min (o la prueba gratis de 15). Puede subir una foto del ejercicio.', run: () => { prepForm(); go('estudiante'); } },
+  { id: 'match1', tag: 'Atributo 1', t: 'Emparejamiento en menos de 3 minutos', d: 'Se notifica primero a los tutores mejor calificados en el tema. El primero que acepta toma la sesión.', ms: 8000, run: () => { prepMatching(); go('estudiante'); } },
+  { id: 'tutor', tag: 'Atributos 3 y 7', t: 'Tutor verificado, con notas y reseñas', d: 'Insignias por materia, verificación visible, calificación promedio y número de reseñas.', run: () => { prepMatch(); go('estudiante'); } },
+  { id: 'sesion', tag: 'Atributo 2', t: 'Sesión en vivo con pizarra y chat', d: 'Video, chat interno y pizarra compartida. Se graba por seguridad y se puede extender +15 min con aprobación del padre.', ms: 9000, run: () => { prepSession(); go('estudiante'); tourT(() => { pushChat({ from: 'me', text: '¿Por qué se multiplica por 6x?' }); autoReply(); }, 3800); } },
+  { id: 'calif', tag: 'Atributo 7', t: 'Calificación obligatoria al cerrar', d: 'El estudiante califica de 1 a 5 y deja un comentario. El padre también puede calificar desde el reporte.', run: () => { prepRate(); go('estudiante'); } },
+  { id: 'reporte', tag: 'Atributo 5', t: 'Reporte automático para el representante', d: 'Temas reforzados, próximos pasos y compromiso del estudiante, por correo y WhatsApp.', run: () => { ensureDemo(); prepRate(); finishStudentSession(); S.user = 'parent'; go('padre'); tourT(() => { const r = S.reports[0]; r.seen = true; openReportModal(r); }, 250); } },
+  { id: 'pago', tag: 'Atributo 4', t: 'Pago protegido con ventana de reclamo', d: 'El pago queda retenido durante la sesión y se libera 24 h después. El padre puede reportar un problema y pedir reembolso.', run: () => { ensureDemo(); ensureRevision(); S.user = 'parent'; go('padre'); tourT(() => { closeModal(); $('#pagos')?.scrollIntoView({ behavior: 'smooth' }); }, 250); } },
+  { id: 'verif', tag: 'Atributo 3', t: 'El tutor demuestra que está calificado', d: 'Correo ESPOL, cédula con selfie, matrícula, récord, nota mínima 8/10 por materia y una prueba corta.', run: () => { S.user = null; S.treg = { step: 3, d: { tName: 'Carlos Rivas', tEmail: 'carivas@espol.edu.ec', tPhone: '0987654321', tPass: 'demo123', files: { fCedF: 'cedula_frente.jpg', fCedB: 'cedula_reverso.jpg', fSelf: 'selfie.jpg', fMat: 'matricula_2026.pdf', fRec: 'record.pdf' }, subj: { mat: 9.1, fis: 8.8 } } }; go('registro-tutor'); } },
+  { id: 'oferta', tag: 'Oferta', t: 'El tutor se pone en línea y acepta', d: 'Recibe solicitudes solo de sus materias, con 30 s para aceptar. Ve cuánto recibe y su dinero retenido, por liberar y liberado.', run: () => { ensureDemo(); S.user = 'tutor'; const T = S.tutor; T.view = 'panel'; T.online = true; T.active = null; T.pending = { ...(REQS.find(r => T.grades[r.subj] !== undefined) || REQS[1]), left: 30 }; go('tutor'); } },
+  { id: 'insignias', tag: 'Atributo 8', t: 'Insignias positivas del estudiante', d: 'Puntual, respetuoso y constante, según la evaluación del tutor. Solo las ven el estudiante, su representante y el tutor asignado.', run: () => { ensureDemo(); S.user = 'student'; resetFlow(); go('estudiante'); tourT(() => $('#badges')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250); } },
+  { id: 'app', tag: 'Atributo 6', t: 'App liviana y acceso web', d: 'Menos de 50 MB y versión web responsive. Fin de la simulación: puedes explorar libremente desde el simulador.', run: () => { S.user = null; go('inicio'); S.pendingScroll = 'dispositivos'; tourT(() => AFTER.inicio(), 200); } }
 ];
 let tourTs = [];
 function tourT(fn, ms) { tourTs.push(setTimeout(fn, ms)); }
@@ -1451,6 +1696,7 @@ document.addEventListener('submit', e => {
     if (acc.pass && acc.pass !== pw) return showErr(['contraseña incorrecta']);
     return login(cand[0]);
   }
+  if (id === 'dxForm') return handleDxForm();
   if (id === 'inviteForm') {
     const errs = []; if (($('#iPass').value || '').length < 6) errs.push('crea una contraseña de al menos 6 caracteres');
     if (!$('#iData').checked) errs.push('autoriza el tratamiento de datos'); if (!$('#iRec').checked) errs.push('autoriza la grabación');
@@ -1467,21 +1713,21 @@ document.addEventListener('submit', e => {
     setTimeout(() => { T.reviews.unshift({ by: first(a.name) + ' (estudiante)', stars: pick([5, 5, 4]), text: pick(['Explica muy claro, gracias.', 'Muy paciente, entendí todo.', 'Buena clase, me ayudó para la prueba.']) }); if (route() === 'tutor' && T.view === 'panel') render(); toast('Recibiste una nueva reseña', 'info'); }, 2500);
   }
 });
-function openModal(html) { $('#modalCard').innerHTML = html; $('#modal').classList.remove('hidden'); }
+function openModal(html) { $('#modalCard').style.maxWidth = ''; $('#modalCard').innerHTML = html; $('#modal').classList.remove('hidden'); }
 function closeModal() { $('#modal').classList.add('hidden'); }
 function toast(msg, kind = 'ok') {
   const el = document.createElement('div'); el.className = 'toast ' + kind; el.textContent = msg; $('#toasts').appendChild(el);
   setTimeout(() => el.classList.add('out'), 3200); setTimeout(() => el.remove(), 3600);
 }
-const ROUTES = ['inicio', 'tutores', 'registro-familia', 'registro-tutor', 'ingresar', 'invitacion', 'padre', 'estudiante', 'tutor'];
-const PRIVATE = { padre: 'parent', estudiante: 'student', tutor: 'tutor' };
+const ROUTES = ['inicio', 'tutores', 'registro-familia', 'registro-tutor', 'ingresar', 'invitacion', 'padre', 'estudiante', 'diagnostico', 'tutor'];
+const PRIVATE = { padre: 'parent', estudiante: 'student', diagnostico: 'student', tutor: 'tutor' };
 function route() { const h = location.hash.slice(1); return ROUTES.includes(h) ? h : 'inicio'; }
 function go(r) { if (location.hash === '#' + r) render(); else location.hash = r; }
 function render() {
   ticks.forEach(id => { clearInterval(id); clearTimeout(id); }); ticks = [];
   let r = route();
   if (PRIVATE[r] && (S.user !== PRIVATE[r] || !{ parent: S.parent, student: S.child, tutor: S.tutor }[PRIVATE[r]])) {
-    S.gateMsg = { padre: 'Ingresa con la cuenta del representante para ver este panel.', estudiante: 'Ingresa con la cuenta del estudiante.', tutor: 'Ingresa con tu cuenta de tutor.' }[r];
+    S.gateMsg = { padre: 'Ingresa con la cuenta del representante para ver este panel.', estudiante: 'Ingresa con la cuenta del estudiante.', diagnostico: 'Ingresa con la cuenta del estudiante para hacer el diagnóstico.', tutor: 'Ingresa con tu cuenta de tutor.' }[r];
     r = 'ingresar';
   } else if (r !== 'ingresar') S.gateMsg = null;
   renderTop(); renderSim();

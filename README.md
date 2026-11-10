@@ -15,8 +15,9 @@ Prototipo funcional de **PoliTutors**, una plataforma bajo demanda (*on-demand*)
 - [Cómo presentarlo en 2 minutos](#cómo-presentarlo-en-2-minutos)
 - [Estructura del sitio](#estructura-del-sitio)
 - [Flujos por rol](#flujos-por-rol)
+- [Diagnóstico de aprendizaje](#diagnóstico-de-aprendizaje)
 - [El simulador](#el-simulador)
-- [Simulación guiada (15 pasos)](#simulación-guiada-15-pasos)
+- [Simulación guiada (17 pasos)](#simulación-guiada-17-pasos)
 - [Dónde ver cada atributo](#dónde-ver-cada-atributo)
 - [Qué está simulado y supuestos de negocio](#qué-está-simulado-y-supuestos-de-negocio)
 - [Cómo modificarlo](#cómo-modificarlo)
@@ -70,7 +71,8 @@ Homepage (#inicio)
 ├── ¿Eres estudiante de la ESPOL? → Página para tutores (#tutores) → Registro de tutor (#registro-tutor)
 │     └── cuenta → documentos → materias → prueba → código de conducta → revisión → Panel del tutor (#tutor)
 ├── Ingresar (#ingresar) → la misma pantalla para los tres roles
-└── Secciones: Cómo funciona · 8 atributos · Seguridad · Precios · App + web · Testimonios · FAQ
+├── Diagnóstico de aprendizaje (#diagnostico) → test de 3 partes → perfil y recomendaciones
+└── Secciones: Cómo funciona · Diagnóstico · 8 atributos · Seguridad · Precios · App + web · Testimonios · FAQ
 ```
 
 Cada sección de la homepage:
@@ -79,6 +81,7 @@ Cada sección de la homepage:
 |---|---|
 | Hero | Propuesta de valor y las **dos entradas**: familias y tutores |
 | Cómo funciona | 4 pasos con pestañas *Para familias* / *Para tutores* |
+| Diagnóstico de aprendizaje | Qué mide el test y un ejemplo de resultado |
 | Ocho razones | Los 8 atributos, cada uno con “Verlo funcionando →” que salta a la simulación |
 | Confianza y seguridad | Verificación, pago protegido, todo dentro de la plataforma, LOPDP, código de conducta |
 | Precios | Prueba gratis de 15 min, $6 / $8.50 / $11 y la garantía de primera sesión |
@@ -95,11 +98,12 @@ Cada sección de la homepage:
 3. **Permisos:** consentimiento para el tratamiento de datos (LOPDP; obligatorio para menores de 15 años) y para la grabación de sesiones. Elige si recibe los reportes por correo y/o WhatsApp.
 4. **Pago:** Payphone, Kushki o transferencia. No se cobra nada al registrarse.
 5. Se generan el **usuario y la contraseña temporal del hijo**.
-6. **Panel:** reportes de avance (con marca de *Nuevo*), calificación del tutor como representante, tabla de pagos con estados, botón **Reportar** para pedir reembolso, insignias del hijo, sesiones por materia y ajustes de notificaciones.
+6. **Panel:** resumen del diagnóstico del hijo (nivel por materia, metodología y la recomendación principal, con un botón para ver el diagnóstico completo), reportes de avance (con marca de *Nuevo*), calificación del tutor como representante, tabla de pagos con estados, botón **Reportar** para pedir reembolso, insignias del hijo, sesiones por materia y ajustes de notificaciones.
 
 ### 🎒 Estudiante
 - **Si lo registra el padre:** entra con el usuario que se le generó.
 - **Si se registra solo:** ingresa sus datos y los de su representante. La cuenta queda **pendiente** (puede explorar, pero no pedir ayuda) hasta que el representante abre la invitación, la aprueba y registra un método de pago.
+- **Diagnóstico de aprendizaje:** una franja en su panel le invita a hacerlo (ver la sección siguiente). Los temas que le faltan aparecen marcados como *por reforzar*.
 - **Pedir ayuda:** materia → tema → descripción → **foto del ejercicio** (opcional) → duración (15 min gratis la primera vez, 30, 45 o 60 min).
 - **Confirmación:** el cobro va a la cuenta del representante y queda **retenido**. Si no hay tutor en 3 minutos, no se cobra.
 - **Emparejamiento:** cuenta regresiva de 3:00 y aviso a los tutores mejor calificados en esa materia.
@@ -120,15 +124,52 @@ Cada sección de la homepage:
 
 ---
 
+## Diagnóstico de aprendizaje
+
+Un test de **5 minutos** que el estudiante hace desde **Mi diagnóstico** (menú superior) o desde la franja de su panel. Sirve para saber **cómo estudia** y **qué le falta** en cada materia, y con eso recomendarle cómo mejorar.
+
+![Resultados del diagnóstico](docs/capturas/08-diagnostico-resultados.png)
+
+**Parte 1: Cómo estudias** (11 preguntas). Mide cinco dimensiones de metodología:
+
+| Dimensión | Qué pregunta |
+|---|---|
+| Planificación | Cuándo empieza a estudiar para un examen y si organiza su semana |
+| Técnica de estudio | Si relee o practica ejercicios, y si explica con sus palabras lo aprendido |
+| Constancia | Horas de estudio a la semana |
+| Concentración | Dónde está el celular y cuánto tiempo estudia sin distraerse |
+| Aprender de los errores | Qué hace cuando no entiende algo y cuando le devuelven una prueba |
+
+Además pregunta **cómo prefiere que le expliquen** y **cómo se siente antes de un examen**.
+
+**Parte 2: Tus materias.** Para Matemáticas, Física y Química: última nota (opcional), confianza del 1 al 5 y temas que más le cuestan.
+
+**Parte 3: Mini prueba.** 7 ejercicios cortos, cada uno asociado a un tema, con la opción **“No lo sé”** para no adivinar.
+
+**Resultados:**
+- **Nivel por materia** (*Fuerte*, *En desarrollo* o *Necesita refuerzo*). Combina la mini prueba (60%), la confianza (20%) y la nota (20%). Si no hay nota, usa 70% prueba y 30% confianza.
+- **Te falta reforzar:** temas de los ejercicios fallados más los que marcó como difíciles. Estos últimos se indican como *(autoevaluación)*.
+- **Sesión recomendada** por materia (60, 45 o 30 min según el nivel) con el botón **Pedir ayuda en…**, que deja lista la solicitud.
+- **Perfil de metodología** (*Método sólido*, *en desarrollo* o *por construir*) con las cinco dimensiones de 0 a 100.
+- **Cómo mejorar tu forma de estudiar:** técnicas para las dimensiones más bajas (práctica de recuperación, repaso espaciado, hábito diario, bloques sin distracciones, cuaderno de errores, simulacros con tiempo).
+- **Plan sugerido para la semana**, armado con las materias más débiles.
+- **Lo que verá el tutor:** cómo prefiere que le expliquen y sus temas por reforzar. El tutor lo usa al saludar en la sesión.
+
+**Quién lo ve:** el estudiante, su representante (resumen en su panel y diagnóstico completo) y el tutor asignado. Se recomienda repetirlo cada mes con **Repetir diagnóstico**.
+
+> Las preguntas, los pesos y las técnicas están en las constantes `DX_M`, `DX_T`, `METHOD_TIPS` y la función `computeDiag()` de `index.html`. Son una propuesta del prototipo y conviene validarlas con un orientador o docente.
+
+---
+
 ## El simulador
 
 El botón **⚙ Simulador** (abajo a la izquierda) es una herramienta para presentar el prototipo. **No forma parte del producto.**
 
 | Opción | Para qué sirve |
 |---|---|
-| ▶ Simulación guiada | Inicia el recorrido de 15 pasos |
+| ▶ Simulación guiada | Inicia el recorrido de 17 pasos |
 | Entrar como… | Cambia entre las cuentas creadas (representante, estudiante, tutor) sin cerrar sesión |
-| Cargar cuentas de ejemplo | Crea a **Ana Vera** (representante), **Mateo Vera** (estudiante, con historial) y **Carlos Rivas** (tutor verificado) |
+| Cargar cuentas de ejemplo | Crea a **Ana Vera** (representante), **Mateo Vera** (estudiante, con historial y diagnóstico) y **Carlos Rivas** (tutor verificado) |
 | ⏩ Adelantar 24 h | Libera los pagos que estaban en la ventana de reclamo |
 | ✉ Abrir invitación | Aparece cuando hay un estudiante pendiente de aprobación |
 | ✓ Aprobar al tutor | Aparece cuando hay un tutor en revisión |
@@ -146,7 +187,7 @@ Las cuentas que crees tú mismo usan la contraseña que escribiste en el registr
 
 ---
 
-## Simulación guiada (15 pasos)
+## Simulación guiada (17 pasos)
 
 | # | Etiqueta | Qué se ve |
 |---|---|---|
@@ -154,17 +195,19 @@ Las cuentas que crees tú mismo usan la contraseña que escribiste en el registr
 | 2 | Registro familiar | ¿Quién crea la cuenta? Padre o estudiante |
 | 3 | Registro familiar | El padre agrega a su hijo |
 | 4 | Seguridad | Consentimiento de datos (LOPDP) y grabación |
-| 5 | Atributo 2 | Pedir ayuda: materia, tema, foto y duración |
-| 6 | Atributo 1 | Emparejamiento en menos de 3 minutos |
-| 7 | Atributos 3 y 7 | Tutor verificado con notas y reseñas |
-| 8 | Atributo 2 | Sesión en vivo con pizarra y chat |
-| 9 | Atributo 7 | Calificación obligatoria al cerrar |
-| 10 | Atributo 5 | Reporte automático para el representante |
-| 11 | Atributo 4 | Pago protegido con ventana de reclamo |
-| 12 | Atributo 3 | Verificación del tutor (documentos, notas, prueba) |
-| 13 | Oferta | El tutor se pone en línea y acepta solicitudes |
-| 14 | Atributo 8 | Insignias positivas del estudiante |
-| 15 | Atributo 6 | App liviana y acceso web |
+| 5 | Diagnóstico | Test de metodología y conocimientos |
+| 6 | Diagnóstico | Resultados: qué le falta y cómo mejorar |
+| 7 | Atributo 2 | Pedir ayuda: materia, tema, foto y duración |
+| 8 | Atributo 1 | Emparejamiento en menos de 3 minutos |
+| 9 | Atributos 3 y 7 | Tutor verificado con notas y reseñas |
+| 10 | Atributo 2 | Sesión en vivo con pizarra y chat |
+| 11 | Atributo 7 | Calificación obligatoria al cerrar |
+| 12 | Atributo 5 | Reporte automático para el representante |
+| 13 | Atributo 4 | Pago protegido con ventana de reclamo |
+| 14 | Atributo 3 | Verificación del tutor (documentos, notas, prueba) |
+| 15 | Oferta | El tutor se pone en línea y acepta solicitudes |
+| 16 | Atributo 8 | Insignias positivas del estudiante |
+| 17 | Atributo 6 | App liviana y acceso web |
 
 Controles: **◀** anterior · **▶ Auto / ❚❚ Pausar** · **Siguiente ▶** · **✕** salir.
 Desde la homepage, cada tarjeta de atributo tiene **“Verlo funcionando →”**, que abre la simulación en el paso correspondiente.
@@ -224,6 +267,9 @@ Todo se edita en `index.html`, dentro de la etiqueta `<script>`. Busca estas con
 | Tutores de ejemplo | `const TUTORS = [...]` |
 | Solicitudes que recibe el tutor | `const REQS = [...]` |
 | Preguntas de la prueba del tutor | `const QUIZ = {...}` |
+| Preguntas del diagnóstico | `const DX_M = [...]` (metodología) y `const DX_T = [...]` (mini prueba) |
+| Técnicas de estudio recomendadas | `const METHOD_TIPS = {...}` |
+| Pesos y niveles del diagnóstico | `function computeDiag()` |
 | Pasos de la simulación guiada | `const TOUR = [...]` |
 | Colores de la marca | Variables `--brand`, `--accent`, etc. al inicio de `<style>` |
 
@@ -241,10 +287,11 @@ index.html
     ├── Datos         SUBJECTS, DURATIONS, TUTORS, REQS, QUIZ, OBS…
     ├── Estado (S)    Cuentas (parent, child, tutor), reportes, pagos, flujo actual
     ├── Vistas        VIEWS.inicio, tutores, registro-familia, registro-tutor,
-    │                 ingresar, invitacion, estudiante, padre, tutor
+    │                 ingresar, invitacion, estudiante, diagnostico, padre, tutor
+    ├── Diagnóstico   DX_M, DX_T, computeDiag(), diagHTML()
     ├── Sala en vivo  Pizarra (canvas), chat y temporizador, compartidos por estudiante y tutor
     ├── Acciones      ACT: manejadores de clics mediante data-act="..."
-    ├── Simulación    TOUR: los 15 pasos de la simulación guiada
+    ├── Simulación    TOUR: los 17 pasos de la simulación guiada
     └── Router        route(), go(), render()
 ```
 
@@ -257,3 +304,4 @@ index.html
 | **Registro familiar: permisos**<br>![](docs/capturas/02-registro-familia.png) | **Emparejamiento**<br>![](docs/capturas/03-emparejamiento.png) |
 | **Sesión en vivo**<br>![](docs/capturas/04-sesion-en-vivo.png) | **Panel del representante**<br>![](docs/capturas/05-panel-padre.png) |
 | **Panel del tutor**<br>![](docs/capturas/06-panel-tutor.png) | **Verificación del tutor**<br>![](docs/capturas/07-verificacion-tutor.png) |
+| **Diagnóstico: test**<br>![](docs/capturas/09-diagnostico-test.png) | **Diagnóstico: resultados**<br>![](docs/capturas/08-diagnostico-resultados.png) |
