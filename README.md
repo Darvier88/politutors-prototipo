@@ -280,6 +280,8 @@ En esta versión no aparecen el simulador, las cuentas de ejemplo, los recorrido
 
 ## Conectar Google Forms
 
+> **Estado:** los cuatro formularios ya están creados y conectados en `const FORMS`. Sus respuestas llegan a la hoja «PoliTutors · Validación (respuestas)» en el Drive de Darwin (una pestaña por formulario). Si hay que rehacerlos, sigue los pasos de abajo.
+
 Sin configuración, todo funciona en modo demo. Para recibir datos reales, crea **cuatro Google Forms** con preguntas de **respuesta corta**, una por campo:
 
 | Form | Campos (en este orden) |

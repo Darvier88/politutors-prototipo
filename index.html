@@ -651,13 +651,17 @@ const QUIZ = {
    ========================================================= */
 const FORMS = {
   // B1 · Preinscripción de padres desde la landing
-  padres: { action: '', fields: { nombre: '', whatsapp: '', curso: '', materia: '', plan: '', canal: '' } },
+  padres: { action: 'https://docs.google.com/forms/d/e/1FAIpQLSd6KY4yHmwLnqCgolMz_B_zyDNcmJez7rui3rLBe6BhNeXkjg/formResponse',
+    fields: { nombre: 'entry.1567096115', whatsapp: 'entry.428018490', curso: 'entry.1214911131', materia: 'entry.264572139', plan: 'entry.300768398', canal: 'entry.1467955748' } },
   // A1 · Preinscripción de tutores fundadores (incluye las preguntas de la encuesta)
-  tutores: { action: '', fields: { nombre: '', correo: '', materias: '', horas: '', acepta15: '', comisionMax: '', canal: '' } },
+  tutores: { action: 'https://docs.google.com/forms/d/e/1FAIpQLSelYC8e5cSKGRpDUyrPFB1nZ-PAcEE1L1OwvE1KRmEFdonaXQ/formResponse',
+    fields: { nombre: 'entry.1998743035', correo: 'entry.2033030413', materias: 'entry.1656027960', horas: 'entry.917268545', acepta15: 'entry.86097366', comisionMax: 'entry.1001662730', canal: 'entry.1433889124' } },
   // B1 · Eventos del embudo: visitas a la landing y clics en «Reservar»
-  eventos: { action: '', fields: { tipo: '', plan: '', canal: '' } },
+  eventos: { action: 'https://docs.google.com/forms/d/e/1FAIpQLScuZcmKalgm3ug1DjAb3E7H4dZrEq74bSlOq2MgMVEsMaRFJw/formResponse',
+    fields: { tipo: 'entry.797170560', plan: 'entry.950995098', canal: 'entry.1318103568' } },
   // C1 · Piloto de recompra: cada reporte o agradecimiento enviado por WhatsApp
-  piloto: { action: '', fields: { estudiante: '', whatsapp: '', grupo: '', materia: '', tema: '', tutor: '' } }
+  piloto: { action: 'https://docs.google.com/forms/d/e/1FAIpQLScPqvot_L8dgRJnsQwzkRHMdwaR1ADNnvE8MASvKD2LYlPQrQ/formResponse',
+    fields: { estudiante: 'entry.1199694240', whatsapp: 'entry.1702812181', grupo: 'entry.1205905641', materia: 'entry.1156143644', tema: 'entry.1644545331', tutor: 'entry.1191201606' } }
 };
 const ENCUESTA_TUTORES = '';   // A1 · Enlace opcional a una encuesta más larga (Google Form)
 const PLANS = { prueba: ['Prueba gratis', 'Gratis', '15 min'], consulta: ['Consulta', '$10.00', '30 min'], nivelacion: ['Nivelación', '$17.00', '45 min'], completa: ['Clase completa', '$20.00', '60 min'] };
