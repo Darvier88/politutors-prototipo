@@ -669,6 +669,8 @@ const QS = new URLSearchParams(location.search);
 const LANDING = QS.get('modo') === 'landing';
 const CANAL = (QS.get('utm_source') || QS.get('canal') || 'directo').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 30) || 'directo';
 const formOn = k => !!FORMS[k].action;
+// Fuera de ?modo=landing todo se envía igual, pero con canal «demo» para poder filtrarlo en la hoja
+const CANAL_ENVIO = LANDING ? CANAL : 'demo';
 function sendForm(k, data) {
   const F = FORMS[k];
   if (!F.action) return false;
@@ -684,10 +686,10 @@ let VAL = valEmpty();
 try { VAL = Object.assign(valEmpty(), JSON.parse(localStorage.getItem(VAL_KEY) || '{}')); } catch (e) {}
 const valSave = () => { try { localStorage.setItem(VAL_KEY, JSON.stringify(VAL)); } catch (e) {} };
 function trackEvent(tipo, plan = '') {
-  if (tipo === 'visita') { VAL.visitas++; VAL.vc[CANAL] = (VAL.vc[CANAL] || 0) + 1; }
+  if (tipo === 'visita') { VAL.visitas++; VAL.vc[CANAL_ENVIO] = (VAL.vc[CANAL_ENVIO] || 0) + 1; }
   if (tipo === 'clic_reservar') VAL.clics[plan] = (VAL.clics[plan] || 0) + 1;
   valSave();
-  if (LANDING) sendForm('eventos', { tipo, plan, canal: CANAL });
+  sendForm('eventos', { tipo, plan, canal: CANAL_ENVIO });
 }
 if (LANDING) { let seen = false; try { seen = sessionStorage.getItem('pt-visita') === '1'; sessionStorage.setItem('pt-visita', '1'); } catch (e) {} if (!seen) trackEvent('visita'); }
 
@@ -1095,7 +1097,7 @@ function leadModal(plan, pre = {}) {
 function leadThanks(nombre, wa, enviado) {
   return `<div class="center"><div class="big-wait">${ic('check', 'lg')}</div><h3 style="font-size:20px">¡Listo, ${esc(first(nombre))}! Tu cupo está reservado</h3>
     <p class="muted" style="margin:8px 0">PoliTutors todavía no está en funcionamiento: estamos terminando de preparar el servicio. Te escribiremos al <b>${esc(wa)}</b> cuando abramos, y tu primera sesión de 15 min será gratis.</p>
-    ${LANDING ? '' : `<p class="tiny muted">${enviado ? 'Enviado a Google Forms.' : 'Modo demo: los datos no salieron de este navegador.'}</p>`}
+    ${LANDING ? '' : `<p class="tiny muted">${enviado ? 'Enviado a Google Forms con canal «demo».' : 'Modo demo: los datos no salieron de este navegador.'}</p>`}
     <button class="btn primary" style="margin-top:10px" data-act="closeModal">Entendido</button></div>`;
 }
 function fundadorModal(pre = {}) {
@@ -2101,21 +2103,21 @@ document.addEventListener('submit', e => {
   }
   if (id === 'dxForm') return handleDxForm();
   if (id === 'leadForm') {
-    const d = { nombre: $('#lName').value.trim(), whatsapp: waNum($('#lWa').value), curso: $('#lCurso').value, materia: $('#lMat').value, plan: $('#lPlan').value, canal: CANAL };
+    const d = { nombre: $('#lName').value.trim(), whatsapp: waNum($('#lWa').value), curso: $('#lCurso').value, materia: $('#lMat').value, plan: $('#lPlan').value, canal: CANAL_ENVIO };
     const errs = []; if (d.nombre.length < 2) errs.push('escribe tu nombre'); if (!/^5939\d{8}$/.test(d.whatsapp)) errs.push('escribe un WhatsApp de Ecuador (09XXXXXXXX)'); if (!$('#lOk').checked) errs.push('acepta que te contactemos para avisarte del lanzamiento');
     if (errs.length) return showErr(errs);
-    const enviado = LANDING && sendForm('padres', { ...d, plan: PLANS[d.plan][0] });
-    VAL.leads.push({ t: Date.now(), plan: d.plan, canal: CANAL, enviado }); valSave();
+    const enviado = sendForm('padres', { ...d, plan: PLANS[d.plan][0] });
+    VAL.leads.push({ t: Date.now(), plan: d.plan, canal: CANAL_ENVIO, enviado }); valSave();
     openModal(leadThanks(d.nombre, $('#lWa').value.trim(), enviado)); return;
   }
   if (id === 'tutForm') {
-    const d = { nombre: $('#fName').value.trim(), correo: $('#fMail').value.trim().toLowerCase(), materias: $$('input[name=fSubj]:checked').map(x => x.value), horas: $('#fHrs').value, acepta15: $('input[name=fAcc]:checked')?.value || '', comisionMax: $('#fMax').value, canal: CANAL };
+    const d = { nombre: $('#fName').value.trim(), correo: $('#fMail').value.trim().toLowerCase(), materias: $$('input[name=fSubj]:checked').map(x => x.value), horas: $('#fHrs').value, acepta15: $('input[name=fAcc]:checked')?.value || '', comisionMax: $('#fMax').value, canal: CANAL_ENVIO };
     const errs = []; if (d.nombre.length < 2) errs.push('escribe tu nombre'); if (!/^[^@\s]+@espol\.edu\.ec$/.test(d.correo)) errs.push('usa tu correo @espol.edu.ec');
     if (!d.materias.length) errs.push('elige al menos una materia'); if (!d.acepta15) errs.push('responde si aceptarías el 15%'); if (!$('#fOk').checked) errs.push('acepta el uso de tus datos');
     if (errs.length) return showErr(errs);
-    const enviado = LANDING && sendForm('tutores', { ...d, materias: d.materias.join(', ') });
+    const enviado = sendForm('tutores', { ...d, materias: d.materias.join(', ') });
     VAL.tutores.push({ t: Date.now(), acepta15: d.acepta15, comisionMax: d.comisionMax, materias: d.materias, enviado }); valSave();
-    openModal(`<div class="center"><div class="big-wait">${ic('check', 'lg')}</div><h3 style="font-size:20px">¡Gracias, ${esc(first(d.nombre))}!</h3><p class="muted" style="margin:8px 0">Quedaste preinscrito como tutor fundador. Te escribiremos a ${esc(d.correo)} antes del lanzamiento con los siguientes pasos.</p>${LANDING ? '' : `<p class="tiny muted">${enviado ? 'Enviado a Google Forms.' : 'Modo demo: los datos no salieron de este navegador.'}</p>`}${ENCUESTA_TUTORES ? `<a class="btn ghost" href="${esc(ENCUESTA_TUTORES)}" target="_blank" rel="noopener">Responder la encuesta completa</a> ` : ''}<button class="btn primary" style="margin-top:10px" data-act="closeModal">Cerrar</button></div>`); return;
+    openModal(`<div class="center"><div class="big-wait">${ic('check', 'lg')}</div><h3 style="font-size:20px">¡Gracias, ${esc(first(d.nombre))}!</h3><p class="muted" style="margin:8px 0">Quedaste preinscrito como tutor fundador. Te escribiremos a ${esc(d.correo)} antes del lanzamiento con los siguientes pasos.</p>${LANDING ? '' : `<p class="tiny muted">${enviado ? 'Enviado a Google Forms con canal «demo».' : 'Modo demo: los datos no salieron de este navegador.'}</p>`}${ENCUESTA_TUTORES ? `<a class="btn ghost" href="${esc(ENCUESTA_TUTORES)}" target="_blank" rel="noopener">Responder la encuesta completa</a> ` : ''}<button class="btn primary" style="margin-top:10px" data-act="closeModal">Cerrar</button></div>`); return;
   }
   if (id === 'inviteForm') {
     const errs = []; if (($('#iPass').value || '').length < 6) errs.push('crea una contraseña de al menos 6 caracteres');

@@ -274,7 +274,7 @@ Los recorridos también se abren con un enlace: `index.html#val-h1`, `#val-h2` y
 | `index.html?modo=landing&utm_source=whatsapp` | Grupos de WhatsApp de padres |
 | `index.html?modo=landing&utm_source=espol#tutores` | Grupos de estudiantes ESPOL (A1) |
 
-En esta versión no aparecen el simulador, las cuentas de ejemplo, los recorridos ni los testimonios ilustrativos. El pie de página aclara que el servicio está en fase de validación. Solo en esta versión los formularios se envían a Google Forms; en el prototipo normal funcionan en modo demo.
+En esta versión no aparecen el simulador, las cuentas de ejemplo, los recorridos ni los testimonios ilustrativos. El pie de página aclara que el servicio está en fase de validación. Los formularios se envían a Google Forms desde las dos versiones. Lo que viene del prototipo normal llega con canal **`demo`**: filtra esa columna en la hoja para quedarte solo con los datos reales (`meta`, `whatsapp`, `espol`).
 
 ---
 
