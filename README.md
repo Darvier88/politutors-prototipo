@@ -20,6 +20,8 @@ Prototipo funcional de **PoliTutors**, una plataforma bajo demanda (*on-demand*)
 - [El simulador](#el-simulador)
 - [Simulación guiada (17 pasos)](#simulación-guiada-17-pasos)
 - [Simulación por rol](#simulación-por-rol)
+- [Validación de hipótesis](#validación-de-hipótesis)
+- [Conectar Google Forms](#conectar-google-forms)
 - [Dónde ver cada atributo](#dónde-ver-cada-atributo)
 - [Qué está simulado y supuestos de negocio](#qué-está-simulado-y-supuestos-de-negocio)
 - [Identidad visual](#identidad-visual)
@@ -77,6 +79,8 @@ Homepage (#inicio)
 │     └── cuenta → documentos → materias → prueba → código de conducta → revisión → Panel del tutor (#tutor)
 ├── Ingresar (#ingresar) → la misma pantalla para los tres roles
 ├── Diagnóstico de aprendizaje (#diagnostico) → test de 3 partes → perfil y recomendaciones
+├── Plan de validación (#validacion) → hipótesis, embudo, enlaces y estado de Google Forms (solo equipo)
+├── Versión limpia (?modo=landing) → landing para padres con «Reservar» y página de tutores fundadores
 └── Secciones: Cómo funciona · Diagnóstico · 8 atributos · Seguridad · Precios · App + web · Testimonios · FAQ
 ```
 
@@ -176,6 +180,9 @@ El botón **Simulador** (abajo a la derecha) es una herramienta para presentar e
 | Simular como padre / estudiante / tutor | Inicia la simulación de un solo rol |
 | Entrar como… | Cambia entre las cuentas creadas (representante, estudiante, tutor) sin cerrar sesión |
 | Cargar cuentas de ejemplo | Crea a **Ana Vera** (representante), **Mateo Vera** (estudiante, con historial y diagnóstico) y **Carlos Rivas** (tutor verificado) |
+| Plan de validación y embudo | Abre `#validacion`: hipótesis, experimentos, umbrales, embudo y enlaces (ver [Validación de hipótesis](#validación-de-hipótesis)) |
+| Recorrido · Hipótesis I / II / III | Muestra en qué pantalla ocurre cada experimento |
+| Ver la landing para padres (B1) | Previsualiza la versión limpia que verán los padres |
 | ⏩ Adelantar 24 h | Libera los pagos que estaban en la ventana de reclamo |
 | ✉ Abrir invitación | Aparece cuando hay un estudiante pendiente de aprobación |
 | ✓ Aprobar al tutor | Aparece cuando hay un tutor en revisión |
@@ -238,6 +245,67 @@ Con GitHub Pages, el enlace queda, por ejemplo, como `https://darvier88.github.i
 
 ---
 
+## Validación de hipótesis
+
+El prototipo incluye las herramientas para validar las tres hipótesis del proyecto. El plan completo (umbrales, fuentes y cronograma) está en el documento *PoliTutors · Prototipo y Validación*.
+
+| Hipótesis | Enunciado | Experimento en el prototipo |
+|---|---|---|
+| I | Si ofrecemos una plataforma que conecta padres y tutores, el tutor estará dispuesto a ceder un 15% a la aplicación por la gestión | **A1** · Sección *Tutores fundadores* en `#tutores`: preinscripción con correo ESPOL, materias, horas, si acepta el 15% y la comisión máxima |
+| II | Si mostramos una landing page con la información verificada de los tutores, los padres mostrarán intención de pagar $10 / $17 / $20 | **B1** · Versión limpia `?modo=landing`: botón *Reservar* en cada plan, preinscripción y mensaje «Aún no lanzamos» |
+| III | Si el padre recibe un reporte automático de avance después de cada clase, volverá a comprar una segunda sesión pagada en menos de 14 días | **C1** · En el reporte del tutor, bloque *Piloto C1*: abre WhatsApp con el reporte (grupo A) o un agradecimiento (grupo B) |
+
+### Vista `#validacion` (solo para el equipo)
+
+Se abre desde **Simulador → Plan de validación y embudo**. Muestra:
+
+- Las tres hipótesis con su meta en formato XYZ, con quién se validan y los umbrales para validar o invalidar.
+- Un **embudo** con lo que pasó en ese navegador (visitas, clics en *Reservar*, preinscripciones por canal, respuestas de tutores y envíos del piloto) y el estado contra cada umbral. Sirve para practicar la presentación; los datos reales llegan a las Google Sheets.
+- Los **enlaces para compartir**, cada uno con su canal de origen.
+- El estado de conexión de cada Google Form y el cronograma de 5 semanas.
+
+Los recorridos también se abren con un enlace: `index.html#val-h1`, `#val-h2` y `#val-h3`.
+
+### Versión limpia para padres y tutores (`?modo=landing`)
+
+| Enlace | Para qué |
+|---|---|
+| `index.html?modo=landing&utm_source=meta` | Anuncios de Instagram y Facebook |
+| `index.html?modo=landing&utm_source=whatsapp` | Grupos de WhatsApp de padres |
+| `index.html?modo=landing&utm_source=espol#tutores` | Grupos de estudiantes ESPOL (A1) |
+
+En esta versión no aparecen el simulador, las cuentas de ejemplo, los recorridos ni los testimonios ilustrativos. El pie de página aclara que el servicio está en fase de validación. Solo en esta versión los formularios se envían a Google Forms; en el prototipo normal funcionan en modo demo.
+
+---
+
+## Conectar Google Forms
+
+Sin configuración, todo funciona en modo demo. Para recibir datos reales, crea **cuatro Google Forms** con preguntas de **respuesta corta**, una por campo:
+
+| Form | Campos (en este orden) |
+|---|---|
+| `padres` (B1) | nombre, whatsapp, curso, materia, plan, canal |
+| `eventos` (B1) | tipo, plan, canal |
+| `tutores` (A1) | nombre, correo, materias, horas, acepta15, comisionMax, canal |
+| `piloto` (C1) | estudiante, whatsapp, grupo, materia, tema, tutor |
+
+Para cada Form:
+
+1. Abre el Form, menú **⋮ → Obtener enlace prellenado**, escribe cualquier texto en cada pregunta y pulsa **Obtener enlace**.
+2. El enlace se ve así: `https://docs.google.com/forms/d/e/ABC123/viewform?usp=pp_url&entry.111=x&entry.222=y`.
+3. En `index.html`, busca `const FORMS` y completa:
+   - `action`: el mismo enlace cambiando `viewform?...` por `formResponse`, por ejemplo `https://docs.google.com/forms/d/e/ABC123/formResponse`.
+   - `fields`: el `entry.XXX` de cada pregunta, en el campo que corresponda (por ejemplo `nombre: 'entry.111'`).
+4. En **Respuestas → Vincular a Hojas de cálculo** crea la Google Sheet donde llegarán los datos.
+
+En la Sheet del piloto agrega una columna **«Recompró en 14 días» (sí/no)** y llénala a mano. Las visitas y los clics en *Reservar* llegan al Form `eventos` con `tipo` = `visita` o `clic_reservar`. El CTR de los anuncios se toma del Administrador de anuncios de Meta.
+
+Opcional: en `const ENCUESTA_TUTORES` pega el enlace de una encuesta más larga para tutores; aparecerá un botón *Responder la encuesta completa*.
+
+> Los formularios se envían con `fetch` en modo `no-cors`, así que el sitio no puede confirmar que Google los recibió. Prueba cada Form una vez antes de lanzar y revisa que la fila aparezca en la Sheet.
+
+---
+
 ## Dónde ver cada atributo
 
 | # | Atributo | Dónde se ve en el prototipo |
@@ -296,7 +364,10 @@ Todo se edita en `index.html`, dentro de la etiqueta `<script>`. Busca estas con
 
 | Qué cambiar | Dónde |
 |---|---|
-| Precios y duraciones | `const DURATIONS = [...]` |
+| Precios y duraciones | `const DURATIONS = [...]` y `const PLANS = {...}` (botones *Reservar*) |
+| Google Forms de la validación | `const FORMS = {...}` y `const ENCUESTA_TUTORES` |
+| Textos y umbrales de las hipótesis | `const HYP = [...]` |
+| Recorridos de validación | `const VAL_STEPS = [...]` y `const VAL_TOURS = {...}` |
 | Precio de la extensión | `const EXT_PRICE = 3;` |
 | Porcentaje que recibe el tutor | `const SHARE = 0.85;` |
 | Materias y temas | `const SUBJECTS = {...}` |
@@ -342,4 +413,5 @@ index.html
 | **Sesión en vivo**<br>![](docs/capturas/04-sesion-en-vivo.png) | **Panel del representante**<br>![](docs/capturas/05-panel-padre.png) |
 | **Panel del tutor**<br>![](docs/capturas/06-panel-tutor.png) | **Verificación del tutor**<br>![](docs/capturas/07-verificacion-tutor.png) |
 | **Diagnóstico: test**<br>![](docs/capturas/09-diagnostico-test.png) | **Diagnóstico: resultados**<br>![](docs/capturas/08-diagnostico-resultados.png) |
-| **Simulación por rol (tutor)**<br>![](docs/capturas/10-simulacion-tutor.png) | |
+| **Simulación por rol (tutor)**<br>![](docs/capturas/10-simulacion-tutor.png) | **Plan de validación**<br>![](docs/capturas/11-validacion.png) |
+| **Landing para padres (B1)**<br>![](docs/capturas/12-landing.png) | |

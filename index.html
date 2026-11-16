@@ -98,6 +98,7 @@ label.lbl{display:block;font-weight:600;font-size:13.5px;margin:0 0 2px;color:va
 .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px 20px}
 .fgrid .full{grid-column:1/-1}
 .hint{font-size:13px;color:var(--muted);margin-top:6px}
+.mf{margin-top:12px}
 .check{display:flex;gap:12px;align-items:flex-start;padding:12px 2px;border:0;border-bottom:1px solid var(--line);font-size:15px;cursor:pointer}
 .check input{margin-top:3px;width:18px;height:18px;flex:none;accent-color:var(--azul)}
 .check small{display:block;color:var(--muted);font-size:13px}
@@ -643,6 +644,50 @@ const QUIZ = {
 };
 
 /* =========================================================
+   Validación (hipótesis I, II y III)
+   Pega aquí los datos de tus Google Forms. Instrucciones en el README,
+   sección «Conectar Google Forms». Si «action» está vacío, el formulario
+   funciona en modo demo: guarda solo en este navegador.
+   ========================================================= */
+const FORMS = {
+  // B1 · Preinscripción de padres desde la landing
+  padres: { action: '', fields: { nombre: '', whatsapp: '', curso: '', materia: '', plan: '', canal: '' } },
+  // A1 · Preinscripción de tutores fundadores (incluye las preguntas de la encuesta)
+  tutores: { action: '', fields: { nombre: '', correo: '', materias: '', horas: '', acepta15: '', comisionMax: '', canal: '' } },
+  // B1 · Eventos del embudo: visitas a la landing y clics en «Reservar»
+  eventos: { action: '', fields: { tipo: '', plan: '', canal: '' } },
+  // C1 · Piloto de recompra: cada reporte o agradecimiento enviado por WhatsApp
+  piloto: { action: '', fields: { estudiante: '', whatsapp: '', grupo: '', materia: '', tema: '', tutor: '' } }
+};
+const ENCUESTA_TUTORES = '';   // A1 · Enlace opcional a una encuesta más larga (Google Form)
+const PLANS = { prueba: ['Prueba gratis', 'Gratis', '15 min'], consulta: ['Consulta', '$10.00', '30 min'], nivelacion: ['Nivelación', '$17.00', '45 min'], completa: ['Clase completa', '$20.00', '60 min'] };
+const QS = new URLSearchParams(location.search);
+const LANDING = QS.get('modo') === 'landing';
+const CANAL = (QS.get('utm_source') || QS.get('canal') || 'directo').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 30) || 'directo';
+const formOn = k => !!FORMS[k].action;
+function sendForm(k, data) {
+  const F = FORMS[k];
+  if (!F.action) return false;
+  const body = new URLSearchParams();
+  Object.entries(data).forEach(([n, v]) => { if (F.fields[n]) body.append(F.fields[n], v); });
+  try { fetch(F.action, { method: 'POST', mode: 'no-cors', body }); } catch (e) { return false; }
+  return true;
+}
+/* Contadores locales del embudo (solo este navegador; los datos reales quedan en la Google Sheet) */
+const VAL_KEY = 'politutors-validacion';
+const valEmpty = () => ({ visitas: 0, vc: {}, clics: {}, leads: [], tutores: [], piloto: [] });
+let VAL = valEmpty();
+try { VAL = Object.assign(valEmpty(), JSON.parse(localStorage.getItem(VAL_KEY) || '{}')); } catch (e) {}
+const valSave = () => { try { localStorage.setItem(VAL_KEY, JSON.stringify(VAL)); } catch (e) {} };
+function trackEvent(tipo, plan = '') {
+  if (tipo === 'visita') { VAL.visitas++; VAL.vc[CANAL] = (VAL.vc[CANAL] || 0) + 1; }
+  if (tipo === 'clic_reservar') VAL.clics[plan] = (VAL.clics[plan] || 0) + 1;
+  valSave();
+  if (LANDING) sendForm('eventos', { tipo, plan, canal: CANAL });
+}
+if (LANDING) { let seen = false; try { seen = sessionStorage.getItem('pt-visita') === '1'; sessionStorage.setItem('pt-visita', '1'); } catch (e) {} if (!seen) trackEvent('visita'); }
+
+/* =========================================================
    Estado
    ========================================================= */
 const S = {
@@ -653,7 +698,8 @@ const S = {
   reg: { who: null, step: 1, d: { cSubj: [] } },
   treg: { step: 1, d: { subj: {} } },
   homeTab: 'fam', simOpen: false, pendingScroll: null,
-  tour: { on: false, i: 0, auto: false }, dx: null
+  tour: { on: false, i: 0, auto: false }, dx: null,
+  landing: LANDING       // vista limpia para padres (B1); el simulador puede previsualizarla
 };
 function newFlow() {
   return { step: 'form', subj: 'mat', topic: '', detail: '', photo: null, dur: S.child && S.child.trialUsed ? 1 : 0, tutorId: null, skipped: [],
@@ -733,6 +779,12 @@ const stChip = s => `<span class="st ${s}">${STATUS[s]}</span>`;
    ========================================================= */
 function renderTop() {
   const logo = `<a class="logo" href="#inicio">${LOGO_MARK}<span>poli<span class="t2">tutors</span></span></a>`;
+  if (S.landing) {
+    $('#top').innerHTML = `<div class="wrap">${logo}
+      <nav class="pubnav"><button class="link" data-act="scrollTo" data-id="como">Cómo funciona</button><button class="link" data-act="scrollTo" data-id="seguridad">Seguridad</button><button class="link" data-act="scrollTo" data-id="precios">Precios</button><a class="link" href="#tutores">Para tutores</a></nav>
+      <div class="row gap">${!LANDING ? '<button class="btn ghost sm" data-act="landingOff">Salir de la vista landing</button>' : ''}<button class="btn primary sm" data-act="scrollTo" data-id="precios">Reservar</button></div></div>`;
+    return;
+  }
   if (!S.user) {
     $('#top').innerHTML = `<div class="wrap">${logo}
       <nav class="pubnav"><button class="link" data-act="scrollTo" data-id="como">Cómo funciona</button><button class="link" data-act="scrollTo" data-id="seguridad">Seguridad</button><button class="link" data-act="scrollTo" data-id="precios">Precios</button><a class="link" href="#tutores">Para tutores</a></nav>
@@ -746,7 +798,7 @@ function renderTop() {
     <button class="btn ghost sm" data-act="logout">Salir</button></div></div>`;
 }
 function renderSim() {
-  if (S.tour.on) { $('#sim').innerHTML = ''; return; }
+  if (S.tour.on || LANDING) { $('#sim').innerHTML = ''; return; }
   const acc = [];
   if (S.parent && !S.parent.pending) acc.push(['parent', `${first(S.parent.name)} · representante`]);
   if (S.child) acc.push(['student', `${first(S.child.name)} · estudiante${S.child.status === 'pendiente' ? ' (pendiente)' : ''}`]);
@@ -755,6 +807,7 @@ function renderSim() {
       <div class="row between"><b>Simulador</b><button class="link" data-act="simToggle" aria-label="Cerrar">✕</button></div>
       <p class="tiny muted">Herramientas para presentar el prototipo. No forman parte del producto.</p>
       <h4>Recorrido</h4><button class="btn primary sm" data-act="tourStart">▶ Simulación guiada (17 pasos)</button><button class="btn ghost sm" data-act="tourRole" data-r="padre">Simular como padre o madre</button><button class="btn ghost sm" data-act="tourRole" data-r="estudiante">Simular como estudiante</button><button class="btn ghost sm" data-act="tourRole" data-r="tutor">Simular como tutor</button>
+      <h4>Validación</h4><button class="btn ghost sm" data-act="go" data-r="validacion">${ic('clipboard')} Plan de validación y embudo</button><button class="btn ghost sm" data-act="valTour" data-h="h1">Recorrido · Hipótesis I (tutores, 15%)</button><button class="btn ghost sm" data-act="valTour" data-h="h2">Recorrido · Hipótesis II (precios)</button><button class="btn ghost sm" data-act="valTour" data-h="h3">Recorrido · Hipótesis III (reporte)</button><button class="btn ghost sm" data-act="${S.landing ? 'landingOff' : 'landingOn'}">${S.landing ? 'Salir de la vista landing' : 'Ver la landing para padres (B1)'}</button>
       <h4>Cambiar de cuenta</h4>${acc.length ? acc.map(([r, l]) => `<button class="btn ghost sm" data-act="loginAs" data-r="${r}">Entrar como ${esc(l)}</button>`).join('') : '<p class="tiny muted">Aún no hay cuentas creadas.</p>'}
       <button class="btn ghost sm" data-act="loadDemo">Cargar cuentas de ejemplo</button>
       <h4>Tiempo</h4><button class="btn ghost sm" data-act="advance">⏩ Adelantar 24 h (liberar pagos)</button>
@@ -784,24 +837,28 @@ VIEWS.inicio = () => {
   const fam = [['Crea la cuenta familiar', 'El representante se registra y agrega a su hijo (o el estudiante invita a su representante).'], ['Diagnóstico y pide ayuda', 'Un test de 5 min detecta qué le falta. Luego pide ayuda en ese tema; el cobro queda retenido.'], ['Aprende en vivo', 'Tutor ESPOL en menos de 3 min: video, chat y pizarra compartida.'], ['Reporte a casa', 'Al terminar, el representante recibe el reporte y el pago se libera.']];
   const tut = [['Regístrate con tu correo ESPOL', 'Datos básicos, cédula, matrícula vigente y récord académico.'], ['Demuestra lo que sabes', 'Nota mínima de 8/10 por materia y una prueba corta.'], ['Activa tu disponibilidad', 'Ponte en línea cuando quieras y acepta solicitudes en 30 s.'], ['Enseña y cobra', 'Llenas el reporte en 2 min y recibes el 85% de cada sesión.']];
   const steps = S.homeTab === 'fam' ? fam : tut;
+  const L = S.landing;
   const ctas = `<div class="role-ctas">
-      <a class="role-cta" href="#registro-familia"><span class="q">¿Eres padre, madre o estudiante?</span><span class="a">Crea tu cuenta aquí</span>
+      ${L ? `<a class="role-cta" href="#precios" data-act="scrollTo" data-id="precios"><span class="q">¿Eres padre, madre o estudiante?</span><span class="a">Reserva tu primera sesión</span>
+        <ul><li>Tutores verificados con matrícula ESPOL</li><li>Primera sesión de 15 min gratis</li><li>Reporte de cada clase para el representante</li></ul>
+        <span class="go">Ver planes y reservar ${ic('arrow')}</span></a>`
+      : `<a class="role-cta" href="#registro-familia"><span class="q">¿Eres padre, madre o estudiante?</span><span class="a">Crea tu cuenta aquí</span>
         <ul><li>Tutores verificados con matrícula ESPOL</li><li>Pago retenido hasta que termine la clase</li><li>Reporte automático de cada sesión</li></ul>
-        <span class="go">Crear cuenta familiar ${ic('arrow')}</span></a>
-      <a class="role-cta tut" href="#tutores"><span class="q">¿Estudias en la ESPOL?</span><span class="a">Hazte tutor aquí</span>
+        <span class="go">Crear cuenta familiar ${ic('arrow')}</span></a>`}
+      <a class="role-cta tut" href="#tutores"><span class="q">¿Estudias en la ESPOL?</span><span class="a">${L ? 'Sé tutor fundador' : 'Hazte tutor aquí'}</span>
         <span class="tiny muted">Enseña en tus horas libres, sin horario fijo.</span><span class="stat">$8.50 por consulta de 30 min</span>
-        <span class="go">Crear cuenta de tutor ${ic('arrow')}</span></a></div>`;
+        <span class="go">${L ? 'Quiero ser tutor fundador' : 'Crear cuenta de tutor'} ${ic('arrow')}</span></a></div>`;
   return `
   <section class="hero gridbg"><div class="wrap hero-grid">
     <div>
-      <span class="eyebrow">Matemáticas · Física · Química — Guayaquil</span>
+      <span class="eyebrow">Matemáticas · Física · Química — Guayaquil</span>${L ? ' <span class="pill amber">Lanzamiento próximo</span>' : ''}
       <h1>Explicado <span class="hl">de joven a joven</span>, por estudiantes de la ESPOL.</h1>
       <p class="lead">¿Te trabaste con un ejercicio? Pide ayuda y en menos de 3 minutos te atiende un tutor verificado. El pago queda protegido y tu representante recibe un reporte de cada clase.</p>
       ${ctas}
-      <button class="demo-link" data-act="tourStart"><span>▶</span>Ver la simulación de cómo funciona</button>
-      <div class="role-sim"><span class="eyebrow">Simular como</span><button data-act="tourRole" data-r="padre">Padre o madre</button><button data-act="tourRole" data-r="estudiante">Estudiante</button><button data-act="tourRole" data-r="tutor">Tutor ESPOL</button></div>
+      ${L ? '' : `<button class="demo-link" data-act="tourStart"><span>▶</span>Ver la simulación de cómo funciona</button>
+      <div class="role-sim"><span class="eyebrow">Simular como</span><button data-act="tourRole" data-r="padre">Padre o madre</button><button data-act="tourRole" data-r="estudiante">Estudiante</button><button data-act="tourRole" data-r="tutor">Tutor ESPOL</button></div>`}
     </div>
-    <div class="phone">
+    <div class="phone">${L ? '<span class="tiny muted mono" style="display:block;margin-bottom:8px">Vista de ejemplo de la app</span>' : ''}
       <div class="ok-bar">Tutor encontrado en <b>0:42</b><svg class="annot" style="right:-14px;top:-10px;width:78px;height:42px" viewBox="0 0 78 42"><path d="M14 6C40 0 76 6 74 22S30 42 8 34C-2 30 2 14 20 9"/></svg></div>
       <div class="row gap">${avatar(TUTORS[0])}<div><b>Andrea V.</b><span class="verified">Verificado</span><div class="tiny muted">Ing. Computación · 6.º semestre</div></div></div>
       <div class="rating">${stars(4.9)} <b>4.9</b> <span class="tiny muted">58 reseñas</span></div>
@@ -814,7 +871,7 @@ VIEWS.inicio = () => {
     <div class="sec-head" style="margin-bottom:18px"><span class="pill">Cómo funciona</span><h2>De la duda al reporte en cuatro pasos</h2></div>
     <div class="tabs"><button class="${S.homeTab === 'fam' ? 'on' : ''}" data-act="homeTab" data-t="fam">Para familias</button><button class="${S.homeTab === 'tut' ? 'on' : ''}" data-act="homeTab" data-t="tut">Para tutores</button></div>
     <div class="steps">${steps.map((s, i) => `<div class="card"><div class="step-n">${i + 1}</div><h4>${s[0]}</h4><p class="muted tiny">${s[1]}</p></div>`).join('')}</div>
-    <div style="margin-top:20px">${S.homeTab === 'fam' ? '<a class="btn primary" href="#registro-familia">Crear cuenta familiar</a>' : '<a class="btn primary" href="#tutores">Quiero ser tutor</a>'}</div>
+    <div style="margin-top:20px">${S.homeTab === 'fam' ? (L ? '<button class="btn primary" data-act="scrollTo" data-id="precios">Reservar mi primera sesión</button>' : '<a class="btn primary" href="#registro-familia">Crear cuenta familiar</a>') : '<a class="btn primary" href="#tutores">Quiero ser tutor</a>'}</div>
   </div></section>
 
   <section class="block" id="diagnostico-info" style="padding-top:0"><div class="wrap"><div class="card dx-hero" style="padding:28px">
@@ -822,7 +879,7 @@ VIEWS.inicio = () => {
       <h2 style="font-size:28px;font-weight:800;margin:12px 0 8px">Sabemos qué le falta antes de la primera clase</h2>
       <p class="muted">En 5 minutos, el estudiante cuenta cómo estudia, se autoevalúa y resuelve una mini prueba. Recibe su nivel por materia, los temas que le faltan, técnicas para estudiar mejor y un plan semanal.</p>
       <ul class="check-list"><li>Metodología: planificación, técnica, constancia, concentración y manejo de errores</li><li>Vacíos por materia, detectados con ejercicios reales</li><li>El tutor adapta la explicación y el padre ve el resumen</li></ul>
-      <button class="btn primary" style="margin-top:16px" data-act="tourAt" data-id="diag-res">Ver un diagnóstico de ejemplo</button></div>
+      ${L ? '' : '<button class="btn primary" style="margin-top:16px" data-act="tourAt" data-id="diag-res">Ver un diagnóstico de ejemplo</button>'}</div>
     <div class="dx-subj card" style="--c:#0077A8;padding:18px"><div class="row between"><b>Δv Física</b><span class="lvl bad">Necesita refuerzo</span></div>
       <div class="bar" style="margin:10px 0 4px"><i style="width:38%"></i></div><div class="tiny muted">Prueba 1/2 · Confianza 2/5 · Nota 6.5</div>
       <div class="dx-lbl">Le falta reforzar</div><div class="chips" style="margin:0"><span class="gapchip">Leyes de Newton</span></div>
@@ -831,8 +888,8 @@ VIEWS.inicio = () => {
   </div></div></section>
 
   <section class="block white" id="atributos"><div class="wrap">
-    <div class="sec-head"><span class="pill amber">Lo que incluye</span><h2>Ocho razones para elegir PoliTutors</h2><p class="muted">Toca “Verlo funcionando” para saltar a ese momento de la simulación.</p></div>
-    <div class="feat-grid">${feats.map((f, i) => `<div class="card feat"><span class="num">0${i + 1}</span><h4>${f[0]}</h4><p>${f[1]}</p><button data-act="tourAt" data-id="${f[2]}">Verlo funcionando →</button></div>`).join('')}</div>
+    <div class="sec-head"><span class="pill amber">Lo que incluye</span><h2>Ocho razones para elegir PoliTutors</h2>${L ? '' : '<p class="muted">Toca “Verlo funcionando” para saltar a ese momento de la simulación.</p>'}</div>
+    <div class="feat-grid">${feats.map((f, i) => `<div class="card feat"><span class="num">0${i + 1}</span><h4>${f[0]}</h4><p>${f[1]}</p>${L ? '' : `<button data-act="tourAt" data-id="${f[2]}">Verlo funcionando →</button>`}</div>`).join('')}</div>
   </div></section>
 
   <section class="block" id="seguridad"><div class="wrap">
@@ -849,13 +906,12 @@ VIEWS.inicio = () => {
   <section class="block white" id="precios"><div class="wrap">
     <div class="sec-head"><span class="pill">Precios</span><h2>Pagas solo por lo que usas</h2><p class="muted">Sin mensualidades. El cobro se hace al pedir la sesión y queda retenido hasta que termina.</p></div>
     <div class="price-grid">
-      <div class="card price"><span class="muted">Prueba</span><b>Gratis</b><span class="tiny muted">15 min · primera sesión</span></div>
-      <div class="card price hot"><span class="muted">Consulta</span><b>$10.00</b><span class="tiny muted">30 min</span></div>
-      <div class="card price"><span class="muted">Nivelación</span><b>$17.00</b><span class="tiny muted">45 min</span></div>
-      <div class="card price"><span class="muted">Clase completa</span><b>$20.00</b><span class="tiny muted">60 min</span></div>
+      ${Object.entries(PLANS).map(([k, [n, p, m]]) => `<div class="card price ${k === 'consulta' ? 'hot' : ''}"><span class="muted">${n === 'Prueba gratis' ? 'Prueba' : n}</span><b>${p}</b><span class="tiny muted">${m}${k === 'prueba' ? ' · primera sesión' : ''}</span>
+        <div style="margin-top:12px"><button class="btn ${k === 'consulta' ? 'primary' : 'ghost'} sm" data-act="reservar" data-p="${k}">${k === 'prueba' ? 'Reservar prueba gratis' : 'Reservar'}</button></div></div>`).join('')}
     </div>
+    ${L ? '<p class="tiny muted center" style="margin-top:10px">Estamos por lanzar en Guayaquil. Al reservar te avisamos por WhatsApp cuando abramos; no se cobra nada ahora.</p>' : ''}
     <div class="guarantee"><span class="trust-ic">${ic('shield', 'lg')}</span><div><b>Garantía de primera sesión</b><div class="tiny">Si la primera sesión pagada con un tutor no te convence, la reportas dentro de 24 h y te devolvemos el 100%.</div></div></div>
-    <p class="tiny muted center" style="margin-top:10px">Precios referenciales del prototipo. Extensión de +15 min: ${money(EXT_PRICE)}.</p>
+    <p class="tiny muted center" style="margin-top:10px">${L ? 'Precios de lanzamiento' : 'Precios referenciales del prototipo'}. Extensión de +15 min: ${money(EXT_PRICE)}.</p>
   </div></section>
 
   <section class="block" id="dispositivos"><div class="wrap devices">
@@ -865,14 +921,14 @@ VIEWS.inicio = () => {
     <div class="dev-row"><div class="dev"><div class="scr" style="width:110px;height:200px">App<br>&lt; 50 MB</div></div><div class="dev" style="border-radius:14px"><div class="scr" style="width:260px;height:170px">Web</div></div></div>
   </div></section>
 
-  <section class="block white"><div class="wrap">
+  ${L ? '' : `<section class="block white"><div class="wrap">
     <div class="sec-head"><span class="pill">Testimonios</span><h2>Lo que dicen las familias</h2><p class="tiny muted">Testimonios ilustrativos del prototipo.</p></div>
     <div class="testi-grid">
       <div class="card testi">${stars(5)}<p>“Ya no tengo que buscar profesor por WhatsApp. Mi hija pide ayuda y yo recibo el reporte.”</p><b>Patricia M.</b><div class="tiny muted">Mamá de estudiante de 2.º BGU</div></div>
       <div class="card testi">${stars(5)}<p>“Me explican como un pana, sin miedo a preguntar. Subí en física el primer parcial.”</p><b>Joaquín L.</b><div class="tiny muted">Estudiante de 3.º BGU</div></div>
       <div class="card testi">${stars(5)}<p>“Doy tutorías entre clases y cobro sin perseguir a nadie. El pago llega solo.”</p><b>Andrea V.</b><div class="tiny muted">Tutora, Ing. Computación ESPOL</div></div>
     </div>
-  </div></section>
+  </div></section>`}
 
   <section class="block" id="faq"><div class="wrap">
     <div class="sec-head"><span class="pill">Preguntas frecuentes</span><h2>¿Tienes dudas?</h2></div>
@@ -892,17 +948,17 @@ VIEWS.inicio = () => {
   </div></section>
 
   <section class="block" style="padding-top:0"><div class="wrap"><div class="final-cta hatch"><h2>Empieza hoy</h2>${ctas}</div></div></section>
-  <footer><div class="wrap row between wrapf gap"><span><b>PoliTutors</b> · Proyecto de emprendimiento, ESPOL · Guayaquil</span>
+  <footer><div class="wrap row between wrapf gap"><span><b>PoliTutors</b> · Proyecto de emprendimiento, ESPOL · Guayaquil${L ? ' · En fase de validación: el servicio aún no está en funcionamiento' : ''}</span>
     <span class="row wrapf"><button class="link" data-act="coc">Código de conducta</button><button class="link" data-act="privacy">Privacidad (LOPDP)</button><a class="link" href="#tutores">Para tutores</a></span></div></footer>`;
 };
 AFTER.inicio = () => { if (S.pendingScroll) { const id = S.pendingScroll; S.pendingScroll = null; setTimeout(() => $('#' + id)?.scrollIntoView({ behavior: 'smooth' }), 60); } };
 
 VIEWS.tutores = () => `
   <section class="hero gridbg"><div class="wrap hero-grid">
-    <div><span class="eyebrow">Para estudiantes de la ESPOL</span>
+    <div><span class="eyebrow">Para estudiantes de la ESPOL</span>${S.landing ? ' <span class="pill amber">Cupos de tutor fundador</span>' : ''}
       <h1>Enseña lo que dominas. <span class="hl">Gana entre clases.</span></h1>
       <p class="lead">Ayuda a bachilleres de Guayaquil con matemáticas, física o química desde tu celular. Tú decides cuándo estás en línea y cobras sin perseguir a nadie.</p>
-      <div class="row gap wrapf"><a class="btn primary lg" href="#registro-tutor">Crear mi cuenta de tutor</a><a class="btn ghost lg" href="#ingresar">Ya tengo cuenta</a></div>
+      <div class="row gap wrapf">${S.landing ? '<button class="btn primary lg" data-act="fundador">Quiero ser tutor fundador</button>' : '<a class="btn primary lg" href="#registro-tutor">Crear mi cuenta de tutor</a><a class="btn ghost lg" href="#ingresar">Ya tengo cuenta</a>'}</div>
       <div class="trust"><span>Horario libre</span><span>85% de cada sesión</span><span>Pago a las 24 h</span></div></div>
     <div class="calc"><b>¿Cuánto podrías ganar?</b>
       <p class="tiny muted" style="margin:4px 0 14px">Horas de tutoría a la semana</p>
@@ -918,12 +974,151 @@ VIEWS.tutores = () => `
       <div class="card"><div class="step-n">3</div><h4>Materias y prueba</h4><p class="tiny muted">Mínimo 8/10 en la materia y una prueba corta por cada una.</p></div>
       <div class="card"><div class="step-n">4</div><h4>Código de conducta</h4><p class="tiny muted">Reglas para trabajar con menores y datos para recibir tus pagos.</p></div>
     </div>
-    <div class="center" style="margin-top:24px"><a class="btn primary lg" href="#registro-tutor">Empezar registro</a></div>
-  </div></section>`;
+    ${S.landing ? '' : '<div class="center" style="margin-top:24px"><a class="btn primary lg" href="#registro-tutor">Empezar registro</a></div>'}
+  </div></section>
+  <section class="block white" id="fundadores"><div class="wrap"><div class="card dx-hero" style="padding:28px">
+    <div><span class="pill amber">Tutores fundadores</span>
+      <h2 style="font-size:28px;font-weight:800;margin:12px 0 8px">Sé de los primeros tutores de PoliTutors</h2>
+      <p class="muted">Estamos armando el primer grupo de tutores antes del lanzamiento. Cuéntanos qué materias dominas y qué te parece el modelo de cobro: tú recibes el 85% de cada sesión y la plataforma se queda con el 15% por conseguirte estudiantes, cobrar y gestionar los pagos.</p>
+      <ul class="check-list"><li>Prioridad en las primeras solicitudes</li><li>Pago puntual 24 h después de cada sesión</li><li>Certificado de horas de tutoría</li></ul>
+      <div class="row gap wrapf" style="margin-top:16px"><button class="btn primary" data-act="fundador">Preinscribirme como tutor fundador</button>${ENCUESTA_TUTORES ? `<a class="btn ghost" href="${esc(ENCUESTA_TUTORES)}" target="_blank" rel="noopener">Responder la encuesta completa</a>` : ''}</div></div>
+    <div class="card" style="padding:18px"><b>Así se reparte una sesión</b>
+      <div class="kv" style="margin-top:10px"><span>Consulta · 30 min</span><b class="mono">$10.00 → recibes $8.50</b></div>
+      <div class="kv"><span>Nivelación · 45 min</span><b class="mono">$17.00 → recibes $14.45</b></div>
+      <div class="kv"><span>Clase completa · 60 min</span><b class="mono">$20.00 → recibes $17.00</b></div>
+      <p class="tiny muted" style="margin-top:10px">Como referencia, Wyzant cobra 25% y Preply entre 18% y 33% a sus tutores.</p></div>
+  </div></div></section>`;
 AFTER.tutores = () => {
   const upd = () => { const h = +$('#hrs').value; $('#hrsL').textContent = h + ' h por semana'; $('#earn').textContent = '$' + Math.round(h * 2 * 8.5 * 4); };
   $('#hrs').addEventListener('input', upd); upd();
 };
+
+/* ---------- Validación: plan, embudo y enlaces (herramienta del equipo) ---------- */
+const HYP = [
+  { id: 'h1', n: 'I', tipo: 'Deseabilidad y Viabilidad', t: 'Si ofrecemos una plataforma que conecta padres y tutores, el tutor estará dispuesto a ceder un 15% a la aplicación por la gestión. Ejemplo: de una sesión de $17, el tutor recibe $14.45.',
+    xyz: 'Al menos el 70% de los estudiantes STEM de ESPOL encuestados aceptará ceder el 15% por sesión.', quien: 'Estudiantes STEM de ESPOL de nivel intermedio o avanzado, con buen rendimiento y de 10 a 20 h libres por semana.',
+    exp: [['A1', 'Encuesta y preinscripción de tutor fundador', '100 o más estudiantes'], ['A2', 'Entrevistas con la simulación del tutor', '10 tutores que ya dan clases']],
+    ok: '70% o más acepta el 15% · comisión máxima (mediana) de 15% o más · 30 o más fundadores', ko: 'Menos del 50% acepta · mediana de 10% o menos · menos de 15 fundadores' },
+  { id: 'h2', n: 'II', tipo: 'Deseabilidad y Viabilidad', t: 'Si mostramos una landing page con la información verificada de los tutores, los padres mostrarán intención de pagar $10 por una consulta (30 min), $17 por una nivelación (45 min) y $20 por una clase completa (60 min).',
+    xyz: 'Al menos el 4% de los padres que llegan por anuncios, y el 14% de los que llegan por WhatsApp, se preinscribirá.', quien: 'Padres de 30 a 50 años con hijos en bachillerato en colegios particulares o fiscomisionales de Guayaquil.',
+    exp: [['B1', 'Landing con botones «Reservar» y preinscripción', '200 o más visitas'], ['B2', 'Entrevistas con la simulación del padre', '20 padres']],
+    ok: 'Anuncios 4% o más · WhatsApp 14% o más · CTR 1.5% o más · 14 de 20 padres eligen un plan', ko: 'Anuncios menos de 1.9% · WhatsApp menos de 7% · CTR menos de 0.75% · menos de 10 de 20' },
+  { id: 'h3', n: 'III', tipo: 'Deseabilidad y Viabilidad', t: 'Si el padre recibe un reporte automático de avance después de cada clase, volverá a comprar una segunda sesión pagada en menos de 14 días.',
+    xyz: 'Al menos el 50% de los padres que reciben el reporte comprará una segunda sesión en menos de 14 días.', quien: 'Familias del piloto que tomaron la prueba gratis de 15 min con un tutor fundador.',
+    exp: [['C1', 'Piloto: grupo A recibe el reporte por WhatsApp; grupo B solo un agradecimiento', '20 o más familias (10 por grupo)']],
+    ok: 'Grupo A recompra 50% o más y supera a B por 15 puntos · utilidad del reporte 4/5 o más', ko: 'Grupo A recompra menos del 25% o no supera a B' }
+];
+const pct = (a, b) => b ? Math.round(a / b * 1000) / 10 : null;
+function verdict(v, ok, ko) {
+  if (v === null || v === undefined) return '<span class="lvl">Sin datos</span>';
+  return v >= ok ? '<span class="lvl ok">Valida</span>' : v < ko ? '<span class="lvl bad">Invalida</span>' : '<span class="lvl amber">Zona gris</span>';
+}
+const median = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y), m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+function valLinks() {
+  const base = location.origin === 'null' || location.protocol === 'file:' ? location.href.split(/[?#]/)[0] : location.origin + location.pathname;
+  return [['Anuncios de Meta (padres)', `${base}?modo=landing&utm_source=meta`], ['Grupos de WhatsApp (padres)', `${base}?modo=landing&utm_source=whatsapp`], ['Tutores ESPOL (A1)', `${base}?modo=landing&utm_source=espol#tutores`]];
+}
+VIEWS.validacion = () => {
+  const V = VAL, leads = V.leads, tut = V.tutores;
+  const canals = [...new Set([...Object.keys(V.vc), ...leads.map(l => l.canal)])];
+  const clicks = Object.values(V.clics).reduce((a, b) => a + b, 0);
+  const acept = tut.filter(t => t.acepta15 === 'Sí').length;
+  const med = median(tut.map(t => parseInt(t.comisionMax, 10)).filter(n => !isNaN(n)));
+  const pA = V.piloto.filter(p => p.grupo === 'A').length, pB = V.piloto.filter(p => p.grupo === 'B').length;
+  return `<div class="wrap page">
+    <div class="page-head"><div><span class="pill amber">Herramienta del equipo · no forma parte del producto</span><h2 style="margin-top:6px">Plan de validación</h2>
+      <p class="muted">Tres hipótesis, cinco experimentos y un umbral fijado antes de ver los datos. Los recorridos muestran en qué pantalla del prototipo ocurre cada experimento.</p></div></div>
+    <div class="stack">${HYP.map(h => `<div class="card" id="val-${h.id}">
+      <div class="row between wrapf gap"><h3 style="margin:0">Hipótesis ${h.n}</h3><span class="pill">${h.tipo}</span></div>
+      <p style="font-size:16.5px;margin:10px 0 6px"><b>${esc(h.t)}</b></p>
+      <div class="kv"><span>Meta (formato XYZ)</span><b>${esc(h.xyz)}</b></div>
+      <div class="kv"><span>Con quién</span><b>${esc(h.quien)}</b></div>
+      ${h.exp.map(([c, d, n]) => `<div class="kv"><span>Experimento ${c}</span><b>${esc(d)} · ${esc(n)}</b></div>`).join('')}
+      <div class="kv"><span>Se valida si</span><b>${esc(h.ok)}</b></div>
+      <div class="kv"><span>Se invalida si</span><b>${esc(h.ko)}</b></div>
+      <div class="row gap wrapf" style="margin-top:12px"><button class="btn primary sm" data-act="valTour" data-h="${h.id}">▶ Ver dónde ocurre en el prototipo</button>
+        ${h.id === 'h2' ? '<button class="btn ghost sm" data-act="landingOn">Abrir la vista landing</button>' : h.id === 'h1' ? '<button class="btn ghost sm" data-act="valFundador">Probar la preinscripción de tutor</button>' : '<button class="btn ghost sm" data-act="valPilot">Probar el reporte del piloto</button>'}</div></div>`).join('')}</div>
+
+    <div class="grid-2-1" style="margin-top:20px">
+      <div class="card" id="val-embudo"><h3>Embudo en este navegador</h3>
+        <p class="tiny muted">Cuenta lo que pasa en este dispositivo para practicar la presentación. Los datos reales de la validación llegan a la Google Sheet de cada formulario.</p>
+        <div class="kpis" style="margin-top:12px">
+          <div class="kpi"><span>Visitas a la landing</span><b>${V.visitas}</b></div>
+          <div class="kpi"><span>Clics en «Reservar»</span><b>${clicks}</b></div>
+          <div class="kpi"><span>Preinscripciones (B1)</span><b>${leads.length}</b></div>
+          <div class="kpi"><span>Tutores fundadores (A1)</span><b>${tut.length}</b></div>
+        </div>
+        <h4 class="dx-lbl">Hipótesis II · conversión por canal</h4>
+        <div style="overflow-x:auto"><table><thead><tr><th>Canal</th><th>Visitas</th><th>Preinscripciones</th><th>Conversión</th><th>Meta</th><th>Estado</th></tr></thead><tbody>
+          ${canals.length ? canals.map(c => { const v = V.vc[c] || 0, l = leads.filter(x => x.canal === c).length, cv = pct(l, v), wa = c.includes('whatsapp');
+            return `<tr><td>${esc(c)}</td><td>${v}</td><td>${l}</td><td>${cv === null ? '—' : cv + '%'}</td><td>${wa ? '14%' : '4%'}</td><td>${verdict(cv, wa ? 14 : 4, wa ? 7 : 1.9)}</td></tr>`; }).join('') : '<tr><td colspan="6" class="tiny muted">Aún no hay visitas. Abre la landing con uno de los enlaces de la derecha.</td></tr>'}</tbody></table></div>
+        <p class="tiny muted">Plan elegido al reservar: ${Object.keys(PLANS).map(k => `${PLANS[k][0]} ${leads.filter(l => l.plan === k).length}`).join(' · ')}</p>
+        <h4 class="dx-lbl">Hipótesis I · tutores</h4>
+        <div class="kv"><span>Aceptan el 15% (sin condiciones)</span><b>${tut.length ? `${acept} de ${tut.length} (${pct(acept, tut.length)}%)` : '—'} ${verdict(pct(acept, tut.length), 70, 50)}</b></div>
+        <div class="kv"><span>Comisión máxima aceptada (mediana)</span><b>${med === null ? '—' : med + '%'} ${verdict(med, 15, 10.01)}</b></div>
+        <div class="kv"><span>Tutores fundadores preinscritos</span><b>${tut.length} ${verdict(tut.length || null, 30, 15)}</b></div>
+        <h4 class="dx-lbl" id="val-piloto">Hipótesis III · piloto C1</h4>
+        <div class="kv"><span>Reportes enviados (grupo A)</span><b>${pA}</b></div>
+        <div class="kv"><span>Agradecimientos enviados (grupo B)</span><b>${pB}</b></div>
+        <p class="tiny muted">La recompra se marca en la Google Sheet del piloto: una columna «Recompró en 14 días» (sí/no) por familia. Meta: grupo A 50% o más y 15 puntos sobre el grupo B.</p>
+        <button class="btn ghost sm" style="margin-top:10px" data-act="valReset">Borrar los datos de este navegador</button></div>
+      <aside class="stack">
+        <div class="card"><h3>Enlaces para compartir</h3><p class="tiny muted">Cada enlace abre la versión limpia y registra el canal de origen.</p>
+          ${valLinks().map(([n, u]) => `<div class="kv" style="align-items:center"><span>${n}</span><b class="row gap"><button class="btn ghost sm" data-act="copyText" data-t="${esc(u)}">Copiar</button><a class="btn ghost sm" href="${esc(u)}" target="_blank" rel="noopener">Abrir</a></b></div>`).join('')}</div>
+        <div class="card"><h3>Google Forms</h3><p class="tiny muted">Se configuran en la constante <code>FORMS</code> de <code>index.html</code> (ver README).</p>
+          ${[['padres', 'B1 · Preinscripción de padres'], ['eventos', 'B1 · Visitas y clics'], ['tutores', 'A1 · Tutores fundadores'], ['piloto', 'C1 · Piloto de recompra']].map(([k, n]) => `<div class="kv"><span>${n}</span><b>${formOn(k) ? '<span class="lvl ok">Conectado</span>' : '<span class="lvl amber">Modo demo</span>'}</b></div>`).join('')}</div>
+        <div class="card"><h3>Cronograma (5 semanas)</h3><ol class="tiny" style="padding-left:18px;margin:0;color:var(--ink-2)">
+          <li><b>Semana 1:</b> conectar los formularios, lanzar A1 y hacer las entrevistas A2.</li>
+          <li><b>Semana 2:</b> anuncios y difusión por WhatsApp (B1) durante 7 días; entrevistas B2.</li>
+          <li><b>Semana 3:</b> sesiones de prueba del piloto C1 y envío de reportes al grupo A.</li>
+          <li><b>Semanas 4 y 5:</b> ventana de 14 días de C1, cierre y decisión por hipótesis.</li></ol></div>
+      </aside></div></div>`;
+};
+
+/* ---------- Formularios de validación ---------- */
+function leadModal(plan, pre = {}) {
+  return `<form id="leadForm"><h3 style="font-size:19px">Reserva tu cupo</h3>
+    <p class="muted tiny" style="margin:4px 0 14px">PoliTutors abre pronto en Guayaquil. Déjanos tus datos y te escribimos por WhatsApp cuando lancemos. No se cobra nada ahora.</p>
+    <label class="lbl" for="lPlan">Plan que te interesa</label><select id="lPlan">${Object.entries(PLANS).map(([k, [n, p, m]]) => `<option value="${k}" ${k === plan ? 'selected' : ''}>${n} · ${p} · ${m}</option>`).join('')}</select>
+    ${fld('Tu nombre', 'lName', 'text', pre.nombre, 'Ej.: Ana Vera', 'autocomplete="name"', 'mf')}
+    ${fld('WhatsApp', 'lWa', 'tel', pre.whatsapp, '09XXXXXXXX', 'inputmode="tel" autocomplete="tel"', 'mf')}
+    ${sel('Curso de tu hijo o hija', 'lCurso', CURSOS, pre.curso || CURSOS[0], 'mf')}
+    ${sel('Materia en la que necesita ayuda', 'lMat', [...Object.values(SUBJECTS).map(s => s.name), 'Varias'], pre.materia || 'Matemáticas', 'mf')}
+    <label class="check" style="margin-top:12px"><input type="checkbox" id="lOk" ${pre.ok ? 'checked' : ''}><span><small>Acepto que PoliTutors, proyecto de emprendimiento de la ESPOL, guarde estos datos y me contacte por WhatsApp para avisarme del lanzamiento.</small></span></label>
+    <div id="fErr"></div>
+    <div class="row gap end" style="margin-top:14px"><button type="button" class="btn ghost" data-act="closeModal">Cancelar</button><button class="btn primary">Reservar mi cupo</button></div></form>`;
+}
+function leadThanks(nombre, wa, enviado) {
+  return `<div class="center"><div class="big-wait">${ic('check', 'lg')}</div><h3 style="font-size:20px">¡Listo, ${esc(first(nombre))}! Tu cupo está reservado</h3>
+    <p class="muted" style="margin:8px 0">PoliTutors todavía no está en funcionamiento: estamos terminando de preparar el servicio. Te escribiremos al <b>${esc(wa)}</b> cuando abramos, y tu primera sesión de 15 min será gratis.</p>
+    ${LANDING ? '' : `<p class="tiny muted">${enviado ? 'Enviado a Google Forms.' : 'Modo demo: los datos no salieron de este navegador.'}</p>`}
+    <button class="btn primary" style="margin-top:10px" data-act="closeModal">Entendido</button></div>`;
+}
+function fundadorModal(pre = {}) {
+  const ms = pre.materias || [];
+  return `<form id="tutForm"><h3 style="font-size:19px">Preinscripción de tutor fundador</h3>
+    <p class="muted tiny" style="margin:4px 0 14px">Toma 1 minuto. Nos ayuda a preparar el lanzamiento y a definir el modelo de cobro.</p>
+    ${fld('Nombre', 'fName', 'text', pre.nombre, 'Ej.: Carlos Rivas', 'autocomplete="name"', 'mf')}
+    ${fld('Correo ESPOL', 'fMail', 'email', pre.correo, 'usuario@espol.edu.ec', 'autocomplete="email"', 'mf')}
+    <label class="lbl mf">Materias que podrías enseñar</label><div class="chips">${Object.entries(SUBJECTS).map(([k, s]) => `<label class="chip"><input type="checkbox" name="fSubj" value="${s.name}" ${ms.includes(s.name) ? 'checked' : ''}>${s.name}</label>`).join('')}</div>
+    ${sel('Horas libres por semana', 'fHrs', ['Menos de 5', '5 a 10', '10 a 20', 'Más de 20'], pre.horas || '5 a 10', 'mf')}
+    <label class="lbl" style="margin-top:12px">Recibes el 85% de cada sesión y PoliTutors se queda con el 15% por conseguirte estudiantes, cobrar y gestionar los pagos. ¿Lo aceptarías?</label>
+    <div class="chips">${['Sí', 'No', 'Depende'].map(o => `<label class="chip"><input type="radio" name="fAcc" value="${o}" ${pre.acepta15 === o ? 'checked' : ''}>${o}</label>`).join('')}</div>
+    ${sel('¿Qué comisión máxima te parecería justa?', 'fMax', ['5%', '10%', '15%', '20%', '25%'], pre.comisionMax || '15%', 'mf')}
+    <label class="check" style="margin-top:12px"><input type="checkbox" id="fOk" ${pre.ok ? 'checked' : ''}><span><small>Acepto que el equipo de PoliTutors (proyecto de emprendimiento de la ESPOL) guarde estos datos y me contacte por correo.</small></span></label>
+    <div id="fErr"></div>
+    <div class="row gap end" style="margin-top:14px"><button type="button" class="btn ghost" data-act="closeModal">Cancelar</button><button class="btn primary">Preinscribirme</button></div></form>`;
+}
+const waNum = n => { const d = String(n || '').replace(/\D/g, ''); return d.startsWith('593') ? d : d.startsWith('0') ? '593' + d.slice(1) : d.length === 9 ? '593' + d : d; };
+function pilotText(grupo, d) {
+  if (grupo === 'B') return `Hola, gracias por confiar en PoliTutors. ${d.estudiante} tuvo hoy su sesión de ${d.materia} con ${d.tutor}. ¡Esperamos verlos pronto!`;
+  return `PoliTutors · Reporte de avance\n${d.materia}: ${d.tema}\nTutor: ${d.tutor} (${d.min} min)\nTemas reforzados:\n- ${d.puntos.join('\n- ')}\nQué reforzar y próximo paso: ${d.obs || '—'}\nPuntualidad ${d.ev.punt}/5 · Respeto ${d.ev.resp}/5 · Constancia ${d.ev.cons}/5`;
+}
+function waPreview(grupo, d) {
+  return `<h3 style="font-size:19px">Mensaje de WhatsApp · grupo ${grupo}</h3><p class="muted tiny" style="margin:4px 0 12px">${grupo === 'A' ? 'El grupo A recibe el reporte completo.' : 'El grupo B solo recibe un agradecimiento, para comparar la recompra.'}</p>
+    <div class="card" style="background:#E7F6E7;border-color:#BFE3BF;white-space:pre-line;font-size:14.5px">${esc(pilotText(grupo, d))}</div>
+    <div class="row end" style="margin-top:14px"><button class="btn primary" data-act="closeModal">Cerrar</button></div>`;
+}
 
 /* ---------- Registro familiar ---------- */
 const wizSteps = (names, cur) => `<div class="wiz-steps">${names.map((s, i) => `<div class="ws ${i + 1 < cur ? 'done' : i + 1 === cur ? 'on' : ''}"><span>${i + 1 < cur ? '✓' : i + 1}</span>${s}</div>`).join('')}</div>`;
@@ -1640,6 +1835,11 @@ function vTutorReport() {
     <label class="lbl" style="margin-top:16px">Compromiso del estudiante</label>
     ${rows.map(([k, l]) => `<div class="row between" style="padding:4px 0"><span style="font-size:14px">${l}</span><span class="star-pick" style="margin:0">${[1, 2, 3, 4, 5].map(n => `<button type="button" style="font-size:26px" class="${n <= tEval[k] ? 'on' : ''}" data-act="evalStar" data-k="${k}" data-n="${n}">★</button>`).join('')}</span></div>`).join('')}
     <p class="hint">Esta evaluación alimenta las insignias del estudiante. Solo se muestran insignias positivas.</p>
+    <details class="card" style="margin-top:16px;padding:14px;box-shadow:none" ${a.pilot ? 'open' : ''}><summary><b>Piloto C1 · enviar por WhatsApp</b> <span class="tiny muted">(opcional, para la validación)</span></summary>
+      ${fld('WhatsApp del representante', 'pWa', 'tel', a.pilot?.wa, '09XXXXXXXX', 'inputmode="tel"', 'mf')}
+      <label class="lbl" style="margin-top:10px">Grupo del piloto</label>
+      <div class="chips">${[['A', 'A · recibe el reporte'], ['B', 'B · solo agradecimiento']].map(([g, l]) => `<label class="chip"><input type="radio" name="pGrupo" value="${g}" ${(a.pilot?.grupo || (VAL.piloto.length % 2 ? 'B' : 'A')) === g ? 'checked' : ''}>${l}</label>`).join('')}</div>
+      <p class="hint">Al enviar se abre WhatsApp con el mensaje listo. Alterna los grupos (A, B, A, B…) y marca la recompra en la Google Sheet a los 14 días.</p></details>
     <div id="fErr"></div><button class="btn primary block lg" style="margin-top:14px">Enviar reporte y cerrar sesión</button></form></div>`;
 }
 AFTER.tutor = () => {
@@ -1723,6 +1923,16 @@ const ACT = {
   notif: el => { const k = el.dataset.k; S.parent.notify[k] = !S.parent.notify[k]; render(); },
   addKid: () => toast('Agregar más hijos estará disponible en la versión completa', 'info'),
   closeModal: () => closeModal(),
+  /* validación */
+  reservar: el => { trackEvent('clic_reservar', el.dataset.p); openModal(leadModal(el.dataset.p)); },
+  fundador: () => openModal(fundadorModal()),
+  landingOn: () => { S.landing = true; S.user = null; trackEvent('visita'); go('inicio'); toast('Vista landing para padres: así la verán desde los anuncios y WhatsApp', 'info'); },
+  landingOff: () => { S.landing = false; go('validacion'); },
+  valTour: el => startValTour(el.dataset.h),
+  valFundador: () => openModal(fundadorModal()),
+  valPilot: () => { tutorLiveState(false); S.live = null; const T = S.tutor; T.view = 'report'; T.active.obs = 'Ya resuelve los ejercicios básicos; practicar 3 más antes de la prueba.'; T.active.pilot = { wa: '', grupo: VAL.piloto.length % 2 ? 'B' : 'A' }; tEval = { punt: 5, resp: 5, cons: 4 }; go('tutor'); },
+  valReset: () => { VAL = valEmpty(); valSave(); render(); toast('Datos de validación de este navegador borrados', 'info'); },
+  copyText: async el => { try { await navigator.clipboard.writeText(el.dataset.t); toast('Enlace copiado'); } catch (e) { toast('No se pudo copiar; mantén presionado el enlace «Abrir»', 'info'); } },
   /* tutor */
   toggleOnline: () => { const T = S.tutor; T.online = !T.online; if (!T.online) T.pending = null; render(); toast(T.online ? 'Estás en línea: recibirás solicitudes de tus materias' : 'Te desconectaste', 'info'); },
   tAccept: () => { const T = S.tutor, p = T.pending; T.active = { ...p, id: 'l' + Date.now() }; T.pending = null;
@@ -1744,7 +1954,7 @@ const ACT = {
   tourNext: () => tourGo(S.tour.i + 1),
   tourPrev: () => tourGo(Math.max(0, S.tour.i - 1)),
   tourAuto: () => { S.tour.auto = !S.tour.auto; renderTour(); if (S.tour.auto) scheduleTour(); else clearTimeout(tourTimer); },
-  tourExit: () => { clearTimeout(tourTimer); S.tour.on = false; S.tour.auto = false; S.tour.list = null; S.tour.role = null; document.body.classList.remove('touring'); renderTour(); renderSim(); }
+  tourExit: () => { clearTimeout(tourTimer); const wasLanding = S.landing; S.tour.on = false; S.tour.auto = false; S.tour.list = null; S.tour.role = null; S.landing = LANDING; document.body.classList.remove('touring'); closeModal(); renderTour(); if (wasLanding !== S.landing) render(); renderSim(); }
 };
 function keepComment() { const c = $('#comment'); if (c) S.flow.comment = c.value; }
 function openReportModal(r) {
@@ -1809,12 +2019,34 @@ const EXTRA_STEPS = [
   { id: 'tut-report', tag: 'Atributo 5', t: 'El tutor llena el reporte en 2 minutos', d: 'Marca los temas reforzados, escribe los próximos pasos y evalúa puntualidad, respeto y constancia.', run: () => { const T = tutorLiveState(false); S.live = null; T.view = 'report'; T.active.obs = 'Ya resuelve los ejercicios básicos; practicar 3 más antes de la prueba.'; tEval = { punt: 5, resp: 5, cons: 4 }; go('tutor'); } },
   { id: 'tut-cobro', tag: 'Atributo 4', t: 'El tutor ve su dinero por liberar', d: 'El pago queda protegido 24 h y luego se libera a su cuenta bancaria: recibe el 85% de cada sesión.', run: () => { const T = tutorLiveState(false); S.live = null; T.ledger.forEach(l => { if (l.status === 'retenido') l.status = 'revision'; }); T.active = null; T.pending = null; T.online = false; T.view = 'panel'; go('tutor'); } }
 ];
+const VAL_DEMO = { estudiante: 'Valeria R.', materia: 'Química', tema: 'Estequiometría', tutor: 'Carlos Rivas', min: 30, obs: 'Ya balancea ecuaciones simples; reforzar relaciones molares antes de la prueba.', ev: { punt: 5, resp: 5, cons: 4 }, puntos: TOPIC_POINTS('Estequiometría') };
+const valView = id => { S.user = null; go('validacion'); tourT(() => $('#' + id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 250); };
+const landingAt = (r, id) => { S.user = null; S.landing = true; if (id) S.pendingScroll = id; go(r); if (id && r !== 'inicio') tourT(() => $('#' + id)?.scrollIntoView({ behavior: 'smooth' }), 250); };
+const VAL_STEPS = [
+  { id: 'val-h1', tag: 'Hipótesis I', t: 'Los tutores aceptan ceder el 15%', d: 'Meta: al menos el 70% de los estudiantes STEM de ESPOL encuestados acepta. Se mide con la encuesta A1 y las entrevistas A2.', run: () => valView('val-h1') },
+  { id: 'val-tut', tag: 'Experimento A1', t: 'Página para tutores con cupos de fundador', d: 'Se comparte por grupos de WhatsApp y Teams de ESPOL con el enlace «Tutores ESPOL». Muestra el reparto: $10 → $8.50, $17 → $14.45, $20 → $17.', run: () => landingAt('tutores', 'fundadores') },
+  { id: 'val-fund', tag: 'Experimento A1', t: 'Preinscripción con las preguntas clave', d: 'Correo @espol.edu.ec, materias, horas libres, si acepta el 15% y la comisión máxima que le parece justa. Las respuestas llegan a una Google Sheet.', run: () => { landingAt('tutores', 'fundadores'); tourT(() => openModal(fundadorModal({ nombre: 'Carlos Rivas', correo: 'carivas@espol.edu.ec', materias: ['Matemáticas', 'Física'], horas: '10 a 20', acepta15: 'Sí', comisionMax: '15%', ok: true })), 300); } },
+  { id: 'val-emb1', tag: 'Hipótesis I', t: 'Resultado contra el umbral', d: 'Valida con 70% o más que acepta (≈ 52% real), mediana de 15% o más y 30 fundadores. Invalida con menos del 50%.', run: () => valView('val-embudo') },
+  { id: 'val-h2', tag: 'Hipótesis II', t: 'Los padres pagarían $10, $17 y $20', d: 'Meta: al menos el 4% de quienes llegan por anuncios y el 14% de quienes llegan por WhatsApp se preinscribe. Se mide con la landing B1 y las entrevistas B2.', run: () => valView('val-h2') },
+  { id: 'val-land', tag: 'Experimento B1', t: 'La landing para padres', d: 'Versión limpia, sin simulador ni testimonios inventados. Se abre con ?modo=landing y registra si la visita vino de anuncios o de WhatsApp.', run: () => landingAt('inicio') },
+  { id: 'val-prec', tag: 'Experimento B1', t: 'Cada plan tiene su botón «Reservar»', d: 'El clic cuenta como intención de compra con ese precio. Avisamos que aún no lanzamos y que no se cobra nada.', run: () => landingAt('inicio', 'precios') },
+  { id: 'val-res', tag: 'Experimento B1', t: 'Preinscripción en 4 campos', d: 'Nombre, WhatsApp, curso y materia, con consentimiento de datos. Se envía a una Google Sheet junto con el plan y el canal.', run: () => { landingAt('inicio', 'precios'); tourT(() => openModal(leadModal('consulta', { nombre: 'Ana Vera', whatsapp: '0991234567', curso: CURSOS[1], materia: 'Matemáticas', ok: true })), 400); } },
+  { id: 'val-gra', tag: 'Experimento B1', t: 'Mensaje honesto: «Aún no lanzamos»', d: 'El padre sabe que el servicio está por abrir y que su primera sesión de 15 min será gratis. Esa lista se usa luego para el piloto C1.', run: () => { landingAt('inicio', 'precios'); tourT(() => openModal(leadThanks('Ana Vera', '0991234567', true)), 400); } },
+  { id: 'val-emb2', tag: 'Hipótesis II', t: 'Conversión por canal contra el umbral', d: 'Anuncios: valida con 4% o más, invalida con menos de 1.9%. WhatsApp: valida con 14% o más, invalida con menos de 7%.', run: () => valView('val-embudo') },
+  { id: 'val-h3', tag: 'Hipótesis III', t: 'El reporte hace que el padre vuelva a comprar', d: 'Meta: al menos el 50% de los padres que reciben el reporte compra una segunda sesión en menos de 14 días.', run: () => valView('val-h3') },
+  { id: 'val-rep', tag: 'Experimento C1', t: 'El tutor llena el reporte y elige el grupo', d: 'En el piloto, el tutor fundador escribe el WhatsApp del representante y alterna los grupos: A recibe el reporte, B solo un agradecimiento.', run: () => { ACT.valPilot(); const T = S.tutor; T.active.pilot = { wa: '0991234567', grupo: 'A' }; render(); } },
+  { id: 'val-waA', tag: 'Experimento C1', t: 'Grupo A: el reporte llega por WhatsApp', d: 'Temas vistos, qué reforzar y próximo paso, en menos de 1 hora después de la clase.', run: () => { valView('val-h3'); tourT(() => openModal(waPreview('A', VAL_DEMO)), 300); } },
+  { id: 'val-waB', tag: 'Experimento C1', t: 'Grupo B: solo un agradecimiento', d: 'Así comparamos: si los dos grupos recompran parecido, el reporte no es lo que impulsa la recompra.', run: () => { valView('val-h3'); tourT(() => openModal(waPreview('B', VAL_DEMO)), 300); } },
+  { id: 'val-emb3', tag: 'Hipótesis III', t: 'Recompra a los 14 días', d: 'Valida si el grupo A recompra 50% o más y supera a B por 15 puntos. Invalida si A recompra menos del 25% o no supera a B.', run: () => valView('val-piloto') }
+];
+const VAL_TOURS = { h1: { name: 'Hipótesis I', ids: ['val-h1', 'val-tut', 'val-fund', 'val-emb1'] }, h2: { name: 'Hipótesis II', ids: ['val-h2', 'val-land', 'val-prec', 'val-res', 'val-gra', 'val-emb2'] }, h3: { name: 'Hipótesis III', ids: ['val-h3', 'val-rep', 'val-waA', 'val-waB', 'reporte', 'val-emb3'] } };
+function startValTour(h) { const R = VAL_TOURS[h]; S.tour.list = R.ids.map(stepById); S.tour.role = R.name; S.tour.auto = true; tourGo(0); }
 const ROLE_TOURS = {
   padre: { name: 'Padre o madre', ids: ['home', 'quien', 'hijo', 'permisos', 'padre-diag', 'reporte', 'pago'] },
   estudiante: { name: 'Estudiante', ids: ['home', 'diag', 'diag-res', 'pedir', 'match1', 'tutor', 'sesion', 'calif', 'insignias'] },
   tutor: { name: 'Tutor ESPOL', ids: ['tut-land', 'verif', 'tut-quiz', 'tut-review', 'oferta', 'tut-live', 'tut-report', 'tut-cobro'] }
 };
-const stepById = id => TOUR.find(x => x.id === id) || EXTRA_STEPS.find(x => x.id === id);
+const stepById = id => TOUR.find(x => x.id === id) || EXTRA_STEPS.find(x => x.id === id) || VAL_STEPS.find(x => x.id === id);
 const TL = () => S.tour.list || TOUR;
 function startRoleTour(role) { const R = ROLE_TOURS[role]; S.tour.list = R.ids.map(stepById); S.tour.role = R.name; S.tour.auto = true; tourGo(0); }
 let tourTs = [];
@@ -1823,7 +2055,7 @@ function tourGo(i) {
   if (i >= TL().length) return ACT.tourExit();
   tourTs.forEach(clearTimeout); tourTs = []; clearTimeout(tourTimer);
   closeModal(); S.tour.on = true; S.tour.i = i; S.simOpen = false; document.body.classList.add('touring');
-  TL()[i].run(); renderTour(); renderSim();
+  S.landing = LANDING; TL()[i].run(); renderTour(); renderSim();
   if (S.tour.auto) scheduleTour();
 }
 function scheduleTour() { clearTimeout(tourTimer); tourTimer = setTimeout(() => tourGo(S.tour.i + 1), TL()[S.tour.i].ms || 7000); }
@@ -1864,6 +2096,23 @@ document.addEventListener('submit', e => {
     return login(cand[0]);
   }
   if (id === 'dxForm') return handleDxForm();
+  if (id === 'leadForm') {
+    const d = { nombre: $('#lName').value.trim(), whatsapp: waNum($('#lWa').value), curso: $('#lCurso').value, materia: $('#lMat').value, plan: $('#lPlan').value, canal: CANAL };
+    const errs = []; if (d.nombre.length < 2) errs.push('escribe tu nombre'); if (!/^5939\d{8}$/.test(d.whatsapp)) errs.push('escribe un WhatsApp de Ecuador (09XXXXXXXX)'); if (!$('#lOk').checked) errs.push('acepta que te contactemos para avisarte del lanzamiento');
+    if (errs.length) return showErr(errs);
+    const enviado = LANDING && sendForm('padres', { ...d, plan: PLANS[d.plan][0] });
+    VAL.leads.push({ t: Date.now(), plan: d.plan, canal: CANAL, enviado }); valSave();
+    openModal(leadThanks(d.nombre, $('#lWa').value.trim(), enviado)); return;
+  }
+  if (id === 'tutForm') {
+    const d = { nombre: $('#fName').value.trim(), correo: $('#fMail').value.trim().toLowerCase(), materias: $$('input[name=fSubj]:checked').map(x => x.value), horas: $('#fHrs').value, acepta15: $('input[name=fAcc]:checked')?.value || '', comisionMax: $('#fMax').value, canal: CANAL };
+    const errs = []; if (d.nombre.length < 2) errs.push('escribe tu nombre'); if (!/^[^@\s]+@espol\.edu\.ec$/.test(d.correo)) errs.push('usa tu correo @espol.edu.ec');
+    if (!d.materias.length) errs.push('elige al menos una materia'); if (!d.acepta15) errs.push('responde si aceptarías el 15%'); if (!$('#fOk').checked) errs.push('acepta el uso de tus datos');
+    if (errs.length) return showErr(errs);
+    const enviado = LANDING && sendForm('tutores', { ...d, materias: d.materias.join(', ') });
+    VAL.tutores.push({ t: Date.now(), acepta15: d.acepta15, comisionMax: d.comisionMax, materias: d.materias, enviado }); valSave();
+    openModal(`<div class="center"><div class="big-wait">${ic('check', 'lg')}</div><h3 style="font-size:20px">¡Gracias, ${esc(first(d.nombre))}!</h3><p class="muted" style="margin:8px 0">Quedaste preinscrito como tutor fundador. Te escribiremos a ${esc(d.correo)} antes del lanzamiento con los siguientes pasos.</p>${LANDING ? '' : `<p class="tiny muted">${enviado ? 'Enviado a Google Forms.' : 'Modo demo: los datos no salieron de este navegador.'}</p>`}${ENCUESTA_TUTORES ? `<a class="btn ghost" href="${esc(ENCUESTA_TUTORES)}" target="_blank" rel="noopener">Responder la encuesta completa</a> ` : ''}<button class="btn primary" style="margin-top:10px" data-act="closeModal">Cerrar</button></div>`); return;
+  }
   if (id === 'inviteForm') {
     const errs = []; if (($('#iPass').value || '').length < 6) errs.push('crea una contraseña de al menos 6 caracteres');
     if (!$('#iData').checked) errs.push('autoriza el tratamiento de datos'); if (!$('#iRec').checked) errs.push('autoriza la grabación');
@@ -1874,6 +2123,16 @@ document.addEventListener('submit', e => {
   if (id === 'tReportForm') {
     const T = S.tutor, a = T.active;
     if (!tEval.punt || !tEval.resp || !tEval.cons) return showErr(['califica puntualidad, respeto y constancia']);
+    const pWa = ($('#pWa')?.value || '').trim();
+    if (pWa) {
+      const num = waNum(pWa); if (!/^5939\d{8}$/.test(num)) return showErr(['escribe un WhatsApp de Ecuador válido (09XXXXXXXX) o deja el campo vacío']);
+      const grupo = $('input[name=pGrupo]:checked')?.value || 'A';
+      const d = { estudiante: a.name, materia: SUBJECTS[a.subj].name, tema: a.topic, tutor: T.name, min: a.real || a.min, obs: $('#tObs')?.value.trim(), ev: { ...tEval }, puntos: $$('input[name=tp]:checked').map(x => x.value) };
+      window.open(`https://wa.me/${num}?text=${encodeURIComponent(pilotText(grupo, d))}`, '_blank', 'noopener');
+      const enviado = sendForm('piloto', { estudiante: a.name, whatsapp: num, grupo, materia: d.materia, tema: a.topic, tutor: T.name });
+      VAL.piloto.push({ t: Date.now(), grupo, enviado }); valSave();
+      toast(`Piloto C1: mensaje del grupo ${grupo} listo en WhatsApp`, 'info');
+    }
     const l = T.ledger.find(x => x.id === a.id); if (l) l.status = 'revision';
     T.sessions++; T.active = null; T.view = 'panel'; render();
     toast(`Reporte enviado al representante de ${a.name}`);
@@ -1886,15 +2145,17 @@ function toast(msg, kind = 'ok') {
   const el = document.createElement('div'); el.className = 'toast ' + kind; el.textContent = msg; $('#toasts').appendChild(el);
   setTimeout(() => el.classList.add('out'), 3200); setTimeout(() => el.remove(), 3600);
 }
-const ROUTES = ['inicio', 'tutores', 'registro-familia', 'registro-tutor', 'ingresar', 'invitacion', 'padre', 'estudiante', 'diagnostico', 'tutor'];
+const ROUTES = ['inicio', 'tutores', 'registro-familia', 'registro-tutor', 'ingresar', 'invitacion', 'padre', 'estudiante', 'diagnostico', 'tutor', 'validacion'];
 const PRIVATE = { padre: 'parent', estudiante: 'student', diagnostico: 'student', tutor: 'tutor' };
 function route() { const h = location.hash.slice(1); return ROUTES.includes(h) ? h : 'inicio'; }
 function go(r) { if (location.hash === '#' + r) render(); else location.hash = r; }
 function render() {
   const sh = location.hash.slice(1);
-  if (sh.startsWith('sim-') && ROLE_TOURS[sh.slice(4)]) { startRoleTour(sh.slice(4)); return; }
+  if (!LANDING && sh.startsWith('sim-') && ROLE_TOURS[sh.slice(4)]) { startRoleTour(sh.slice(4)); return; }
+  if (!LANDING && sh.startsWith('val-') && VAL_TOURS[sh.slice(4)]) { startValTour(sh.slice(4)); return; }
   ticks.forEach(id => { clearInterval(id); clearTimeout(id); }); ticks = [];
   let r = route();
+  if (S.landing && !['inicio', 'tutores'].includes(r)) { if (LANDING) r = 'inicio'; else S.landing = false; }
   if (PRIVATE[r] && (S.user !== PRIVATE[r] || !{ parent: S.parent, student: S.child, tutor: S.tutor }[PRIVATE[r]])) {
     S.gateMsg = { padre: 'Ingresa con la cuenta del representante para ver este panel.', estudiante: 'Ingresa con la cuenta del estudiante.', diagnostico: 'Ingresa con la cuenta del estudiante para hacer el diagnóstico.', tutor: 'Ingresa con tu cuenta de tutor.' }[r];
     r = 'ingresar';
