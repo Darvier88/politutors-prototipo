@@ -89,7 +89,7 @@ Cada sección de la homepage:
 | Diagnóstico de aprendizaje | Qué mide el test y un ejemplo de resultado |
 | Ocho razones | Los 8 atributos, cada uno con “Verlo funcionando →” que salta a la simulación |
 | Confianza y seguridad | Verificación, pago protegido, todo dentro de la plataforma, LOPDP, código de conducta |
-| Precios | Prueba gratis de 15 min, $6 / $8.50 / $11 y la garantía de primera sesión |
+| Precios | Prueba gratis de 15 min, $10 / $17 / $20 y la garantía de primera sesión |
 | App liviana + web | Atributo 6 |
 | Testimonios y FAQ | Testimonios ilustrativos y preguntas separadas para familias y tutores |
 
@@ -267,8 +267,8 @@ Con GitHub Pages, el enlace queda, por ejemplo, como `https://darvier88.github.i
 
 | Supuesto | Valor en el prototipo |
 |---|---|
-| Precios por sesión | 15 min gratis (una vez) · 30 min $6.00 · 45 min $8.50 · 60 min $11.00 |
-| Extensión | +15 min por $3.00 |
+| Precios por sesión | 15 min gratis (una vez) · 30 min $10.00 · 45 min $17.00 · 60 min $20.00 |
+| Extensión | +15 min por $5.00 |
 | Comisión de la plataforma | 15% (el tutor recibe el 85%) |
 | Nota mínima del tutor | 8/10 en la materia |
 | Ventana de reclamo | 24 h antes de liberar el pago |

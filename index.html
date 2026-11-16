@@ -596,8 +596,8 @@ const SUBJECTS = {
   fis: { name: 'Física', icon: 'Δv', color: '#0077A8', topics: ['Cinemática', 'Leyes de Newton', 'Trabajo y energía', 'Vectores', 'Electricidad'] },
   qui: { name: 'Química', icon: 'H₂O', color: '#2E7D5B', topics: ['Estequiometría', 'Nomenclatura', 'Balanceo de ecuaciones', 'Soluciones', 'Enlaces químicos'] }
 };
-const DURATIONS = [{ min: 15, price: 0, trial: true }, { min: 30, price: 6 }, { min: 45, price: 8.5 }, { min: 60, price: 11 }];
-const EXT_PRICE = 3;
+const DURATIONS = [{ min: 15, price: 0, trial: true }, { min: 30, price: 10 }, { min: 45, price: 17 }, { min: 60, price: 20 }];
+const EXT_PRICE = 5;
 const SHARE = 0.85;
 const CURSOS = ['1.º de Bachillerato', '2.º de Bachillerato', '3.º de Bachillerato'];
 const METHODS = { payphone: ['Payphone', 'Tarjeta de crédito o débito'], kushki: ['Kushki', 'Tarjeta de crédito o débito'], transfer: ['Transferencia directa', 'Pichincha, Guayaquil, Pacífico, Produbanco…'] };
@@ -629,12 +629,12 @@ const REPLIES = ['Perfecto. Vamos paso a paso: primero identifiquemos qué datos
 const STUDENT_MSGS = ['Ah, ya entendí la primera parte.', '¿Y si el número es negativo cambia algo?', 'Me sale 12, ¿está bien?', 'Gracias, eso me confundía en clase.', '¿Me deja uno para practicar?'];
 const BOARD_EX = { mat: ['f(x) = (3x² + 1)⁵', "f'(x) = 5(3x² + 1)⁴ · 6x"], fis: ['v = v₀ + a·t', 'x = x₀ + v₀·t + ½·a·t²'], qui: ['2 H₂ + O₂ → 2 H₂O', '4 g H₂ → 2 mol → 36 g H₂O'] };
 const REQS = [
-  { name: 'Valeria R.', curso: '1.º de Bachillerato', subj: 'qui', topic: 'Estequiometría', min: 30, price: 6 },
-  { name: 'Sebastián P.', curso: '3.º de Bachillerato', subj: 'mat', topic: 'Límites', min: 45, price: 8.5 },
-  { name: 'Isabella M.', curso: '2.º de Bachillerato', subj: 'fis', topic: 'Leyes de Newton', min: 30, price: 6 },
-  { name: 'Thiago C.', curso: '3.º de Bachillerato', subj: 'mat', topic: 'Derivadas', min: 60, price: 11 },
-  { name: 'Emilia G.', curso: '1.º de Bachillerato', subj: 'qui', topic: 'Nomenclatura', min: 30, price: 6 },
-  { name: 'Joaquín L.', curso: '2.º de Bachillerato', subj: 'fis', topic: 'Cinemática', min: 45, price: 8.5 }
+  { name: 'Valeria R.', curso: '1.º de Bachillerato', subj: 'qui', topic: 'Estequiometría', min: 30, price: 10 },
+  { name: 'Sebastián P.', curso: '3.º de Bachillerato', subj: 'mat', topic: 'Límites', min: 45, price: 17 },
+  { name: 'Isabella M.', curso: '2.º de Bachillerato', subj: 'fis', topic: 'Leyes de Newton', min: 30, price: 10 },
+  { name: 'Thiago C.', curso: '3.º de Bachillerato', subj: 'mat', topic: 'Derivadas', min: 60, price: 20 },
+  { name: 'Emilia G.', curso: '1.º de Bachillerato', subj: 'qui', topic: 'Nomenclatura', min: 30, price: 10 },
+  { name: 'Joaquín L.', curso: '2.º de Bachillerato', subj: 'fis', topic: 'Cinemática', min: 45, price: 17 }
 ];
 const QUIZ = {
   mat: { q: '¿Cuál es la derivada de f(x) = x³ + 2x?', o: ['3x² + 2', 'x² + 2', '3x + 2'], a: 0 },
@@ -674,9 +674,9 @@ function seedHistory() {
     { id: 'r1', date: now - 15 * DAY, subj: 'mat', topic: 'Trigonometría', tutorId: 4, min: 30, real: 30, points: TOPIC_POINTS('Trigonometría'), obs: OBS.mat[0], ev: { punt: 4, resp: 5, cons: 4 }, stars: 4, payId: 'p1', seen: true }
   ];
   S.payments = [
-    { id: 'p3', date: now - 3 * DAY, tutorId: 3, subj: 'fis', amount: 6, status: 'liberado' },
-    { id: 'p2', date: now - 8 * DAY, tutorId: 1, subj: 'mat', amount: 8.5, status: 'liberado' },
-    { id: 'p1', date: now - 15 * DAY, tutorId: 4, subj: 'mat', amount: 6, status: 'liberado' }
+    { id: 'p3', date: now - 3 * DAY, tutorId: 3, subj: 'fis', amount: 10, status: 'liberado' },
+    { id: 'p2', date: now - 8 * DAY, tutorId: 1, subj: 'mat', amount: 17, status: 'liberado' },
+    { id: 'p1', date: now - 15 * DAY, tutorId: 4, subj: 'mat', amount: 10, status: 'liberado' }
   ];
 }
 function makeTutor(d) {
@@ -693,7 +693,7 @@ function ensureDemo() {
   S.child.status = 'activo';
   if (!S.child.diag) S.child.diag = makeDiag(DEMO_DX);
   if (!S.tutor) S.tutor = makeTutor({ name: 'Carlos Rivas', email: 'carivas@espol.edu.ec', phone: '0987654321', grades: { mat: 9.1, fis: 8.8 }, status: 'verificado',
-    ledger: [{ id: 'l1', date: Date.now() - 2 * DAY, student: 'Sebastián P.', subj: 'mat', price: 8.5, status: 'liberado' }],
+    ledger: [{ id: 'l1', date: Date.now() - 2 * DAY, student: 'Sebastián P.', subj: 'mat', price: 17, status: 'liberado' }],
     reviews: [{ by: 'Sebastián (estudiante)', stars: 5, text: 'Me explicó límites mejor que en el colegio.' }], sessions: 1 });
   if (S.tutor.status !== 'verificado') S.tutor.status = 'verificado';
 }
@@ -789,7 +789,7 @@ VIEWS.inicio = () => {
         <ul><li>Tutores verificados con matrícula ESPOL</li><li>Pago retenido hasta que termine la clase</li><li>Reporte automático de cada sesión</li></ul>
         <span class="go">Crear cuenta familiar ${ic('arrow')}</span></a>
       <a class="role-cta tut" href="#tutores"><span class="q">¿Estudias en la ESPOL?</span><span class="a">Hazte tutor aquí</span>
-        <span class="tiny muted">Enseña en tus horas libres, sin horario fijo.</span><span class="stat">$5.10 por consulta de 30 min</span>
+        <span class="tiny muted">Enseña en tus horas libres, sin horario fijo.</span><span class="stat">$8.50 por consulta de 30 min</span>
         <span class="go">Crear cuenta de tutor ${ic('arrow')}</span></a></div>`;
   return `
   <section class="hero gridbg"><div class="wrap hero-grid">
@@ -805,7 +805,7 @@ VIEWS.inicio = () => {
       <div class="ok-bar">Tutor encontrado en <b>0:42</b><svg class="annot" style="right:-14px;top:-10px;width:78px;height:42px" viewBox="0 0 78 42"><path d="M14 6C40 0 76 6 74 22S30 42 8 34C-2 30 2 14 20 9"/></svg></div>
       <div class="row gap">${avatar(TUTORS[0])}<div><b>Andrea V.</b><span class="verified">Verificado</span><div class="tiny muted">Ing. Computación · 6.º semestre</div></div></div>
       <div class="rating">${stars(4.9)} <b>4.9</b> <span class="tiny muted">58 reseñas</span></div>
-      <div class="kv" style="margin-top:10px"><span>Derivadas · 30 min</span><b class="mono">$6.00 retenido</b></div>
+      <div class="kv" style="margin-top:10px"><span>Derivadas · 30 min</span><b class="mono">$10.00 retenido</b></div>
       <div class="mini-rep"><span class="eyebrow">Reporte enviado a mamá</span><ul><li>Regla de la cadena</li><li>3 ejercicios resueltos</li></ul><p class="tutor-note" style="margin-top:8px">“Ya la aplica sola; practicar 3 más antes del parcial.”</p></div>
     </div>
   </div></section>
@@ -850,9 +850,9 @@ VIEWS.inicio = () => {
     <div class="sec-head"><span class="pill">Precios</span><h2>Pagas solo por lo que usas</h2><p class="muted">Sin mensualidades. El cobro se hace al pedir la sesión y queda retenido hasta que termina.</p></div>
     <div class="price-grid">
       <div class="card price"><span class="muted">Prueba</span><b>Gratis</b><span class="tiny muted">15 min · primera sesión</span></div>
-      <div class="card price hot"><span class="muted">Consulta</span><b>$6.00</b><span class="tiny muted">30 min</span></div>
-      <div class="card price"><span class="muted">Nivelación</span><b>$8.50</b><span class="tiny muted">45 min</span></div>
-      <div class="card price"><span class="muted">Clase completa</span><b>$11.00</b><span class="tiny muted">60 min</span></div>
+      <div class="card price hot"><span class="muted">Consulta</span><b>$10.00</b><span class="tiny muted">30 min</span></div>
+      <div class="card price"><span class="muted">Nivelación</span><b>$17.00</b><span class="tiny muted">45 min</span></div>
+      <div class="card price"><span class="muted">Clase completa</span><b>$20.00</b><span class="tiny muted">60 min</span></div>
     </div>
     <div class="guarantee"><span class="trust-ic">${ic('shield', 'lg')}</span><div><b>Garantía de primera sesión</b><div class="tiny">Si la primera sesión pagada con un tutor no te convence, la reportas dentro de 24 h y te devolvemos el 100%.</div></div></div>
     <p class="tiny muted center" style="margin-top:10px">Precios referenciales del prototipo. Extensión de +15 min: ${money(EXT_PRICE)}.</p>
@@ -885,7 +885,7 @@ VIEWS.inicio = () => {
         <details><summary>¿Las sesiones se graban?</summary><p>Sí. Toda la comunicación ocurre dentro de la plataforma y se graba por seguridad, con tu consentimiento como representante.</p></details></div>
       <div><h3>Para tutores</h3>
         <details><summary>¿Qué necesito para ser tutor?</summary><p>Ser estudiante activo de la ESPOL, tener 8/10 o más en la materia que vas a enseñar, aprobar una prueba corta y aceptar el código de conducta.</p></details>
-        <details><summary>¿Cuánto gano?</summary><p>Recibes el 85% de cada sesión. Por ejemplo, $5.10 por una consulta de 30 minutos.</p></details>
+        <details><summary>¿Cuánto gano?</summary><p>Recibes el 85% de cada sesión. Por ejemplo, $8.50 por una consulta de 30 minutos o $14.45 por una nivelación de 45.</p></details>
         <details><summary>¿Cuándo me pagan?</summary><p>El pago se libera 24 h después de cada sesión y se transfiere a tu cuenta bancaria.</p></details>
         <details><summary>¿Tengo horario fijo?</summary><p>No. Activas “En línea” cuando quieras y solo recibes solicitudes de tus materias.</p></details></div>
     </div>
@@ -908,7 +908,7 @@ VIEWS.tutores = () => `
       <p class="tiny muted" style="margin:4px 0 14px">Horas de tutoría a la semana</p>
       <input type="range" id="hrs" min="1" max="20" value="6">
       <div class="row between tiny muted"><span>1 h</span><span id="hrsL">6 h por semana</span><span>20 h</span></div>
-      <div class="big" id="earn" style="margin-top:12px">$245</div><p class="tiny muted">al mes aprox. (sesiones de 30 min a $6, recibes $5.10 c/u)</p></div>
+      <div class="big" id="earn" style="margin-top:12px">$408</div><p class="tiny muted">al mes aprox. (sesiones de 30 min a $10, recibes $8.50 c/u)</p></div>
   </div></section>
   <section class="block"><div class="wrap">
     <div class="sec-head"><span class="pill">Requisitos</span><h2>Requisitos y proceso</h2><p class="muted">La verificación toma hasta 3 días hábiles.</p></div>
@@ -921,7 +921,7 @@ VIEWS.tutores = () => `
     <div class="center" style="margin-top:24px"><a class="btn primary lg" href="#registro-tutor">Empezar registro</a></div>
   </div></section>`;
 AFTER.tutores = () => {
-  const upd = () => { const h = +$('#hrs').value; $('#hrsL').textContent = h + ' h por semana'; $('#earn').textContent = '$' + Math.round(h * 2 * 5.1 * 4); };
+  const upd = () => { const h = +$('#hrs').value; $('#hrsL').textContent = h + ' h por semana'; $('#earn').textContent = '$' + Math.round(h * 2 * 8.5 * 4); };
   $('#hrs').addEventListener('input', upd); upd();
 };
 
